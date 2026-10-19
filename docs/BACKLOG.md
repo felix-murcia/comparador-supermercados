@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 en curso — 3/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 en curso — 4/6)
 
 ---
 
@@ -39,7 +39,7 @@
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
-| 4 — API búsqueda/comparativa | 6 | 8d | 🟡 En curso (3/6) |
+| 4 — API búsqueda/comparativa | 6 | 8d | 🟡 En curso (4/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
@@ -492,16 +492,17 @@
 
 ---
 
-### [ ] T4.2 — `GET /v1/busquedas/{id}` 🔴
+### [x] T4.2 — `GET /v1/busquedas/{id}` 🔴
 
 - **Depende de**: T3.4
 - **Estimación**: 1d
 - **Descripción**: Endpoint de polling que devuelve estado + progreso + resultados parciales.
 - **Aceptación**:
-  - [ ] `{ estado, progreso, resultados_parciales, completado_en? }`.
-  - [ ] Estados: `pendiente | en_progreso | completada | fallida`.
-  - [ ] Solo el dueño del job puede consultarlo (o admin).
-  - [ ] Tests de transición de estados.
+  - [x] `{ estado, progreso, resultados_parciales, completado_en? }`.
+  - [x] Estados: `pendiente | en_progreso | completada | fallida`.
+  - [x] Solo el dueño del job puede consultarlo (o admin).
+  - [x] Tests de transición de estados.
+- **Nota**: `GET /v1/busquedas/{id}` en `api/src/api_http/v1/busquedas.py`. El propietario se comprueba con el usuario interno del token (`RepositorioUsuarios.obtener_por_provider`); si no coincide con el `usuario_id` del job responde 403 y si el job no existe 404. Los resultados parciales salen de la comparativa vigente. `POST /v1/busquedas` marca el sticky read del usuario para que el polling lea del primario.
 
 ---
 
@@ -994,10 +995,10 @@ Actualizar al cerrar cada tarea:
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
-| 4 — API búsqueda/comparativa | 3 | 6 | 50% |
+| 4 — API búsqueda/comparativa | 4 | 6 | 67% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **28** | **53** | **53%** |
+| **Total MVP** | **29** | **53** | **55%** |
 
 ---

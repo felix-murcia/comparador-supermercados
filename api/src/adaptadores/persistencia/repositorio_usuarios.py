@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,4 +39,19 @@ class SQLAlchemyRepositorioUsuarios:
             .execution_options(populate_existing=True)
         )
         modelo = (await self._session.scalars(stmt)).one()
+        return usuario_desde_modelo(modelo)
+
+    async def obtener_por_provider(
+        self, provider: str, provider_id: str
+    ) -> Usuario | None:
+        modelo = await self._session.scalar(
+            select(UsuarioModelo)
+            .where(
+                UsuarioModelo.provider == provider,
+                UsuarioModelo.provider_id == provider_id,
+            )
+            .limit(1)
+        )
+        if modelo is None:
+            return None
         return usuario_desde_modelo(modelo)

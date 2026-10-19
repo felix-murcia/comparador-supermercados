@@ -113,6 +113,10 @@ class RepositorioUsuarios(Protocol):
 
     async def upsert(self, identidad: IdentidadOAuth) -> Usuario: ...
 
+    async def obtener_por_provider(
+        self, provider: str, provider_id: str
+    ) -> Usuario | None: ...
+
 
 @runtime_checkable
 class RepositorioCadenas(Protocol):

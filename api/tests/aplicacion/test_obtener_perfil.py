@@ -31,6 +31,11 @@ class RepositorioUsuariosFake:
             creado_en=datetime.now(UTC),
         )
 
+    async def obtener_por_provider(
+        self, provider: str, provider_id: str
+    ) -> Usuario | None:
+        return None
+
 
 def test_el_fake_cumple_el_protocolo() -> None:
     assert isinstance(RepositorioUsuariosFake(), RepositorioUsuarios)

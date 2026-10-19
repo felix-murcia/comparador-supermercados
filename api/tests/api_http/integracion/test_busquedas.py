@@ -83,10 +83,11 @@ async def test_sin_cache_encola_el_job(
     cliente: AsyncClient, sesion_rw: AsyncSession
 ) -> None:
     provider_id = f"miss-{uuid4().hex[:8]}"
+    consulta = f"leche-{uuid4().hex[:8]}"
 
     respuesta = await cliente.post(
         "/v1/busquedas",
-        json={"query": "leche", "cadenas": ["dia"]},
+        json={"query": consulta, "cadenas": ["dia"]},
         headers={"Authorization": f"Bearer {_token(provider_id)}"},
     )
 
@@ -98,17 +99,18 @@ async def test_sin_cache_encola_el_job(
 
     job = await SQLAlchemyRepositorioBusquedas(sesion_rw).obtener(cuerpo["job_id"])
     assert job is not None
-    assert job.query == "leche"
+    assert job.query == consulta
     assert job.cadenas == ("dia",)
     assert job.estado == "pendiente"
-    assert job.cache_key == calcular_cache_key("leche", ("dia",), "precio_unitario")
+    assert job.cache_key == calcular_cache_key(consulta, ("dia",), "precio_unitario")
 
 
 async def test_con_cache_devuelve_los_resultados(
     cliente: AsyncClient, cache: RedisCache
 ) -> None:
     provider_id = f"hit-{uuid4().hex[:8]}"
-    clave = calcular_cache_key("leche", ("dia",), "precio_unitario")
+    consulta = f"leche-{uuid4().hex[:8]}"
+    clave = calcular_cache_key(consulta, ("dia",), "precio_unitario")
     await cache.set(
         clave,
         {"resultados": [{"nombre": "Leche entera", "precio_eur": "1.29"}]},
@@ -117,7 +119,7 @@ async def test_con_cache_devuelve_los_resultados(
 
     respuesta = await cliente.post(
         "/v1/busquedas",
-        json={"query": "leche", "cadenas": ["dia"]},
+        json={"query": consulta, "cadenas": ["dia"]},
         headers={"Authorization": f"Bearer {_token(provider_id)}"},
     )
 
