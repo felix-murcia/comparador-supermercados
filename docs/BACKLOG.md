@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 2 en curso — 3/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 2 en curso — 4/6)
 
 ---
 
@@ -37,7 +37,7 @@
 |-------|--------|-----------|--------|
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ⚪ Pendiente |
-| 2 — Modelo de datos | 6 | 7d | 🟡 En curso (3/6) |
+| 2 — Modelo de datos | 6 | 7d | 🟡 En curso (4/6) |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
@@ -322,16 +322,16 @@
 
 ---
 
-### [ ] T2.6 — Value Objects y reglas de dominio 🟢
+### [x] T2.6 — Value Objects y reglas de dominio 🟢
 
 - **Depende de**: T0.5
 - **Estimación**: 0.5d
 - **Descripción**: `Formato`, `Precio`, `Provincia` como `@dataclass(frozen=True)`. Función `calcular_precio_por_litro`.
 - **Aceptación**:
-  - [ ] `Formato.a_litros_o_kg()` maneja L, ml, kg, g.
-  - [ ] `calcular_precio_por_litro` devuelve `None` si litros <= 0.
-  - [ ] Redondeo a 4 decimales.
-  - [ ] Cobertura 100% en estos módulos.
+  - [x] `Formato.a_litros_o_kg()` maneja L, ml, kg, g.
+  - [x] `calcular_precio_por_litro` devuelve `None` si litros <= 0.
+  - [x] Redondeo a 4 decimales.
+  - [x] Cobertura 100% en estos módulos.
 
 ---
 
@@ -974,12 +974,12 @@ Actualizar al cerrar cada tarea:
 |-------|-------------|-------|---|
 | 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 0 | 5 | 0% |
-| 2 — Modelo de datos | 3 | 6 | 50% |
+| 2 — Modelo de datos | 4 | 6 | 67% |
 | 3 — Ingesta | 0 | 8 | 0% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **9** | **53** | **17%** |
+| **Total MVP** | **10** | **53** | **19%** |
 
 ---
