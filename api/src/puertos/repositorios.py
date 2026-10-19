@@ -16,7 +16,7 @@ from src.dominio.busquedas.estados import EstadoBusqueda
 from src.dominio.cadenas.entidades import Cadena
 from src.dominio.listas.entidades import ItemLista, ItemListaNuevo, Lista
 from src.dominio.precios.entidades import PrecioNuevo, PrecioRegistrado
-from src.dominio.productos.entidades import Producto, ProductoNuevo
+from src.dominio.productos.entidades import Producto, ProductoIngestable, ProductoNuevo
 from src.dominio.usuarios.entidades import IdentidadOAuth, Usuario
 
 
@@ -33,6 +33,8 @@ class RepositorioProductos(Protocol):
     ) -> list[Producto]: ...
 
     async def crear(self, datos: ProductoNuevo) -> Producto: ...
+
+    async def listar_ingestables(self) -> list[ProductoIngestable]: ...
 
 
 @runtime_checkable

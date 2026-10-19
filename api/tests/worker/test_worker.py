@@ -7,6 +7,7 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
+from src.adaptadores.persistencia.cola_busquedas import PostgresColaJobs
 from src.adaptadores.persistencia.repositorio_busquedas import (
     SQLAlchemyRepositorioBusquedas,
 )
@@ -17,9 +18,12 @@ from src.worker import procesar_siguiente_job
 pytestmark = pytest.mark.asyncio
 
 
-async def test_devuelve_false_si_no_hay_jobs(motor_rw: AsyncEngine) -> None:
+async def test_devuelve_false_si_no_hay_jobs(
+    motor_rw: AsyncEngine, sesion_rw: AsyncSession
+) -> None:
     sessionmaker = async_sessionmaker(motor_rw, expire_on_commit=False)
 
+    assert await PostgresColaJobs(sesion_rw).contar_pendientes() == 0
     assert await procesar_siguiente_job(sessionmaker, buscar=_buscar_fake()) is False
 
 

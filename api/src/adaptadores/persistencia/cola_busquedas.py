@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import and_, or_, select, update
+from sqlalchemy import and_, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.adaptadores.persistencia.mapeo import busqueda_desde_modelo
@@ -51,3 +51,12 @@ class PostgresColaJobs:
         if modelo is None:
             return None
         return busqueda_desde_modelo(modelo)
+
+    async def contar_pendientes(self) -> int:
+        """Jobs que aún no han terminado (pendientes o en progreso)."""
+        total = await self._session.scalar(
+            select(func.count())
+            .select_from(BusquedaModelo)
+            .where(BusquedaModelo.estado.in_(("pendiente", "en_progreso")))
+        )
+        return int(total or 0)

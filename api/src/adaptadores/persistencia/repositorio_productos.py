@@ -8,8 +8,16 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.adaptadores.persistencia.mapeo import producto_desde_modelo
-from src.adaptadores.persistencia.modelos import ProductoModelo
-from src.dominio.productos.entidades import Producto, ProductoNuevo
+from src.adaptadores.persistencia.modelos import (
+    CadenaModelo,
+    ProductoCadenaModelo,
+    ProductoModelo,
+)
+from src.dominio.productos.entidades import (
+    Producto,
+    ProductoIngestable,
+    ProductoNuevo,
+)
 
 
 class SQLAlchemyRepositorioProductos:
@@ -63,3 +71,32 @@ class SQLAlchemyRepositorioProductos:
         await self._session.flush()
         await self._session.refresh(modelo)
         return producto_desde_modelo(modelo)
+
+    async def listar_ingestables(self) -> list[ProductoIngestable]:
+        """Productos con al menos una cadena, con los `slug` de esas cadenas."""
+        filas = (
+            await self._session.execute(
+                select(ProductoModelo.id, ProductoModelo.nombre, CadenaModelo.slug)
+                .join(
+                    ProductoCadenaModelo,
+                    ProductoCadenaModelo.producto_id == ProductoModelo.id,
+                )
+                .join(CadenaModelo, CadenaModelo.id == ProductoCadenaModelo.cadena_id)
+                .order_by(ProductoModelo.nombre, CadenaModelo.slug)
+            )
+        ).all()
+
+        por_producto: dict[UUID, ProductoIngestable] = {}
+        for producto_id, nombre, slug in filas:
+            existente = por_producto.get(producto_id)
+            if existente is None:
+                por_producto[producto_id] = ProductoIngestable(
+                    id=producto_id, nombre=nombre, cadenas=(slug,)
+                )
+            else:
+                por_producto[producto_id] = ProductoIngestable(
+                    id=producto_id,
+                    nombre=existente.nombre,
+                    cadenas=existente.cadenas + (slug,),
+                )
+        return list(por_producto.values())

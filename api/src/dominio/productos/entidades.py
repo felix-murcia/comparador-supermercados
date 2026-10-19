@@ -56,3 +56,12 @@ class Producto:
     litros_o_kg: Decimal | None
     ean: str | None
     creado_en: datetime
+
+
+@dataclass(frozen=True)
+class ProductoIngestable:
+    """Producto activo y cadenas donde está disponible, para la ingesta diaria."""
+
+    id: UUID
+    nombre: str
+    cadenas: tuple[str, ...]

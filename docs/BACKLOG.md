@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 6/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 7/8)
 
 ---
 
@@ -38,7 +38,7 @@
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
-| 3 — Ingesta | 8 | 12d | 🟡 En curso (6/8) |
+| 3 — Ingesta | 8 | 12d | 🟡 En curso (7/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
@@ -412,17 +412,18 @@
 
 ---
 
-### [ ] T3.5 — Scheduler diario 🟡
+### [x] T3.5 — Scheduler diario 🟡
 
 - **Depende de**: T3.4
 - **Estimación**: 1d
 - **Descripción**: Proceso `api/src/scheduler.py` que lanza ingesta diaria e invalida caché tras completarla.
 - **Aceptación**:
-  - [ ] Cron interno (APScheduler) a las 03:00 Europe/Madrid.
-  - [ ] Encola jobs de ingesta para productos activos.
-  - [ ] Al terminar, `Cache.invalidar_prefijo("v1:")`.
-  - [ ] Logs de inicio/fin con duración.
-  - [ ] Proceso separado, no dentro de la API.
+  - [x] Cron interno (APScheduler) a las 03:00 Europe/Madrid.
+  - [x] Encola jobs de ingesta para productos activos.
+  - [x] Al terminar, `Cache.invalidar_prefijo("v1:")`.
+  - [x] Logs de inicio/fin con duración.
+  - [x] Proceso separado, no dentro de la API.
+- **Nota**: `api/src/scheduler.py` (`python -m src.scheduler`) con APScheduler y `CronTrigger` a las 03:00 `Europe/Madrid`. Encola un job por producto activo (productos con alguna cadena) y espera a que la cola se vacíe antes de invalidar la caché, de modo que la invalidación ocurre con precios ya frescos. La espera tiene tope (1 h) y la invalidación se hace igualmente.
 
 ---
 
@@ -988,11 +989,11 @@ Actualizar al cerrar cada tarea:
 | 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
-| 3 — Ingesta | 6 | 8 | 75% |
+| 3 — Ingesta | 7 | 8 | 88% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **23** | **53** | **43%** |
+| **Total MVP** | **24** | **53** | **45%** |
 
 ---

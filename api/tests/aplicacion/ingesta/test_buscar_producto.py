@@ -17,7 +17,7 @@ from src.aplicacion.ingesta.buscar_producto import (
 from src.dominio.cadenas.entidades import Cadena
 from src.dominio.precios.entidades import PrecioNuevo, PrecioRegistrado
 from src.dominio.precios.errores import ErrorProductor
-from src.dominio.productos.entidades import Producto, ProductoNuevo
+from src.dominio.productos.entidades import Producto, ProductoIngestable, ProductoNuevo
 from src.puertos.productor import Candidato
 from src.puertos.verificador import ResultadoVerificacion
 
@@ -98,6 +98,9 @@ class ProductosFake:
             ean=datos.ean,
             creado_en=datetime.now(UTC),
         )
+
+    async def listar_ingestables(self) -> list[ProductoIngestable]:
+        return []
 
 
 class ProductosCadenasFake:
