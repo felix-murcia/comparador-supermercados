@@ -1,8 +1,98 @@
-from fastapi import FastAPI
+import asyncio
+import logging
+
+from fastapi import FastAPI, status
+from fastapi.responses import JSONResponse
+from redis.asyncio import Redis
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import create_async_engine
+
+from src.config import settings
+
+CHECK_TIMEOUT_SEGUNDOS = 2.0
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Comparador de Precios API")
+
+
+async def check_database(url: str) -> bool:
+    """Comprueba una conexión de base de datos con un SELECT 1."""
+    if not url:
+        return False
+
+    engine = None
+    try:
+        engine = create_async_engine(
+            url, connect_args={"timeout": CHECK_TIMEOUT_SEGUNDOS}
+        )
+        async with asyncio.timeout(CHECK_TIMEOUT_SEGUNDOS):
+            async with engine.connect() as connection:
+                await connection.execute(text("SELECT 1"))
+        return True
+    except Exception as exc:  # noqa: BLE001 - cualquier fallo implica no readiness
+        # La readiness solo expone el estado, nunca el error ni la DSN.
+        logger.warning("Database readiness check failed: %s", type(exc).__name__)
+        return False
+    finally:
+        if engine is not None:
+            try:
+                await engine.dispose()
+            except Exception as exc:  # noqa: BLE001 - cierre best-effort
+                logger.warning("Database engine dispose failed: %s", type(exc).__name__)
+
+
+async def check_redis(url: str) -> bool:
+    """Comprueba la conexión con Redis mediante PING."""
+    if not url:
+        return False
+
+    client = None
+    try:
+        client = Redis.from_url(
+            url,
+            socket_connect_timeout=CHECK_TIMEOUT_SEGUNDOS,
+            socket_timeout=CHECK_TIMEOUT_SEGUNDOS,
+        )
+        async with asyncio.timeout(CHECK_TIMEOUT_SEGUNDOS):
+            return bool(await client.ping())
+    except Exception as exc:  # noqa: BLE001 - cualquier fallo implica no readiness
+        logger.warning("Redis readiness check failed: %s", type(exc).__name__)
+        return False
+    finally:
+        if client is not None:
+            try:
+                await client.aclose()
+            except Exception as exc:  # noqa: BLE001 - cierre best-effort
+                logger.warning("Redis client close failed: %s", type(exc).__name__)
+
+
+async def check_dependencies() -> dict[str, bool]:
+    """Comprueba en paralelo las dependencias críticas de la API."""
+    names = ("database_rw", "database_ro", "redis")
+    results = await asyncio.gather(
+        check_database(settings.database_url_rw.get_secret_value()),
+        check_database(settings.database_url_ro.get_secret_value()),
+        check_redis(settings.redis_url),
+        return_exceptions=True,
+    )
+    return {name: result is True for name, result in zip(names, results, strict=True)}
 
 
 @app.get("/health/live")
 async def health_live() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/health/ready")
+async def health_ready() -> JSONResponse:
+    checks = await check_dependencies()
+    ready = all(checks.values())
+    status_code = status.HTTP_200_OK if ready else status.HTTP_503_SERVICE_UNAVAILABLE
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": "ready" if ready else "not_ready",
+            "checks": {name: "ok" if ok else "error" for name, ok in checks.items()},
+        },
+    )

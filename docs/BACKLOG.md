@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 en curso — 4/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 en curso — 5/8)
 
 ---
 
@@ -35,7 +35,7 @@
 
 | Épica | Tareas | Estimación | Estado |
 |-------|--------|-----------|--------|
-| 0 — Fundación | 8 | 8d | 🟡 En curso (4/8) |
+| 0 — Fundación | 8 | 8d | 🟡 En curso (5/8) |
 | 1 — Autenticación | 5 | 6d | ⚪ Pendiente |
 | 2 — Modelo de datos | 6 | 7d | ⚪ Pendiente |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
@@ -113,16 +113,16 @@
 
 ---
 
-### [ ] T0.5 — Esqueleto FastAPI + Next.js 🔴
+### [x] T0.5 — Esqueleto FastAPI + Next.js 🔴
 
 - **Depende de**: T0.4
 - **Estimación**: 1d
 - **Descripción**: `api/src/main.py` con `/health/live` y `/health/ready`. `web/src/app/page.tsx` con "Hola". `config.py` con `pydantic-settings` leyendo `.env`.
 - **Aceptación**:
-  - [ ] `GET /health/live` → `{"status": "ok"}`.
-  - [ ] `GET /health/ready` comprueba RW, RO y Redis; devuelve 503 si alguno falla.
-  - [ ] `web` responde en `:3000` con página mínima.
-  - [ ] `settings` carga todas las variables de `.env.example` sin error.
+  - [x] `GET /health/live` → `{"status": "ok"}`.
+  - [x] `GET /health/ready` comprueba RW, RO y Redis; devuelve 503 si alguno falla.
+  - [x] `web` responde en `:3000` con página mínima.
+  - [x] `settings` carga todas las variables de `.env.example` sin error.
 - **Notas**: `health/ready` es lo que K8s usará como readiness probe. No lo dejes para después.
 
 ---
