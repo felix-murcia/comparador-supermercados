@@ -58,7 +58,7 @@ Antes de tocar código, lee en este orden:
 
 ## Requisitos previos
 
-- **Docker** ≥ 24 y **Docker Compose** ≥ 2.20
+- **Docker** ≥ 24 y **Docker Compose** ≥ 2.24
 - **Node.js** ≥ 20 (solo si trabajas en `web/` fuera de Docker)
 - **Python** ≥ 3.12 (solo si trabajas en `api/` fuera de Docker)
 - **Git** ≥ 2.40
@@ -95,6 +95,7 @@ Edita `.env` y rellena **como mínimo**:
 ```env
 APP_SECRET_KEY=<genera con: openssl rand -hex 32>
 POSTGRES_PASSWORD=<elige una contraseña>
+POSTGRES_REPLICATION_PASSWORD=<elige otra contraseña para replicación>
 GOOGLE_CLIENT_ID=<de Google Cloud Console>
 GOOGLE_CLIENT_SECRET=<de Google Cloud Console>
 MICROSOFT_CLIENT_ID=<de Azure Portal>
@@ -104,23 +105,25 @@ LLM_API_KEY=<de tu proveedor>
 
 > ⚠️ **Nunca commitees `.env`**. Está en `.gitignore`. Si detectas un secreto en el repo, avisa: es una penalización grave según `AGENTS.md` §3.1.
 
+> Los comandos de Compose usan `--env-file .env` para que los puertos e `IMAGE_TAG` de `.env` se apliquen a la interpolación. Los secretos se inyectan en los contenedores mediante `env_file`.
+
 ### 3. Levantar el entorno
 
 ```bash
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml up -d --build
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml up -d --build
 ```
 
 Espera a que todos los servicios estén `healthy`:
 
 ```bash
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml ps
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml ps
 ```
 
 ### 4. Aplicar migraciones y seed
 
 ```bash
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api alembic upgrade head
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api python -m scripts.seed
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api alembic upgrade head
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api python -m scripts.seed
 ```
 
 ### 5. Abrir la app
@@ -138,60 +141,60 @@ docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml 
 
 ```bash
 # Levantar
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml up -d
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml up -d
 
 # Parar sin borrar volúmenes
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml down
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml down
 
 # Parar y borrar todo (⚠️ borra BD)
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml down -v
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml down -v
 ```
 
 ### Logs
 
 ```bash
 # Todos
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml logs -f
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml logs -f
 
 # Solo API
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml logs -f api
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml logs -f api
 
 # Solo worker
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml logs -f worker
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml logs -f worker
 ```
 
 ### Base de datos
 
 ```bash
 # Migraciones
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api alembic upgrade head
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api alembic upgrade head
 
 # Crear migración
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api alembic revision --autogenerate -m "descripcion"
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api alembic revision --autogenerate -m "descripcion"
 
 # Revertir una migración
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api alembic downgrade -1
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api alembic downgrade -1
 
 # Acceder a psql (primario)
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec postgres-primary psql -U app -d precios
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec postgres-primary psql -U app -d precios
 ```
 
 ### Tests y linters
 
 ```bash
 # Backend: tests
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api pytest
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api pytest
 
 # Backend: lint + tipos
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api ruff check .
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api mypy src
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api ruff check .
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api mypy src
 
 # Frontend: tests
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npm test
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npm test
 
 # Frontend: lint + tipos
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npm run lint
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npx tsc --noEmit
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npm run lint
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npx tsc --noEmit
 
 # Seguridad
 pre-commit run gitleaks --all-files
@@ -201,10 +204,10 @@ pre-commit run gitleaks --all-files
 
 ```bash
 # Ver estado del worker
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml logs -f worker
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml logs -f worker
 
 # Lanzar ingesta manualmente (dev)
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec worker python -m src.scheduler --run-now
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec worker python -m src.scheduler --run-now
 ```
 
 ---
@@ -248,6 +251,7 @@ docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml 
 │   ├── docker-compose.dev.yml
 │   ├── docker-compose.prod.yml
 │   ├── caddy/Caddyfile
+│   ├── postgres/init-primary.sh
 │   ├── postgres/init-replica.sh
 │   └── k8s/                   ← plantillas (no desplegar aún)
 ├── .env.example
@@ -276,8 +280,8 @@ cd /opt/comparador
 cp .env.example .env
 # Editar .env con valores de producción (APP_ENV=prod, dominio, secretos reales)
 
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.prod.yml up -d --build
-docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.prod.yml exec api alembic upgrade head
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.prod.yml up -d --build
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.prod.yml exec api alembic upgrade head
 ```
 
 **Backups**: configurar cron diario con `pg_dump` del primario. Ver `docs/PLAN.md` §RNF-06.
@@ -297,11 +301,11 @@ chmod 600 .env
 3. **Implementa** con tests.
 4. **Verifica** localmente:
    ```bash
-   docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api pytest
-   docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api ruff check .
-   docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api mypy src
-   docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npm test
-   docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npm run lint
+   docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api pytest
+   docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api ruff check .
+   docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api mypy src
+   docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npm test
+   docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npm run lint
    ```
 5. **Commit** con Conventional Commits:
    ```bash
@@ -332,7 +336,7 @@ Si detectas una vulnerabilidad, **no abras un issue público**. Contacta al main
 
 | Épica | Estado | Progreso |
 |-------|--------|----------|
-| 0 — Fundación | 🟡 En curso | 2/8 |
+| 0 — Fundación | 🟡 En curso | 3/8 |
 | 1 — Autenticación | ⚪ Pendiente | 0/5 |
 | 2 — Modelo de datos | ⚪ Pendiente | 0/6 |
 | 3 — Ingesta | ⚪ Pendiente | 0/8 |

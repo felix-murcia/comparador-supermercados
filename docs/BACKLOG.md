@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 en curso — 2/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 en curso — 3/8)
 
 ---
 
@@ -35,7 +35,7 @@
 
 | Épica | Tareas | Estimación | Estado |
 |-------|--------|-----------|--------|
-| 0 — Fundación | 8 | 8d | 🟡 En curso (2/8) |
+| 0 — Fundación | 8 | 8d | 🟡 En curso (3/8) |
 | 1 — Autenticación | 5 | 6d | ⚪ Pendiente |
 | 2 — Modelo de datos | 6 | 7d | ⚪ Pendiente |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
@@ -84,16 +84,16 @@
 
 ---
 
-### [ ] T0.3 — `docker-compose.base.yml` + dev + prod 🔴
+### [x] T0.3 — `docker-compose.base.yml` + dev + prod 🔴
 
 - **Depende de**: T0.1, T0.2
 - **Estimación**: 2d
 - **Descripción**: Crear tres archivos compose según `PLAN.md` §2.3.
 - **Aceptación**:
-  - [ ] `base.yml`: servicios `postgres-primary`, `postgres-replica`, `redis`, `api`, `worker`, `scheduler`, `web`, `caddy`. Volúmenes nombrados. Healthchecks en `postgres-primary` y `api`.
-  - [ ] `dev.yml`: hot-reload (volúmenes montados), `APP_ENV=dev`, sin TLS, logs verbose, puerto de Postgres expuesto para debugging.
-  - [ ] `prod.yml`: imágenes build, `APP_ENV=prod`, TLS en Caddy, logs JSON, sin puertos de BD expuestos.
-  - [ ] `docker compose -f base -f dev config` valida sin errores.
+  - [x] `base.yml`: servicios `postgres-primary`, `postgres-replica`, `redis`, `api`, `worker`, `scheduler`, `web`, `caddy`. Volúmenes nombrados. Healthchecks en `postgres-primary` y `api`.
+  - [x] `dev.yml`: hot-reload (volúmenes montados), `APP_ENV=dev`, sin TLS, logs verbose, puerto de Postgres expuesto para debugging.
+  - [x] `prod.yml`: imágenes build, `APP_ENV=prod`, TLS en Caddy, logs JSON, sin puertos de BD expuestos.
+  - [x] `docker compose -f base -f dev config` valida sin errores.
 - **Notas**: `postgres-replica` requiere script de inicialización (`infra/postgres/init-replica.sh`) con `pg_basebackup` desde primario.
 
 ---
@@ -969,7 +969,7 @@ Actualizar al cerrar cada tarea:
 
 | Épica | Completadas | Total | % |
 |-------|-------------|-------|---|
-| 0 — Fundación | 2 | 8 | 25% |
+| 0 — Fundación | 3 | 8 | 37.5% |
 | 1 — Autenticación | 0 | 5 | 0% |
 | 2 — Modelo de datos | 0 | 6 | 0% |
 | 3 — Ingesta | 0 | 8 | 0% |
@@ -977,6 +977,6 @@ Actualizar al cerrar cada tarea:
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **2** | **53** | **4%** |
+| **Total MVP** | **3** | **53** | **6%** |
 
 ---

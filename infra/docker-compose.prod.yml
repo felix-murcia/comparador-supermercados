@@ -1,0 +1,30 @@
+# Entorno de producción: imágenes build, TLS y logs JSON.
+# Solo Caddy publica puertos; la BD y Redis quedan en la red interna.
+x-prod-environment: &prod-environment
+  APP_ENV: prod
+  LOG_LEVEL: INFO
+
+services:
+  api:
+    environment:
+      <<: *prod-environment
+
+  worker:
+    environment:
+      <<: *prod-environment
+
+  scheduler:
+    environment:
+      <<: *prod-environment
+
+  web:
+    environment:
+      <<: *prod-environment
+      NODE_ENV: production
+
+  caddy:
+    environment:
+      <<: *prod-environment
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
