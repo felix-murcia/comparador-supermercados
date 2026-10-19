@@ -18,6 +18,7 @@ from src.dominio.productos.entidades import (
     ProductoIngestable,
     ProductoNuevo,
 )
+from src.dominio.productos.reglas import normalizar_nombre
 
 
 class SQLAlchemyRepositorioProductos:
@@ -71,6 +72,22 @@ class SQLAlchemyRepositorioProductos:
         await self._session.flush()
         await self._session.refresh(modelo)
         return producto_desde_modelo(modelo)
+
+    async def obtener_por_slug(self, slug: str) -> Producto | None:
+        """Resuelve un producto por su slug (nombre normalizado o EAN)."""
+        texto = normalizar_nombre(slug.replace("-", " "))
+        if not texto:
+            return None
+
+        if texto.isdigit():
+            por_ean = await self.obtener_por_ean(texto)
+            if por_ean is not None:
+                return por_ean
+
+        for producto in await self.buscar_por_nombre(texto, limite=5):
+            if normalizar_nombre(producto.nombre) == texto:
+                return producto
+        return None
 
     async def listar_ingestables(self) -> list[ProductoIngestable]:
         """Productos con al menos una cadena, con los `slug` de esas cadenas."""

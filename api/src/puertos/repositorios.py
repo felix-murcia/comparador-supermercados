@@ -18,8 +18,10 @@ from src.dominio.ingesta.entidades import MetricaIngesta, MetricasIngesta
 from src.dominio.listas.entidades import ItemLista, ItemListaNuevo, Lista
 from src.dominio.precios.entidades import (
     FiltrosComparacion,
+    HistoricoPrecio,
     PrecioNuevo,
     PrecioRegistrado,
+    PrecioVigente,
     ResultadoComparacion,
 )
 from src.dominio.productos.entidades import Producto, ProductoIngestable, ProductoNuevo
@@ -42,6 +44,8 @@ class RepositorioProductos(Protocol):
 
     async def listar_ingestables(self) -> list[ProductoIngestable]: ...
 
+    async def obtener_por_slug(self, slug: str) -> Producto | None: ...
+
 
 @runtime_checkable
 class RepositorioPrecios(Protocol):
@@ -60,6 +64,14 @@ class RepositorioPrecios(Protocol):
     async def buscar_comparativa(
         self, filtros: FiltrosComparacion
     ) -> list[ResultadoComparacion]: ...
+
+    async def precios_actuales(
+        self, producto_id: UUID, provincia: str | None = None
+    ) -> list[PrecioVigente]: ...
+
+    async def historico_producto(
+        self, producto_id: UUID, desde: datetime | None = None
+    ) -> list[HistoricoPrecio]: ...
 
 
 @runtime_checkable

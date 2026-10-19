@@ -81,6 +81,31 @@ class ResultadoComparacion:
 
 
 @dataclass(frozen=True)
+class PrecioVigente:
+    """Precio actual de un producto en una cadena."""
+
+    producto_cadena_id: UUID
+    cadena: str
+    nombre_cadena: str
+    precio_eur: Decimal
+    precio_por_litro_kg: Decimal | None = None
+    url_producto: str | None = None
+    ambito: AmbitoPrecio = "nacional"
+    provincia: str | None = None
+    disponible: bool | None = None
+    fecha_consulta: datetime | None = None
+
+
+@dataclass(frozen=True)
+class HistoricoPrecio:
+    """Un punto del histórico de precios de un producto en una cadena."""
+
+    cadena: str
+    fecha: datetime
+    precio_eur: Decimal
+
+
+@dataclass(frozen=True)
 class FiltrosComparacion:
     """Filtros, orden y paginación de la comparativa de precios."""
 

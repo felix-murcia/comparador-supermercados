@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 import { t } from "@/lib/i18n";
+import { aSlug } from "@/lib/slug";
 
 type Props = {
   posicion: number;
@@ -68,7 +70,14 @@ export function CardProducto({
         )}
 
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-medium text-texto">{nombre}</h3>
+          <h3 className="truncate font-medium text-texto">
+            <Link
+              href={`/producto/${aSlug(nombre)}`}
+              className="hover:underline"
+            >
+              {nombre}
+            </Link>
+          </h3>
           <p className="truncate text-sm text-gris">
             {[descripcion, cadena].filter(Boolean).join(" · ")}
           </p>

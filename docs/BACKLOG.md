@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 5/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 6/8)
 
 ---
 
@@ -40,7 +40,7 @@
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
-| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (5/8) |
+| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (6/8) |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
@@ -642,17 +642,18 @@
 
 ---
 
-### [ ] T5.6 — Ficha de producto + histórico 🟡
+### [x] T5.6 — Ficha de producto + histórico 🟡
 
 - **Depende de**: T5.4, T4.3
 - **Estimación**: 2d
 - **Descripción**: Página `/producto/[slug]` con detalle y gráfica de histórico de precios.
 - **Aceptación**:
-  - [ ] SSR para SEO.
-  - [ ] Gráfica de histórico (Recharts) con precios por cadena.
-  - [ ] Selector de rango temporal (1M, 3M, 6M, 1A).
-  - [ ] Tabla de precios actuales por cadena.
-  - [ ] Botón "Añadir a lista".
+  - [x] SSR para SEO.
+  - [x] Gráfica de histórico (Recharts) con precios por cadena.
+  - [x] Selector de rango temporal (1M, 3M, 6M, 1A).
+  - [x] Tabla de precios actuales por cadena.
+  - [x] Botón "Añadir a lista".
+- **Nota**: la API añade `GET /v1/productos/{slug}` (resuelve el producto por nombre normalizado o EAN y devuelve los precios vigentes por cadena y el histórico append-only del rango pedido). La página `web/src/app/(app)/producto/[slug]/page.tsx` se renderiza en el servidor (SEO) y la gráfica es `web/src/components/producto/GraficaHistorico.tsx` con Recharts, una línea por cadena; el selector de rango son enlaces `?meses=1|3|6|12`. Las cards enlazan a la ficha con el slug derivado del nombre.
 
 ---
 
@@ -1003,9 +1004,9 @@ Actualizar al cerrar cada tarea:
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
-| 5 — Frontend flujo principal | 5 | 8 | 63% |
+| 5 — Frontend flujo principal | 6 | 8 | 75% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **36** | **53** | **68%** |
+| **Total MVP** | **37** | **53** | **70%** |
 
 ---

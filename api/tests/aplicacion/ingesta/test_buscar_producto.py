@@ -17,8 +17,10 @@ from src.aplicacion.ingesta.buscar_producto import (
 from src.dominio.cadenas.entidades import Cadena
 from src.dominio.precios.entidades import (
     FiltrosComparacion,
+    HistoricoPrecio,
     PrecioNuevo,
     PrecioRegistrado,
+    PrecioVigente,
     ResultadoComparacion,
 )
 from src.dominio.precios.errores import ErrorProductor
@@ -107,6 +109,9 @@ class ProductosFake:
     async def listar_ingestables(self) -> list[ProductoIngestable]:
         return []
 
+    async def obtener_por_slug(self, slug: str) -> Producto | None:
+        return None
+
 
 class ProductosCadenasFake:
     def __init__(self) -> None:
@@ -164,6 +169,16 @@ class PreciosFake:
     async def buscar_comparativa(
         self, filtros: FiltrosComparacion
     ) -> list[ResultadoComparacion]:
+        return []
+
+    async def precios_actuales(
+        self, producto_id: UUID, provincia: str | None = None
+    ) -> list[PrecioVigente]:
+        return []
+
+    async def historico_producto(
+        self, producto_id: UUID, desde: datetime | None = None
+    ) -> list[HistoricoPrecio]:
         return []
 
 

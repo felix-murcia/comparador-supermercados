@@ -39,6 +39,23 @@
     "error_busqueda": "La búsqueda ha fallado. Vuelve a intentarlo.",
     "error_resultados": "No se pudieron cargar los resultados."
   },
+  "producto": {
+    "no_encontrado": "No hemos encontrado ese producto",
+    "precio_actual": "Precio actual por supermercado",
+    "precio": "Precio",
+    "precio_unidad": "Precio por kg/L",
+    "cadena": "Supermercado",
+    "enlace": "Ficha",
+    "ver_producto": "Ver en el supermercado",
+    "sin_precios": "Todavía no hay precios verificados para este producto.",
+    "historico": "Histórico de precios",
+    "rango": "Rango temporal",
+    "rango_1m": "1 mes",
+    "rango_3m": "3 meses",
+    "rango_6m": "6 meses",
+    "rango_1a": "1 año",
+    "sin_historico": "Todavía no hay histórico de precios para este producto."
+  },
   "filtros": {
     "orden": "Orden",
     "orden_precio_unitario": "Precio unitario",

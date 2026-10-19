@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any, cast
 from uuid import UUID
 
@@ -18,8 +19,10 @@ from src.adaptadores.persistencia.modelos import (
 )
 from src.dominio.precios.entidades import (
     FiltrosComparacion,
+    HistoricoPrecio,
     PrecioNuevo,
     PrecioRegistrado,
+    PrecioVigente,
     ResultadoComparacion,
 )
 from src.dominio.precios.estados import AmbitoPrecio
@@ -215,3 +218,132 @@ class SQLAlchemyRepositorioPrecios:
             url_producto=fila["url_producto"],
             disponible=fila["disponible"],
         )
+
+    async def precios_actuales(
+        self, producto_id: UUID, provincia: str | None = None
+    ) -> list[PrecioVigente]:
+        """Un precio vigente por cadena, prefiriendo el de la provincia."""
+        condiciones = [
+            PrecioModelo.estado == "verificado",
+            ProductoCadenaModelo.producto_id == producto_id,
+        ]
+        if provincia:
+            condiciones.append(
+                or_(
+                    PrecioModelo.ambito == "nacional",
+                    and_(
+                        PrecioModelo.ambito == "provincia",
+                        PrecioModelo.provincia == provincia,
+                    ),
+                )
+            )
+        else:
+            condiciones.append(PrecioModelo.ambito == "nacional")
+
+        preferencia = case(
+            (
+                and_(
+                    PrecioModelo.ambito == "provincia",
+                    PrecioModelo.provincia == provincia,
+                ),
+                0,
+            ),
+            (PrecioModelo.ambito == "nacional", 1),
+            else_=2,
+        )
+
+        filas = (
+            (
+                await self._session.execute(
+                    select(
+                        ProductoCadenaModelo.id.label("producto_cadena_id"),
+                        CadenaModelo.slug.label("cadena"),
+                        CadenaModelo.nombre.label("nombre_cadena"),
+                        PrecioModelo.precio_eur.label("precio_eur"),
+                        PrecioModelo.precio_por_litro_kg.label("precio_por_litro_kg"),
+                        ProductoCadenaModelo.url_producto.label("url_producto"),
+                        PrecioModelo.ambito.label("ambito"),
+                        PrecioModelo.provincia.label("provincia"),
+                        PrecioModelo.disponible.label("disponible"),
+                        PrecioModelo.fecha_consulta.label("fecha_consulta"),
+                    )
+                    .select_from(ProductoCadenaModelo)
+                    .join(
+                        PrecioModelo,
+                        PrecioModelo.producto_cadena_id == ProductoCadenaModelo.id,
+                    )
+                    .join(
+                        CadenaModelo, CadenaModelo.id == ProductoCadenaModelo.cadena_id
+                    )
+                    .where(*condiciones)
+                    .ext(distinct_on(ProductoCadenaModelo.id))
+                    .order_by(
+                        ProductoCadenaModelo.id,
+                        preferencia,
+                        PrecioModelo.fecha_consulta.desc(),
+                    )
+                )
+            )
+            .mappings()
+            .all()
+        )
+
+        return [
+            PrecioVigente(
+                producto_cadena_id=fila["producto_cadena_id"],
+                cadena=fila["cadena"],
+                nombre_cadena=fila["nombre_cadena"],
+                precio_eur=fila["precio_eur"],
+                precio_por_litro_kg=fila["precio_por_litro_kg"],
+                url_producto=fila["url_producto"],
+                ambito=cast(AmbitoPrecio, fila["ambito"]),
+                provincia=fila["provincia"],
+                disponible=fila["disponible"],
+                fecha_consulta=fila["fecha_consulta"],
+            )
+            for fila in filas
+        ]
+
+    async def historico_producto(
+        self, producto_id: UUID, desde: datetime | None = None
+    ) -> list[HistoricoPrecio]:
+        """Histórico de precios verificados del producto, por cadena y fecha."""
+        condiciones = [
+            PrecioModelo.estado == "verificado",
+            ProductoCadenaModelo.producto_id == producto_id,
+        ]
+        if desde is not None:
+            condiciones.append(PrecioModelo.fecha_consulta >= desde)
+
+        filas = (
+            (
+                await self._session.execute(
+                    select(
+                        CadenaModelo.slug.label("cadena"),
+                        PrecioModelo.fecha_consulta.label("fecha"),
+                        PrecioModelo.precio_eur.label("precio_eur"),
+                    )
+                    .select_from(ProductoCadenaModelo)
+                    .join(
+                        PrecioModelo,
+                        PrecioModelo.producto_cadena_id == ProductoCadenaModelo.id,
+                    )
+                    .join(
+                        CadenaModelo, CadenaModelo.id == ProductoCadenaModelo.cadena_id
+                    )
+                    .where(*condiciones)
+                    .order_by(CadenaModelo.slug, PrecioModelo.fecha_consulta)
+                )
+            )
+            .mappings()
+            .all()
+        )
+
+        return [
+            HistoricoPrecio(
+                cadena=fila["cadena"],
+                fecha=fila["fecha"],
+                precio_eur=fila["precio_eur"],
+            )
+            for fila in filas
+        ]
