@@ -13,6 +13,7 @@ from uuid import UUID
 
 from src.dominio.busquedas.entidades import Busqueda, BusquedaNueva
 from src.dominio.busquedas.estados import EstadoBusqueda
+from src.dominio.cadenas.entidades import Cadena
 from src.dominio.listas.entidades import ItemLista, ItemListaNuevo, Lista
 from src.dominio.precios.entidades import PrecioNuevo, PrecioRegistrado
 from src.dominio.productos.entidades import Producto, ProductoNuevo
@@ -99,3 +100,27 @@ class RepositorioUsuarios(Protocol):
     """Perfiles de usuario indexados por proveedor OAuth."""
 
     async def upsert(self, identidad: IdentidadOAuth) -> Usuario: ...
+
+
+@runtime_checkable
+class RepositorioCadenas(Protocol):
+    """Catálogo de cadenas de supermercados."""
+
+    async def obtener_por_slug(self, slug: str) -> Cadena | None: ...
+
+
+@runtime_checkable
+class RepositorioProductosCadenas(Protocol):
+    """Relación entre un producto canónico y una cadena, con su URL de ficha."""
+
+    async def obtener_por_producto_y_cadena(
+        self, producto_id: UUID, cadena_id: UUID
+    ) -> UUID | None: ...
+
+    async def crear(
+        self,
+        producto_id: UUID,
+        cadena_id: UUID,
+        url_producto: str,
+        nombre_en_cadena: str,
+    ) -> UUID: ...

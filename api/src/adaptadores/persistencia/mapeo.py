@@ -6,6 +6,7 @@ from typing import cast
 
 from src.adaptadores.persistencia.modelos import (
     BusquedaModelo,
+    CadenaModelo,
     ItemListaModelo,
     ListaModelo,
     PrecioModelo,
@@ -14,6 +15,7 @@ from src.adaptadores.persistencia.modelos import (
 )
 from src.dominio.busquedas.entidades import Busqueda
 from src.dominio.busquedas.estados import EstadoBusqueda
+from src.dominio.cadenas.entidades import Cadena
 from src.dominio.listas.entidades import ItemLista, Lista
 from src.dominio.precios.entidades import PrecioRegistrado
 from src.dominio.precios.estados import AmbitoPrecio, EstadoPrecio
@@ -97,4 +99,13 @@ def usuario_desde_modelo(modelo: UsuarioModelo) -> Usuario:
         provincia=modelo.provincia,
         avatar_url=modelo.avatar_url,
         creado_en=modelo.creado_en,
+    )
+
+
+def cadena_desde_modelo(modelo: CadenaModelo) -> Cadena:
+    return Cadena(
+        id=modelo.id,
+        slug=modelo.slug,
+        nombre=modelo.nombre,
+        logo_svg=modelo.logo_svg,
     )

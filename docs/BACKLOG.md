@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 2/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 3/8)
 
 ---
 
@@ -38,7 +38,7 @@
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
-| 3 — Ingesta | 8 | 12d | 🟡 En curso (2/8) |
+| 3 — Ingesta | 8 | 12d | 🟡 En curso (3/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
@@ -382,17 +382,18 @@
 
 ---
 
-### [ ] T3.3 — Caso de uso `BuscarProducto` 🔴
+### [x] T3.3 — Caso de uso `BuscarProducto` 🔴
 
 - **Depende de**: T3.1, T3.2, T2.3
 - **Estimación**: 1.5d
 - **Descripción**: Orquesta productor → verificador → repositorio con reintento acotado (máx. 3).
 - **Aceptación**:
-  - [ ] Máximo 3 pasadas.
-  - [ ] Si `verificado` → guarda en BD y devuelve éxito.
-  - [ ] Si `rechazado` con motivo `agente_no_encontro` → no reintenta, devuelve fallo.
-  - [ ] Si `sospechoso` tras 3 pasadas → guarda con estado `sospechoso`.
-  - [ ] Tests con productor/verificador/repo mockeados.
+  - [x] Máximo 3 pasadas.
+  - [x] Si `verificado` → guarda en BD y devuelve éxito.
+  - [x] Si `rechazado` con motivo `agente_no_encontro` → no reintenta, devuelve fallo.
+  - [x] Si `sospechoso` tras 3 pasadas → guarda con estado `sospechoso`.
+  - [x] Tests con productor/verificador/repo mockeados.
+- **Nota**: `api/src/aplicacion/ingesta/buscar_producto.py`. Resuelve el producto canónico (por EAN o nombre exacto) y su ficha en la cadena antes de verificar, y pasa al verificador el último precio conocido (`precio_eur_anterior`) para la regla de desviación. Requiere los repositorios de cadenas y de productos por cadena (`RepositorioCadenas`, `RepositorioProductosCadenas`), añadidos en esta tarea con sus adaptadores SQLAlchemy.
 
 ---
 
@@ -984,11 +985,11 @@ Actualizar al cerrar cada tarea:
 | 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
-| 3 — Ingesta | 2 | 8 | 25% |
+| 3 — Ingesta | 3 | 8 | 38% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **19** | **53** | **36%** |
+| **Total MVP** | **20** | **53** | **38%** |
 
 ---

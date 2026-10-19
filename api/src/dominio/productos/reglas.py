@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from decimal import Decimal, InvalidOperation
 
 from src.dominio.productos.entidades import Formato
@@ -32,3 +33,13 @@ def parsear_formato(texto: str | None) -> Formato | None:
 def familia_unidad(unidad: str) -> str:
     """Familia de la unidad para comparar precios: "l" (volumen) o "kg" (masa)."""
     return "l" if unidad in ("L", "ml") else "kg"
+
+
+def normalizar_nombre(texto: str) -> str:
+    """Minúsculas, sin tildes y sin espacios repetidos, para comparar nombres."""
+    sin_acentos = "".join(
+        caracter
+        for caracter in unicodedata.normalize("NFKD", texto.lower())
+        if not unicodedata.combining(caracter)
+    )
+    return " ".join(sin_acentos.split())
