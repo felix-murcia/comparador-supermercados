@@ -26,7 +26,11 @@
     "titulo": "Buscar productos",
     "campo": "Producto a buscar",
     "placeholder": "¿Qué quieres comprar?",
-    "boton": "Buscar"
+    "boton": "Buscar",
+    "comparar": "Comparar",
+    "cadenas": "Supermercados a comparar",
+    "buscando": "Buscando…",
+    "error": "No se pudo lanzar la búsqueda. Inténtalo de nuevo."
   },
   "listas": {
     "titulo": "Mis listas"

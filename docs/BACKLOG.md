@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 1/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 2/8)
 
 ---
 
@@ -40,7 +40,7 @@
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
-| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (1/8) |
+| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (2/8) |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
@@ -583,16 +583,17 @@
 
 ---
 
-### [ ] T5.2 — Hero buscador + selector SVG cadenas 🔴
+### [x] T5.2 — Hero buscador + selector SVG cadenas 🔴
 
 - **Depende de**: T5.1
 - **Estimación**: 2d
 - **Descripción**: Página `/` con buscador centrado, selector de cadenas con logos SVG, botón "Comparar".
 - **Aceptación**:
-  - [ ] Logos SVG en `public/logos/` (DIA, Carrefour, Mercadona).
-  - [ ] Selección múltiple con estado visual.
-  - [ ] Botón "Comparar" deshabilitado si no hay query o cadenas.
-  - [ ] Enter en el input lanza búsqueda.
+  - [x] Logos SVG en `public/logos/` (DIA, Carrefour, Mercadona).
+  - [x] Selección múltiple con estado visual.
+  - [x] Botón "Comparar" deshabilitado si no hay query o cadenas.
+  - [x] Enter en el input lanza búsqueda.
+- **Nota**: `web/src/components/buscador/HeroBuscador.tsx` (cliente) con el input, `SelectorCadenas.tsx` (selección múltiple con los logos de `web/public/logos/`, los mismos que usa el seed) y el botón deshabilitado mientras falte consulta o cadenas. El formulario tiene `onSubmit` propio, así que Enter lanza la búsqueda igual que el botón. La llamada a la API sale del servidor: `web/src/app/api/busquedas/route.ts` hace de proxy y reenvía el token de sesión (`web/src/lib/api.ts`), de modo que el JWT no llega al navegador. Con la respuesta se navega a `/buscar?q=...&cadenas=...&job=...` (la vista de resultados y la barra de progreso son T5.3).
 
 ---
 
@@ -999,9 +1000,9 @@ Actualizar al cerrar cada tarea:
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
-| 5 — Frontend flujo principal | 1 | 8 | 13% |
+| 5 — Frontend flujo principal | 2 | 8 | 25% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **32** | **53** | **60%** |
+| **Total MVP** | **33** | **53** | **62%** |
 
 ---
