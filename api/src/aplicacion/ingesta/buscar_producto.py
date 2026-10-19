@@ -133,7 +133,9 @@ class BuscarProducto:
             estado, motivos = await self._verificador.verificar(candidato)
 
             if estado == "verificado":
-                return await self._guardar(candidato, producto_cadena_id, "verificado")
+                return await self._guardar(
+                    candidato, producto_cadena_id, "verificado", motivos
+                )
 
             if MOTIVO_AGENTE_NO_ENCONTRO in motivos:
                 return ResultadoBusqueda(estado="rechazado", motivos=tuple(motivos))
@@ -141,13 +143,19 @@ class BuscarProducto:
             pendiente = (candidato, producto_cadena_id, estado, motivos)
 
         if pendiente is not None and pendiente[2] == "sospechoso":
-            return await self._guardar(pendiente[0], pendiente[1], "sospechoso")
+            return await self._guardar(
+                pendiente[0], pendiente[1], "sospechoso", pendiente[3]
+            )
 
         motivos = pendiente[3] if pendiente is not None else [MOTIVO_SIN_CANDIDATO]
         return ResultadoBusqueda(estado="rechazado", motivos=tuple(motivos))
 
     async def _guardar(
-        self, candidato: Candidato, producto_cadena_id: UUID, estado: EstadoPrecio
+        self,
+        candidato: Candidato,
+        producto_cadena_id: UUID,
+        estado: EstadoPrecio,
+        motivos: list[str],
     ) -> ResultadoBusqueda:
         precio = await self._repositorio_precios.insertar(
             self._precio_nuevo(candidato, producto_cadena_id, estado)
@@ -156,6 +164,7 @@ class BuscarProducto:
             estado=estado,
             producto_cadena_id=producto_cadena_id,
             precio_id=precio.id,
+            motivos=tuple(motivos),
         )
 
     def _precio_nuevo(

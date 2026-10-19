@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 7/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8)
 
 ---
 
@@ -38,7 +38,7 @@
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
-| 3 — Ingesta | 8 | 12d | 🟡 En curso (7/8) |
+| 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
@@ -455,15 +455,16 @@
 
 ---
 
-### [ ] T3.8 — Métricas de ingesta 🟢
+### [x] T3.8 — Métricas de ingesta 🟢
 
 - **Depende de**: T3.4
 - **Estimación**: 1d
 - **Descripción**: Contadores en logs/BD: `% verificado`, `% sospechoso`, `% rechazado`, motivos más frecuentes.
 - **Aceptación**:
-  - [ ] Tabla `ingesta_metricas` o logs estructurados consultables.
-  - [ ] Endpoint interno `GET /v1/_metrics/ingesta` (protegido).
-  - [ ] Documentado en `README.md` cómo consultarlas.
+  - [x] Tabla `ingesta_metricas` o logs estructurados consultables.
+  - [x] Endpoint interno `GET /v1/_metrics/ingesta` (protegido).
+  - [x] Documentado en `README.md` cómo consultarlas.
+- **Nota**: tabla `ingesta_metricas` (migración `0003`) con el estado, la cadena y el motivo; la escribe el worker en cada cadena procesada. El endpoint `GET /v1/_metrics/ingesta` exige sesión iniciada y devuelve el reparto por estado con porcentajes y los motivos más frecuentes. Consulta documentada en `README.md`.
 
 ---
 
@@ -989,11 +990,11 @@ Actualizar al cerrar cada tarea:
 | 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
-| 3 — Ingesta | 7 | 8 | 88% |
+| 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **24** | **53** | **45%** |
+| **Total MVP** | **25** | **53** | **47%** |
 
 ---

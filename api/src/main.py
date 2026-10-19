@@ -13,6 +13,7 @@ from src.adaptadores.persistencia.engines import dispose_engines
 from src.adaptadores.persistencia.sticky import dispose_sticky_reads
 from src.api_http.errores import ErrorAPI, manejador_error_api
 from src.api_http.v1.me import router as me_router
+from src.api_http.v1.metricas import router as metricas_router
 from src.config import settings
 
 CHECK_TIMEOUT_SEGUNDOS = 2.0
@@ -30,6 +31,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(title="Comparador de Precios API", lifespan=lifespan)
 app.add_exception_handler(ErrorAPI, manejador_error_api)
 app.include_router(me_router)
+app.include_router(metricas_router)
 
 
 async def check_database(url: str) -> bool:

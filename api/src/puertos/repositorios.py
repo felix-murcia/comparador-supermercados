@@ -14,6 +14,7 @@ from uuid import UUID
 from src.dominio.busquedas.entidades import Busqueda, BusquedaNueva
 from src.dominio.busquedas.estados import EstadoBusqueda
 from src.dominio.cadenas.entidades import Cadena
+from src.dominio.ingesta.entidades import MetricaIngesta, MetricasIngesta
 from src.dominio.listas.entidades import ItemLista, ItemListaNuevo, Lista
 from src.dominio.precios.entidades import PrecioNuevo, PrecioRegistrado
 from src.dominio.productos.entidades import Producto, ProductoIngestable, ProductoNuevo
@@ -126,3 +127,12 @@ class RepositorioProductosCadenas(Protocol):
         url_producto: str,
         nombre_en_cadena: str,
     ) -> UUID: ...
+
+
+@runtime_checkable
+class RepositorioMetricas(Protocol):
+    """Métricas de la ingesta: reparto por estado y motivos más frecuentes."""
+
+    async def registrar(self, metrica: MetricaIngesta) -> None: ...
+
+    async def resumen(self, desde: datetime | None = None) -> MetricasIngesta: ...

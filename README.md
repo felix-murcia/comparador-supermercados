@@ -153,6 +153,37 @@ Sin credenciales OAuth la web arranca igual, pero el flujo de login no se comple
 
 ---
 
+## Métricas de ingesta
+
+Cada precio que ingiere el worker se registra en la tabla `ingesta_metricas` con su estado (`verificado`, `sospechoso`, `rechazado`), la cadena y el motivo. El resumen se consulta en el endpoint interno (requiere sesión iniciada):
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/v1/_metrics/ingesta
+```
+
+```json
+{
+  "total": 120,
+  "verificado": 96,
+  "sospechoso": 18,
+  "rechazado": 6,
+  "porcentaje_verificado": 80.0,
+  "porcentaje_sospechoso": 15.0,
+  "porcentaje_rechazado": 5.0,
+  "motivos": [{ "motivo": "desviacion_precio", "total": 12 }]
+}
+```
+
+También se puede consultar en SQL:
+
+```sql
+SELECT estado, count(*) FROM ingesta_metricas GROUP BY estado;
+SELECT motivo, count(*) FROM ingesta_metricas
+  WHERE motivo IS NOT NULL GROUP BY motivo ORDER BY 2 DESC;
+```
+
+---
+
 ## Comandos frecuentes
 
 ### Levantar / parar
@@ -360,7 +391,7 @@ Si detectas una vulnerabilidad, **no abras un issue público**. Contacta al main
 | 0 — Fundación | 🟡 En curso | 6/8 |
 | 1 — Autenticación | ✅ Completada | 5/5 |
 | 2 — Modelo de datos | ✅ Completada | 6/6 |
-| 3 — Ingesta | 🟡 En curso | 7/8 |
+| 3 — Ingesta | ✅ Completada | 8/8 |
 | 4 — API búsqueda/comparativa | ⚪ Pendiente | 0/6 |
 | 5 — Frontend flujo principal | ⚪ Pendiente | 0/8 |
 | 6 — Perfil y listas | ⚪ Pendiente | 0/6 |

@@ -30,6 +30,7 @@ from src.adaptadores.persistencia.modelos import (
 )
 
 _TABLAS = (
+    "ingesta_metricas",
     "precios",
     "lista_items",
     "listas",

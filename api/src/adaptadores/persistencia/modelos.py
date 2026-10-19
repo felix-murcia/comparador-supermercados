@@ -12,6 +12,7 @@ from decimal import Decimal
 
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     DateTime,
     ForeignKey,
     Integer,
@@ -121,6 +122,27 @@ class UsuarioModelo(Base):
     nombre: Mapped[str | None] = mapped_column(Text)
     provincia: Mapped[str | None] = mapped_column(Text)
     avatar_url: Mapped[str | None] = mapped_column(Text)
+    creado_en: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=text("now()")
+    )
+
+
+class IngestaMetricasModelo(Base):
+    __tablename__ = "ingesta_metricas"
+    __table_args__ = (
+        CheckConstraint(
+            "estado IN ('verificado', 'sospechoso', 'rechazado')",
+            name="chk_ingesta_metricas_estado",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    producto_cadena_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    cadena: Mapped[str] = mapped_column(Text)
+    estado: Mapped[str] = mapped_column(Text)
+    motivo: Mapped[str | None] = mapped_column(Text)
     creado_en: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=text("now()")
     )

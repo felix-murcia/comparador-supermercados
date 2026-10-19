@@ -10,15 +10,20 @@ from __future__ import annotations
 import logging
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
+from uuid import UUID
 
 from src.aplicacion.ingesta.buscar_producto import ResultadoBusqueda
 from src.dominio.busquedas.entidades import Busqueda
 from src.dominio.busquedas.estados import EstadoBusqueda
-from src.puertos.repositorios import RepositorioBusquedas
+from src.dominio.ingesta.entidades import MetricaIngesta
+from src.dominio.precios.estados import EstadoPrecio
+from src.puertos.repositorios import RepositorioBusquedas, RepositorioMetricas
 
 logger = logging.getLogger(__name__)
 
 BuscarPrecio = Callable[[str, str], Awaitable[ResultadoBusqueda]]
+
+MOTIVO_ERROR_WORKER = "error_worker"
 
 
 class ProcesarBusqueda:
@@ -29,9 +34,11 @@ class ProcesarBusqueda:
         *,
         buscar: BuscarPrecio,
         repositorio_busquedas: RepositorioBusquedas,
+        repositorio_metricas: RepositorioMetricas,
     ) -> None:
         self._buscar = buscar
         self._repositorio_busquedas = repositorio_busquedas
+        self._repositorio_metricas = repositorio_metricas
 
     async def ejecutar(self, busqueda: Busqueda) -> EstadoBusqueda:
         """Procesa el job y devuelve su estado final."""
@@ -59,8 +66,15 @@ class ProcesarBusqueda:
             logger.warning(
                 "Fallo al procesar %s en %s: %s", query, cadena, type(error).__name__
             )
+            await self._registrar(cadena, "rechazado", None, (MOTIVO_ERROR_WORKER,))
             return False
 
+        await self._registrar(
+            cadena,
+            resultado.estado,
+            resultado.producto_cadena_id,
+            resultado.motivos,
+        )
         if not resultado.guardado:
             logger.info(
                 "Sin precio para %s en %s (%s)",
@@ -69,3 +83,19 @@ class ProcesarBusqueda:
                 ", ".join(resultado.motivos) or "sin motivos",
             )
         return resultado.guardado
+
+    async def _registrar(
+        self,
+        cadena: str,
+        estado: EstadoPrecio,
+        producto_cadena_id: UUID | None,
+        motivos: tuple[str, ...],
+    ) -> None:
+        await self._repositorio_metricas.registrar(
+            MetricaIngesta(
+                cadena=cadena,
+                estado=estado,
+                producto_cadena_id=producto_cadena_id,
+                motivo=motivos[0] if motivos else None,
+            )
+        )

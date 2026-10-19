@@ -29,6 +29,9 @@ from src.adaptadores.persistencia.repositorio_busquedas import (
 from src.adaptadores.persistencia.repositorio_cadenas import (
     SQLAlchemyRepositorioCadenas,
 )
+from src.adaptadores.persistencia.repositorio_metricas import (
+    SQLAlchemyRepositorioMetricas,
+)
 from src.adaptadores.persistencia.repositorio_precios import (
     SQLAlchemyRepositorioPrecios,
 )
@@ -115,6 +118,7 @@ async def procesar_siguiente_job(
         caso = ProcesarBusqueda(
             buscar=pipeline,
             repositorio_busquedas=SQLAlchemyRepositorioBusquedas(sesion),
+            repositorio_metricas=SQLAlchemyRepositorioMetricas(sesion),
         )
         estado = await caso.ejecutar(busqueda)
         await sesion.commit()
