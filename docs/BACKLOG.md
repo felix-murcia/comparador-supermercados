@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 2 en curso — 4/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 2 en curso — 5/6)
 
 ---
 
@@ -37,7 +37,7 @@
 |-------|--------|-----------|--------|
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ⚪ Pendiente |
-| 2 — Modelo de datos | 6 | 7d | 🟡 En curso (4/6) |
+| 2 — Modelo de datos | 6 | 7d | 🟡 En curso (5/6) |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
@@ -282,16 +282,17 @@
 
 ---
 
-### [ ] T2.3 — Repositorios base + tests 🟡
+### [x] T2.3 — Repositorios base + tests 🟡
 
 - **Depende de**: T2.2
 - **Estimación**: 2d
 - **Descripción**: Implementaciones SQLAlchemy de los puertos definidos en `api/src/puertos/repositorios.py`.
 - **Aceptación**:
-  - [ ] `RepositorioProductos`, `RepositorioPrecios`, `RepositorioListas`, `RepositorioBusquedas`.
-  - [ ] Métodos de lectura usan RO, de escritura RW.
-  - [ ] Tests de integración con Postgres de test.
-  - [ ] Cobertura > 80% en repositorios.
+  - [x] `RepositorioProductos`, `RepositorioPrecios`, `RepositorioListas`, `RepositorioBusquedas`.
+  - [x] Métodos de lectura usan RO, de escritura RW.
+  - [x] Tests de integración con Postgres de test.
+  - [x] Cobertura > 80% en repositorios.
+- **Nota**: los adaptadores reciben una `AsyncSession` ya enrutada (RO/RW) por el caso de uso. Los tests de integración requieren `DATABASE_URL_RW`/`DATABASE_URL_RO` y el esquema migrado; sin esas variables se saltan.
 
 ---
 
@@ -974,12 +975,12 @@ Actualizar al cerrar cada tarea:
 |-------|-------------|-------|---|
 | 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 0 | 5 | 0% |
-| 2 — Modelo de datos | 4 | 6 | 67% |
+| 2 — Modelo de datos | 5 | 6 | 83% |
 | 3 — Ingesta | 0 | 8 | 0% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **10** | **53** | **19%** |
+| **Total MVP** | **11** | **53** | **21%** |
 
 ---

@@ -1,4 +1,4 @@
-"""Estados posibles de un precio tras la verificación."""
+"""Estados y ámbitos posibles de un precio verificado."""
 
 from __future__ import annotations
 
@@ -11,3 +11,7 @@ ESTADOS_PRECIO: Final[tuple[EstadoPrecio, ...]] = (
     "sospechoso",
     "rechazado",
 )
+
+AmbitoPrecio = Literal["nacional", "provincia"]
+
+AMBITOS_PRECIO: Final[tuple[AmbitoPrecio, ...]] = ("nacional", "provincia")

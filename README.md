@@ -342,7 +342,7 @@ Si detectas una vulnerabilidad, **no abras un issue público**. Contacta al main
 |-------|--------|----------|
 | 0 — Fundación | 🟡 En curso | 6/8 |
 | 1 — Autenticación | ⚪ Pendiente | 0/5 |
-| 2 — Modelo de datos | 🟡 En curso | 4/6 |
+| 2 — Modelo de datos | 🟡 En curso | 5/6 |
 | 3 — Ingesta | ⚪ Pendiente | 0/8 |
 | 4 — API búsqueda/comparativa | ⚪ Pendiente | 0/6 |
 | 5 — Frontend flujo principal | ⚪ Pendiente | 0/8 |
