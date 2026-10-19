@@ -2,6 +2,14 @@
   "app": {
     "nombre": "Comparador de Precios"
   },
+  "menu": {
+    "titulo": "Menú",
+    "abrir": "Abrir menú",
+    "cerrar": "Cerrar menú",
+    "buscar": "Buscar",
+    "listas": "Listas",
+    "perfil": "Perfil"
+  },
   "login": {
     "titulo": "Entra para comparar precios",
     "subtitulo": "Compara el precio real de tu cesta entre DIA, Carrefour y Mercadona.",
@@ -19,5 +27,12 @@
     "campo": "Producto a buscar",
     "placeholder": "¿Qué quieres comprar?",
     "boton": "Buscar"
-  }
+  },
+  "listas": {
+    "titulo": "Mis listas"
+  },
+  "perfil": {
+    "titulo": "Mi perfil"
+  },
+  "proximamente": "Disponible en la próxima versión."
 }

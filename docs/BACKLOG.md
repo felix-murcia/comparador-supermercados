@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 1/8)
 
 ---
 
@@ -40,7 +40,7 @@
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
-| 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
+| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (1/8) |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
@@ -569,16 +569,17 @@
 
 ---
 
-### [ ] T5.1 — Layout minimalista + menú lateral 🔴
+### [x] T5.1 — Layout minimalista + menú lateral 🔴
 
 - **Depende de**: T1.4
 - **Estimación**: 2d
 - **Descripción**: Layout base con header, menú lateral colapsable, área de contenido. Estilo tipo Google.
 - **Aceptación**:
-  - [ ] Menú colapsable con enlaces: Buscar, Listas, Perfil.
-  - [ ] Responsive (móvil: menú overlay).
-  - [ ] Accesible por teclado.
-  - [ ] Tailwind con tokens en `tailwind.config.ts`.
+  - [x] Menú colapsable con enlaces: Buscar, Listas, Perfil.
+  - [x] Responsive (móvil: menú overlay).
+  - [x] Accesible por teclado.
+  - [x] Tailwind con tokens en `tailwind.config.ts`.
+- **Nota**: Tailwind 3 con tokens en `web/tailwind.config.ts` (colores, radios `pill`/`tarjeta`, anchos `contenido`/`lectura`) y `web/postcss.config.js`. El cromo vive en `web/src/components/layout/AppShell.tsx` (cliente): cabecera fija, botón `aria-expanded`/`aria-controls` para desplegar el menú y overlay en móvil; en escritorio el menú es sticky. `web/src/lib/i18n.ts` resuelve las claves de `locales/es.json` para que no haya strings sueltos en el JSX.
 
 ---
 
@@ -998,9 +999,9 @@ Actualizar al cerrar cada tarea:
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
-| 5 — Frontend flujo principal | 0 | 8 | 0% |
+| 5 — Frontend flujo principal | 1 | 8 | 13% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **31** | **53** | **58%** |
+| **Total MVP** | **32** | **53** | **60%** |
 
 ---

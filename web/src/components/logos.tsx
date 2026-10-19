@@ -1,7 +1,7 @@
 export function LogoGoogle() {
   return (
     <svg
-      className="login__logo"
+      className="h-[18px] w-[18px] shrink-0"
       width="18"
       height="18"
       viewBox="0 0 48 48"
@@ -31,7 +31,7 @@ export function LogoGoogle() {
 export function LogoMicrosoft() {
   return (
     <svg
-      className="login__logo"
+      className="h-[18px] w-[18px] shrink-0"
       width="18"
       height="18"
       viewBox="0 0 23 23"

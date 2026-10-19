@@ -3,26 +3,26 @@
 import { signIn } from "next-auth/react";
 
 import { LogoGoogle, LogoMicrosoft } from "@/components/logos";
-import es from "@/locales/es.json";
+import { t } from "@/lib/i18n";
 
 export function FormularioLogin({ destino }: { destino: string }) {
   return (
-    <div className="login__botones">
+    <div className="mt-6 flex w-full flex-col gap-3">
       <button
         type="button"
-        className="login__boton"
+        className="flex w-full items-center justify-center gap-2.5 rounded-pill border border-borde bg-white px-4 py-2.5 text-sm text-texto hover:bg-primario-suave"
         onClick={() => signIn("google", { callbackUrl: destino })}
       >
         <LogoGoogle />
-        <span>{es.login.google}</span>
+        <span>{t("login.google")}</span>
       </button>
       <button
         type="button"
-        className="login__boton"
+        className="flex w-full items-center justify-center gap-2.5 rounded-pill border border-borde bg-white px-4 py-2.5 text-sm text-texto hover:bg-primario-suave"
         onClick={() => signIn("microsoft", { callbackUrl: destino })}
       >
         <LogoMicrosoft />
-        <span>{es.login.microsoft}</span>
+        <span>{t("login.microsoft")}</span>
       </button>
     </div>
   );
