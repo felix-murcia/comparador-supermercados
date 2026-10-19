@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 4/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 5/8)
 
 ---
 
@@ -38,7 +38,7 @@
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
-| 3 — Ingesta | 8 | 12d | 🟡 En curso (4/8) |
+| 3 — Ingesta | 8 | 12d | 🟡 En curso (5/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
@@ -439,16 +439,17 @@
 
 ---
 
-### [ ] T3.7 — Cálculo de `cache_key` 🟡
+### [x] T3.7 — Cálculo de `cache_key` 🟡
 
 - **Depende de**: T3.6
 - **Estimación**: 0.5d
 - **Descripción**: Función que genera hash SHA-256 de `(query_normalizada, cadenas_ordenadas, orden, filtros, provincia)`.
 - **Aceptación**:
-  - [ ] Normalización de query: lowercase, sin tildes, sin espacios múltiples.
-  - [ ] Cadenas ordenadas alfabéticamente.
-  - [ ] Filtros serializados de forma canónica.
-  - [ ] Tests: misma búsqueda → mismo hash; distinta provincia → distinto hash.
+  - [x] Normalización de query: lowercase, sin tildes, sin espacios múltiples.
+  - [x] Cadenas ordenadas alfabéticamente.
+  - [x] Filtros serializados de forma canónica.
+  - [x] Tests: misma búsqueda → mismo hash; distinta provincia → distinto hash.
+- **Nota**: `api/src/dominio/busquedas/reglas.py` (`calcular_cache_key`), con la normalización de texto en `api/src/dominio/normalizacion.py`. La clave es `v1:` + SHA-256 de la búsqueda canónica.
 
 ---
 
@@ -986,11 +987,11 @@ Actualizar al cerrar cada tarea:
 | 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
-| 3 — Ingesta | 4 | 8 | 50% |
+| 3 — Ingesta | 5 | 8 | 63% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **21** | **53** | **40%** |
+| **Total MVP** | **22** | **53** | **42%** |
 
 ---

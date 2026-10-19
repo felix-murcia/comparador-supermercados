@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import re
-import unicodedata
 from decimal import Decimal, InvalidOperation
 
+from src.dominio.normalizacion import normalizar_texto
 from src.dominio.productos.entidades import Formato
 
 _PATRON_FORMATO = re.compile(r"(\d+(?:[.,]\d+)?)\s*(l|ml|kg|g)\b")
@@ -37,9 +37,4 @@ def familia_unidad(unidad: str) -> str:
 
 def normalizar_nombre(texto: str) -> str:
     """Minúsculas, sin tildes y sin espacios repetidos, para comparar nombres."""
-    sin_acentos = "".join(
-        caracter
-        for caracter in unicodedata.normalize("NFKD", texto.lower())
-        if not unicodedata.combining(caracter)
-    )
-    return " ".join(sin_acentos.split())
+    return normalizar_texto(texto)
