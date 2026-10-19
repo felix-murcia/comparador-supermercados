@@ -147,9 +147,14 @@ services:
       - frontend
 
   caddy:
-    image: caddy:2-alpine
+    build:
+      context: ./caddy
+      dockerfile: Dockerfile
+    image: comparador-precios-caddy:${IMAGE_TAG:-0.1.0}
     environment:
       APP_ENV: ${APP_ENV:-dev}
+      CADDY_SITE_ADDRESS: ":80"
+      RATE_LIMIT_BUSQUEDAS_POR_MINUTO: ${RATE_LIMIT_BUSQUEDAS_POR_MINUTO:-10}
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

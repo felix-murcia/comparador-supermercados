@@ -25,6 +25,7 @@ services:
   caddy:
     environment:
       <<: *prod-environment
+      CADDY_SITE_ADDRESS: "${DOMAIN:-localhost}"
     ports:
       - "${HTTP_PORT:-80}:80"
       - "${HTTPS_PORT:-443}:443"

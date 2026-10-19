@@ -128,9 +128,10 @@ docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-
 
 ### 5. Abrir la app
 
-- **Web**: http://localhost:3000
-- **API**: http://localhost:8000
-- **Health**: http://localhost:8000/health/ready
+- **Web (vía Caddy)**: http://localhost
+- **API (vía Caddy)**: http://localhost/api/health/ready
+- **Web directo**: http://localhost:3000
+- **API directa**: http://localhost:8000
 - **Docs API (dev)**: http://localhost:8000/docs
 
 ---
@@ -250,7 +251,9 @@ docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-
 │   ├── docker-compose.base.yml
 │   ├── docker-compose.dev.yml
 │   ├── docker-compose.prod.yml
-│   ├── caddy/Caddyfile
+│   ├── caddy/
+│   │   ├── Caddyfile
+│   │   └── Dockerfile
 │   ├── postgres/init-primary.sh
 │   ├── postgres/init-replica.sh
 │   └── k8s/                   ← plantillas (no desplegar aún)
@@ -278,7 +281,8 @@ docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-
 git clone <url-del-repo> /opt/comparador
 cd /opt/comparador
 cp .env.example .env
-# Editar .env con valores de producción (APP_ENV=prod, dominio, secretos reales)
+# Editar .env con valores de producción:
+# APP_ENV=prod, DOMAIN=precios.example.com, secretos reales
 
 docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.prod.yml up -d --build
 docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.prod.yml exec api alembic upgrade head
@@ -336,7 +340,7 @@ Si detectas una vulnerabilidad, **no abras un issue público**. Contacta al main
 
 | Épica | Estado | Progreso |
 |-------|--------|----------|
-| 0 — Fundación | 🟡 En curso | 5/8 |
+| 0 — Fundación | 🟡 En curso | 6/8 |
 | 1 — Autenticación | ⚪ Pendiente | 0/5 |
 | 2 — Modelo de datos | ⚪ Pendiente | 0/6 |
 | 3 — Ingesta | ⚪ Pendiente | 0/8 |

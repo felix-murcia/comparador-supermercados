@@ -313,6 +313,28 @@ Responde: "¿cuánto pierdo por no ir a 3 supermercados?" (coste de la comodidad
 
 ---
 
+## ADR-011: Imagen propia de Caddy con plugin de rate limit
+
+**Fecha**: 2026-10-19
+**Estado**: aceptado
+**Contexto**: El rate limit en el borde es requisito para `/api/v1/busquedas` (endpoint costoso). Caddy no incluye `rate_limit` en su distribución estándar; es un módulo externo (`github.com/mholt/caddy-ratelimit`). La imagen oficial `caddy:2-alpine` no puede cargarlo.
+
+**Decisión**: Compilar una imagen propia de Caddy en `infra/caddy/Dockerfile` con Caddy `2.11.7` y `mholt/caddy-ratelimit@v0.1.0`. El Caddyfile aplica una zona por IP (`{remote_host}`) a `/api/v1/busquedas*`, con `RATE_LIMIT_BUSQUEDAS_POR_MINUTO` (10 por defecto) y ventana de 1 minuto. En dev sirve HTTP en `:80`; en prod usa `DOMAIN` para TLS automático.
+
+**Consecuencias**:
+- ✅ Rate limit antes de llegar a la API, sin lógica adicional en FastAPI.
+- ✅ Una sola imagen reproducible con versiones fijadas.
+- ⚠️ El build requiere red para descargar módulos Go y tarda más que usar la imagen oficial. Mitigación: caché de capas en CI/VPS.
+- ⚠️ El contador es en memoria y por instancia. Suficiente para un único VPS; si se escala Caddy horizontalmente, habrá que usar almacenamiento compartido.
+
+**Alternativas consideradas**:
+- **Rate limit en FastAPI**: más código y la petición ya consume recursos de la API antes de limitarse.
+- **Nginx**: válido, pero contradice ADR-001 y añade otra configuración.
+- **Caddy oficial sin rate limit**: no cumple la aceptación de T0.6.
+- **Plugin con build en cada arranque**: descartado por tiempo de arranque y reproducibilidad.
+
+---
+
 ## Plantilla para nuevas decisiones
 
 ```markdown

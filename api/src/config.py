@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     app_secret_key: SecretStr = SecretStr("")
     app_base_url: str = ""
     web_base_url: str = ""
+    domain: str = "localhost"
     api_port: int = 8000
     web_port: int = 3000
     http_port: int = 80

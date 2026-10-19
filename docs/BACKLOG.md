@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 en curso — 5/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 en curso — 6/8)
 
 ---
 
@@ -35,7 +35,7 @@
 
 | Épica | Tareas | Estimación | Estado |
 |-------|--------|-----------|--------|
-| 0 — Fundación | 8 | 8d | 🟡 En curso (5/8) |
+| 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ⚪ Pendiente |
 | 2 — Modelo de datos | 6 | 7d | ⚪ Pendiente |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
@@ -127,16 +127,17 @@
 
 ---
 
-### [ ] T0.6 — Caddyfile 🔴
+### [x] T0.6 — Caddyfile 🔴
 
 - **Depende de**: T0.5
 - **Estimación**: 0.5d
 - **Descripción**: Configurar Caddy como reverse proxy a `api:8000` y `web:3000`, con TLS automático en prod y HTTP en dev.
 - **Aceptación**:
-  - [ ] En dev: `http://localhost` → web; `http://localhost/api/*` → api.
-  - [ ] En prod: TLS automático con dominio configurado en `.env`.
-  - [ ] Rate limit básico en `/api/v1/busquedas` (`RATE_LIMIT_BUSQUEDAS_POR_MINUTO`).
-  - [ ] Compresión gzip/zstd activa.
+  - [x] En dev: `http://localhost` → web; `http://localhost/api/*` → api.
+  - [x] En prod: TLS automático con dominio configurado en `.env`.
+  - [x] Rate limit básico en `/api/v1/busquedas` (`RATE_LIMIT_BUSQUEDAS_POR_MINUTO`).
+  - [x] Compresión gzip/zstd activa.
+- **Notas**: La imagen oficial de Caddy no incluye rate limit; se compila una propia con `mholt/caddy-ratelimit` (ADR-011). `/api/auth/*` se enruta a Next.js para no romper Auth.js.
 
 ---
 
