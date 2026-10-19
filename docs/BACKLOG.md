@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 1/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 2/8)
 
 ---
 
@@ -38,7 +38,7 @@
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
-| 3 — Ingesta | 8 | 12d | 🟡 En curso (1/8) |
+| 3 — Ingesta | 8 | 12d | 🟡 En curso (2/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
@@ -366,18 +366,19 @@
 
 ---
 
-### [ ] T3.2 — Implementación `Verificador` (fetch + reglas) 🔴
+### [x] T3.2 — Implementación `Verificador` (fetch + reglas) 🔴
 
 - **Depende de**: T2.5
 - **Estimación**: 2d
 - **Descripción**: Adaptador que hace `GET` a `url_fuente` y aplica las reglas del validador de `PLAN.md` §7.
 - **Aceptación**:
-  - [ ] Fetch con timeout 10 s y User-Agent de navegador.
-  - [ ] Comprueba precio en HTML (tolerante a `,` y `.`).
-  - [ ] Comprueba coherencia €/L vs. formato (±5%).
-  - [ ] Comprueba desviación vs. último precio conocido (>30% → `sospechoso`).
-  - [ ] Devuelve `(estado, motivos)` con estados `verificado | sospechoso | rechazado`.
-  - [ ] Tests con HTML real cacheado en `tests/fixtures/`.
+  - [x] Fetch con timeout 10 s y User-Agent de navegador.
+  - [x] Comprueba precio en HTML (tolerante a `,` y `.`).
+  - [x] Comprueba coherencia €/L vs. formato (±5%).
+  - [x] Comprueba desviación vs. último precio conocido (>30% → `sospechoso`).
+  - [x] Devuelve `(estado, motivos)` con estados `verificado | sospechoso | rechazado`.
+  - [x] Tests con HTML real cacheado en `tests/fixtures/`.
+- **Nota**: `api/src/adaptadores/ingesta/verificador_fetch.py` (`FetchVerificador`). Motivos estables: `agente_no_encontro`, `url_invalida`, `fetch_error`, `precio_invalido`, `precio_no_encontrado_en_html`, `precio_por_unidad_incoherente`, `desviacion_precio`. El último precio conocido llega en el candidato como `precio_eur_anterior` (lo añade el caso de uso). Reglas puras en `dominio/precios/reglas.py` y `dominio/productos/reglas.py`.
 
 ---
 
@@ -983,11 +984,11 @@ Actualizar al cerrar cada tarea:
 | 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
-| 3 — Ingesta | 1 | 8 | 13% |
+| 3 — Ingesta | 2 | 8 | 25% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **18** | **53** | **34%** |
+| **Total MVP** | **19** | **53** | **36%** |
 
 ---

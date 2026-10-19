@@ -13,3 +13,21 @@ def calcular_precio_por_litro(
     if litros_o_kg <= 0:
         return None
     return (precio_eur / litros_o_kg).quantize(Decimal("0.0001"))
+
+
+def desviacion_relativa(nuevo: Decimal, anterior: Decimal) -> Decimal:
+    """Diferencia relativa entre dos precios; 0 si el precio anterior es 0."""
+    if anterior == 0:
+        return Decimal(0)
+    return abs(nuevo - anterior) / anterior
+
+
+def es_coherente_por_unidad(
+    calculado: Decimal,
+    referencia: Decimal,
+    tolerancia: Decimal = Decimal("0.05"),
+) -> bool:
+    """True si el precio por unidad no se desvía más que la tolerancia."""
+    if referencia == 0:
+        return True
+    return desviacion_relativa(calculado, referencia) <= tolerancia

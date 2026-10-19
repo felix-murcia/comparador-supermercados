@@ -3,6 +3,9 @@
 Verifica un candidato del productor sin usar LLM: fetch de `url_fuente`,
 comprobación del precio en el HTML, coherencia €/L vs. formato y desviación
 respecto al último precio conocido.
+
+El candidato puede incluir `precio_eur_anterior` (lo añade el caso de uso
+cuando conoce el último precio persistido) para la regla de desviación.
 """
 
 from __future__ import annotations
