@@ -16,6 +16,7 @@ from src.dominio.busquedas.estados import EstadoBusqueda
 from src.dominio.listas.entidades import ItemLista, ItemListaNuevo, Lista
 from src.dominio.precios.entidades import PrecioNuevo, PrecioRegistrado
 from src.dominio.productos.entidades import Producto, ProductoNuevo
+from src.dominio.usuarios.entidades import IdentidadOAuth, Usuario
 
 
 @runtime_checkable
@@ -91,3 +92,10 @@ class RepositorioBusquedas(Protocol):
         progreso: int,
         completado_en: datetime | None = None,
     ) -> Busqueda | None: ...
+
+
+@runtime_checkable
+class RepositorioUsuarios(Protocol):
+    """Perfiles de usuario indexados por proveedor OAuth."""
+
+    async def upsert(self, identidad: IdentidadOAuth) -> Usuario: ...

@@ -1,8 +1,8 @@
-"""Fixtures de integración de repositorios contra Postgres real.
+"""Fixtures compartidas de integración contra Postgres real.
 
 Requieren `DATABASE_URL_RW` (obligatoria), opcionalmente `DATABASE_URL_RO`
-para el test de routing, y el esquema migrado (`alembic upgrade head`).
-Sin variables de entorno, los tests se saltan en lugar de fallar.
+para los tests de routing, y el esquema migrado (`alembic upgrade head`).
+Sin variables de entorno, los tests que las piden se saltan en lugar de fallar.
 """
 
 from __future__ import annotations
@@ -99,6 +99,9 @@ async def sesion_ro(
     async with fabrica() as sesion:
         yield sesion
         await sesion.rollback()
+
+
+# ===== Factories para los tests de repositorios =====
 
 
 @pytest_asyncio.fixture

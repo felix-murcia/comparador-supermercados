@@ -57,6 +57,8 @@ class Settings(BaseSettings):
     microsoft_client_secret: SecretStr = SecretStr("")
     microsoft_tenant_id: str = "common"
     microsoft_redirect_uri: str = ""
+    # Secreto de firma de la sesión de Auth.js; la API valida con él (ADR-012).
+    nextauth_secret: SecretStr = SecretStr("")
 
     # ===== LLM =====
     llm_provider: str = ""

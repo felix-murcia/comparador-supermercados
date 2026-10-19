@@ -16,11 +16,15 @@ from src.adaptadores.persistencia.repositorio_precios import (
 from src.adaptadores.persistencia.repositorio_productos import (
     SQLAlchemyRepositorioProductos,
 )
+from src.adaptadores.persistencia.repositorio_usuarios import (
+    SQLAlchemyRepositorioUsuarios,
+)
 from src.puertos.repositorios import (
     RepositorioBusquedas,
     RepositorioListas,
     RepositorioPrecios,
     RepositorioProductos,
+    RepositorioUsuarios,
 )
 
 
@@ -31,3 +35,4 @@ def test_los_adaptadores_cumplen_los_protocolos() -> None:
     assert isinstance(SQLAlchemyRepositorioPrecios(sesion), RepositorioPrecios)
     assert isinstance(SQLAlchemyRepositorioListas(sesion), RepositorioListas)
     assert isinstance(SQLAlchemyRepositorioBusquedas(sesion), RepositorioBusquedas)
+    assert isinstance(SQLAlchemyRepositorioUsuarios(sesion), RepositorioUsuarios)

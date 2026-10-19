@@ -358,7 +358,7 @@ Si detectas una vulnerabilidad, **no abras un issue público**. Contacta al main
 | Épica | Estado | Progreso |
 |-------|--------|----------|
 | 0 — Fundación | 🟡 En curso | 6/8 |
-| 1 — Autenticación | 🟡 En curso | 2/5 |
+| 1 — Autenticación | 🟡 En curso | 3/5 |
 | 2 — Modelo de datos | ✅ Completada | 6/6 |
 | 3 — Ingesta | ⚪ Pendiente | 0/8 |
 | 4 — API búsqueda/comparativa | ⚪ Pendiente | 0/6 |

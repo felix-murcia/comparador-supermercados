@@ -10,6 +10,7 @@ from src.adaptadores.persistencia.modelos import (
     ListaModelo,
     PrecioModelo,
     ProductoModelo,
+    UsuarioModelo,
 )
 from src.dominio.busquedas.entidades import Busqueda
 from src.dominio.busquedas.estados import EstadoBusqueda
@@ -17,6 +18,7 @@ from src.dominio.listas.entidades import ItemLista, Lista
 from src.dominio.precios.entidades import PrecioRegistrado
 from src.dominio.precios.estados import AmbitoPrecio, EstadoPrecio
 from src.dominio.productos.entidades import Producto
+from src.dominio.usuarios.entidades import Usuario
 
 
 def producto_desde_modelo(modelo: ProductoModelo) -> Producto:
@@ -82,4 +84,17 @@ def busqueda_desde_modelo(modelo: BusquedaModelo) -> Busqueda:
         usuario_id=modelo.usuario_id,
         provincia=modelo.provincia,
         completado_en=modelo.completado_en,
+    )
+
+
+def usuario_desde_modelo(modelo: UsuarioModelo) -> Usuario:
+    return Usuario(
+        id=modelo.id,
+        provider=modelo.provider,
+        provider_id=modelo.provider_id,
+        email=modelo.email,
+        nombre=modelo.nombre,
+        provincia=modelo.provincia,
+        avatar_url=modelo.avatar_url,
+        creado_en=modelo.creado_en,
     )

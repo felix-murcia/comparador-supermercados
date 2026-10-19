@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 en curso — 2/5; Épica 2 completada — 6/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 en curso — 3/5; Épica 2 completada — 6/6)
 
 ---
 
@@ -36,7 +36,7 @@
 | Épica | Tareas | Estimación | Estado |
 |-------|--------|-----------|--------|
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
-| 1 — Autenticación | 5 | 6d | 🟡 En curso (2/5) |
+| 1 — Autenticación | 5 | 6d | 🟡 En curso (3/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
@@ -208,17 +208,18 @@
 
 ---
 
-### [ ] T1.3 — `GET /v1/me` + upsert de usuario 🟡
+### [x] T1.3 — `GET /v1/me` + upsert de usuario 🟡
 
 - **Depende de**: T1.1, T1.2
 - **Estimación**: 1d
 - **Descripción**: Endpoint que valida JWT y devuelve perfil. Si el usuario no existe, lo crea (upsert por `provider` + `provider_id`).
 - **Aceptación**:
-  - [ ] `GET /v1/me` con JWT válido → 200 con perfil.
-  - [ ] Sin JWT → 401.
-  - [ ] JWT inválido → 401.
-  - [ ] Primer login crea fila en `usuarios`.
-  - [ ] Test de integración con BD real.
+  - [x] `GET /v1/me` con JWT válido → 200 con perfil.
+  - [x] Sin JWT → 401.
+  - [x] JWT inválido → 401.
+  - [x] Primer login crea fila en `usuarios`.
+  - [x] Test de integración con BD real.
+- **Nota**: el token se valida en la API con `NEXTAUTH_SECRET` (mismo secreto que Auth.js, ADR-012) y solo HS256. Errores en formato `{code, message}` (`NO_AUTENTICADO`, `AUTH_NO_CONFIGURADA`). El upsert es un `INSERT ... ON CONFLICT (provider, provider_id) DO UPDATE` atómico.
 
 ---
 
@@ -977,13 +978,13 @@ Actualizar al cerrar cada tarea:
 | Épica | Completadas | Total | % |
 |-------|-------------|-------|---|
 | 0 — Fundación | 6 | 8 | 75% |
-| 1 — Autenticación | 2 | 5 | 40% |
+| 1 — Autenticación | 3 | 5 | 60% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 0 | 8 | 0% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **14** | **53** | **26%** |
+| **Total MVP** | **15** | **53** | **28%** |
 
 ---
