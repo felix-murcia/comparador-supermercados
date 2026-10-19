@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 en curso — 2/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 en curso — 3/6)
 
 ---
 
@@ -39,7 +39,7 @@
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
-| 4 — API búsqueda/comparativa | 6 | 8d | 🟡 En curso (2/6) |
+| 4 — API búsqueda/comparativa | 6 | 8d | 🟡 En curso (3/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
@@ -476,18 +476,19 @@
 
 ---
 
-### [ ] T4.1 — `POST /v1/busquedas` 🔴
+### [x] T4.1 — `POST /v1/busquedas` 🔴
 
 - **Depende de**: T3.3, T3.6, T3.7
 - **Estimación**: 1d
 - **Descripción**: Endpoint que calcula `cache_key`, consulta Redis, y si no hay hit, encola job.
 - **Aceptación**:
-  - [ ] Body: `{ query, cadenas, orden, filtros, provincia? }`.
-  - [ ] Cache hit → `{ job_id: null, cache_hit: true, resultados }`.
-  - [ ] Cache miss → `{ job_id, cache_hit: false }`.
-  - [ ] Sin JWT → 401.
-  - [ ] Rate limit aplicado.
-  - [ ] Tests: hit, miss, sin auth, rate limit.
+  - [x] Body: `{ query, cadenas, orden, filtros, provincia? }`.
+  - [x] Cache hit → `{ job_id: null, cache_hit: true, resultados }`.
+  - [x] Cache miss → `{ job_id, cache_hit: false }`.
+  - [x] Sin JWT → 401.
+  - [x] Rate limit aplicado.
+  - [x] Tests: hit, miss, sin auth, rate limit.
+- **Nota**: `api/src/api_http/v1/busquedas.py` sobre el caso de uso `CrearBusqueda` (`api/src/aplicacion/busquedas/crear_busqueda.py`). El límite de peticiones se aplica en la aplicación con un contador por usuario en Redis (`RedisLimitador`, `RATE_LIMIT_BUSQUEDAS_POR_MINUTO`); en el borde, Caddy limita `/api/v1/busquedas` por IP (ADR-011). El worker cachea el resultado de cada job con la `cache_key` para que la siguiente petición sea un acierto.
 
 ---
 
@@ -993,10 +994,10 @@ Actualizar al cerrar cada tarea:
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
-| 4 — API búsqueda/comparativa | 2 | 6 | 33% |
+| 4 — API búsqueda/comparativa | 3 | 6 | 50% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **27** | **53** | **51%** |
+| **Total MVP** | **28** | **53** | **53%** |
 
 ---

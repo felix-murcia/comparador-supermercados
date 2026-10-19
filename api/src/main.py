@@ -9,13 +9,20 @@ from redis.asyncio import Redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from src.adaptadores.cache.redis_limitador import dispose_limitador
 from src.adaptadores.persistencia.engines import dispose_engines
 from src.adaptadores.persistencia.sticky import dispose_sticky_reads
-from src.api_http.errores import ErrorAPI, manejador_error_api
+from src.api_http.errores import (
+    ErrorAPI,
+    manejador_error_api,
+    manejador_rate_limit,
+)
+from src.api_http.v1.busquedas import router as busquedas_router
 from src.api_http.v1.comparar import router as comparar_router
 from src.api_http.v1.me import router as me_router
 from src.api_http.v1.metricas import router as metricas_router
 from src.config import settings
+from src.dominio.errores import RateLimitError
 
 CHECK_TIMEOUT_SEGUNDOS = 2.0
 
@@ -27,13 +34,16 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     yield
     await dispose_sticky_reads()
     await dispose_engines()
+    await dispose_limitador()
 
 
 app = FastAPI(title="Comparador de Precios API", lifespan=lifespan)
 app.add_exception_handler(ErrorAPI, manejador_error_api)
+app.add_exception_handler(RateLimitError, manejador_rate_limit)
 app.include_router(me_router)
 app.include_router(metricas_router)
 app.include_router(comparar_router)
+app.include_router(busquedas_router)
 
 
 async def check_database(url: str) -> bool:
