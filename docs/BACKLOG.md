@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 2 completada — 6/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 en curso — 1/5; Épica 2 completada — 6/6)
 
 ---
 
@@ -36,7 +36,7 @@
 | Épica | Tareas | Estimación | Estado |
 |-------|--------|-----------|--------|
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
-| 1 — Autenticación | 5 | 6d | ⚪ Pendiente |
+| 1 — Autenticación | 5 | 6d | 🟡 En curso (1/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
@@ -193,16 +193,17 @@
 
 ---
 
-### [ ] T1.2 — Tabla `usuarios` + migración 🟡
+### [x] T1.2 — Tabla `usuarios` + migración 🟡
 
 - **Depende de**: T2.1
 - **Estimación**: 0.5d
 - **Descripción**: Migración Alembic con tabla `usuarios` según `PLAN.md` §6 y las FK de `busquedas.usuario_id` y `listas.usuario_id`.
 - **Aceptación**:
-  - [ ] Campos: `id`, `provider`, `provider_id`, `email`, `nombre`, `provincia`, `avatar_url`, `creado_en`.
-  - [ ] `UNIQUE (provider, provider_id)`.
-  - [ ] Índice en `email`.
-  - [ ] FK de `busquedas.usuario_id` y `listas.usuario_id` a `usuarios.id`.
+  - [x] Campos: `id`, `provider`, `provider_id`, `email`, `nombre`, `provincia`, `avatar_url`, `creado_en`.
+  - [x] `UNIQUE (provider, provider_id)`.
+  - [x] Índice en `email`.
+  - [x] FK de `busquedas.usuario_id` y `listas.usuario_id` a `usuarios.id`.
+- **Nota**: FK con `ON DELETE SET NULL`: al borrar un usuario, sus búsquedas y listas quedan anónimas en vez de eliminarse.
 
 ---
 
@@ -975,13 +976,13 @@ Actualizar al cerrar cada tarea:
 | Épica | Completadas | Total | % |
 |-------|-------------|-------|---|
 | 0 — Fundación | 6 | 8 | 75% |
-| 1 — Autenticación | 0 | 5 | 0% |
+| 1 — Autenticación | 1 | 5 | 20% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 0 | 8 | 0% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **12** | **53** | **23%** |
+| **Total MVP** | **13** | **53** | **25%** |
 
 ---

@@ -2,7 +2,7 @@
 
 Aplicación web para comparar precios de productos de supermercados en España (DIA, Carrefour, Mercadona), gestionar listas de la compra y calcular el ahorro real de comprar la misma cesta en distintas cadenas o de forma mixta.
 
-**Estado**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 2 — Modelo de datos completada)
+**Estado**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 — Autenticación en curso; Épica 2 — Modelo de datos completada)
 **Versión**: 0.1.0-dev
 **Licencia**: Por definir
 
@@ -341,7 +341,7 @@ Si detectas una vulnerabilidad, **no abras un issue público**. Contacta al main
 | Épica | Estado | Progreso |
 |-------|--------|----------|
 | 0 — Fundación | 🟡 En curso | 6/8 |
-| 1 — Autenticación | ⚪ Pendiente | 0/5 |
+| 1 — Autenticación | 🟡 En curso | 1/5 |
 | 2 — Modelo de datos | ✅ Completada | 6/6 |
 | 3 — Ingesta | ⚪ Pendiente | 0/8 |
 | 4 — API búsqueda/comparativa | ⚪ Pendiente | 0/6 |

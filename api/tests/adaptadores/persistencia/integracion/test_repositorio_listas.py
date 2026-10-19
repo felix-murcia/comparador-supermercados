@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from decimal import Decimal
 from uuid import UUID, uuid4
 
@@ -14,9 +15,11 @@ from src.dominio.listas.entidades import ItemListaNuevo
 pytestmark = pytest.mark.asyncio
 
 
-async def test_crear_y_obtener_lista(sesion_rw: AsyncSession) -> None:
+async def test_crear_y_obtener_lista(
+    sesion_rw: AsyncSession, crear_usuario: Callable[[str], Awaitable[UUID]]
+) -> None:
     repositorio = SQLAlchemyRepositorioListas(sesion_rw)
-    usuario_id = uuid4()
+    usuario_id = await crear_usuario("ana")
 
     lista = await repositorio.crear(usuario_id, "Compra semanal")
 
@@ -26,11 +29,11 @@ async def test_crear_y_obtener_lista(sesion_rw: AsyncSession) -> None:
 
 
 async def test_listar_por_usuario_solo_devuelve_las_suyas(
-    sesion_rw: AsyncSession,
+    sesion_rw: AsyncSession, crear_usuario: Callable[[str], Awaitable[UUID]]
 ) -> None:
     repositorio = SQLAlchemyRepositorioListas(sesion_rw)
-    usuario_a = uuid4()
-    usuario_b = uuid4()
+    usuario_a = await crear_usuario("ana")
+    usuario_b = await crear_usuario("luis")
     await repositorio.crear(usuario_a, "Despensa")
     await repositorio.crear(usuario_a, "Semanal")
     await repositorio.crear(usuario_b, "Ajena")

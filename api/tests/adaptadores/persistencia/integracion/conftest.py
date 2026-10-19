@@ -8,7 +8,7 @@ Sin variables de entorno, los tests se saltan en lugar de fallar.
 from __future__ import annotations
 
 import os
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from decimal import Decimal
 from uuid import UUID
 
@@ -26,6 +26,7 @@ from src.adaptadores.persistencia.modelos import (
     CadenaModelo,
     ProductoCadenaModelo,
     ProductoModelo,
+    UsuarioModelo,
 )
 
 _TABLAS = (
@@ -36,6 +37,7 @@ _TABLAS = (
     "productos_cadena",
     "productos",
     "cadenas",
+    "usuarios",
 )
 
 
@@ -141,3 +143,23 @@ async def producto_cadena_base(
     await sesion_rw.refresh(modelo)
     await sesion_rw.commit()
     return modelo.id
+
+
+@pytest_asyncio.fixture
+async def crear_usuario(
+    sesion_rw: AsyncSession,
+) -> Callable[[str], Awaitable[UUID]]:
+    async def _crear(provider_id: str) -> UUID:
+        modelo = UsuarioModelo(
+            provider="google",
+            provider_id=provider_id,
+            email=f"{provider_id}@example.test",
+            nombre=f"Usuaria {provider_id}",
+        )
+        sesion_rw.add(modelo)
+        await sesion_rw.flush()
+        await sesion_rw.refresh(modelo)
+        await sesion_rw.commit()
+        return modelo.id
+
+    return _crear
