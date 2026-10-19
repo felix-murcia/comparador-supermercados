@@ -42,6 +42,8 @@ class Settings(BaseSettings):
     postgres_replication_password: SecretStr = SecretStr("")
     database_url_rw: SecretStr = SecretStr("")
     database_url_ro: SecretStr = SecretStr("")
+    # Segundos que las lecturas de un usuario van al primario tras escribir.
+    sticky_reads_segundos: int = 5
 
     # ===== Redis =====
     redis_url: str = ""

@@ -41,4 +41,5 @@ def test_settings_load_env_example_without_error() -> None:
     )
     assert settings.redis_url == "redis://redis:6379/0"
     assert settings.cache_ttl_segundos == 86400
+    assert settings.sticky_reads_segundos == 5
     assert settings.log_level == "INFO"

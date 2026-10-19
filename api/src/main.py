@@ -1,5 +1,7 @@
 import asyncio
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, status
 from fastapi.responses import JSONResponse
@@ -7,13 +9,23 @@ from redis.asyncio import Redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from src.adaptadores.persistencia.engines import dispose_engines
+from src.adaptadores.persistencia.sticky import dispose_sticky_reads
 from src.config import settings
 
 CHECK_TIMEOUT_SEGUNDOS = 2.0
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Comparador de Precios API")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    yield
+    await dispose_sticky_reads()
+    await dispose_engines()
+
+
+app = FastAPI(title="Comparador de Precios API", lifespan=lifespan)
 
 
 async def check_database(url: str) -> bool:

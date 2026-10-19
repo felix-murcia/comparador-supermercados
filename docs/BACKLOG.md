@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 2 en curso — 1/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 2 en curso — 2/6)
 
 ---
 
@@ -37,7 +37,7 @@
 |-------|--------|-----------|--------|
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ⚪ Pendiente |
-| 2 — Modelo de datos | 6 | 7d | 🟡 En curso (1/6) |
+| 2 — Modelo de datos | 6 | 7d | 🟡 En curso (2/6) |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
@@ -269,16 +269,16 @@
 
 ---
 
-### [ ] T2.2 — Engines RW/RO + routing 🔴
+### [x] T2.2 — Engines RW/RO + routing 🔴
 
 - **Depende de**: T2.1
 - **Estimación**: 1d
 - **Descripción**: `api/src/adaptadores/persistencia/engines.py` con `engine_rw` y `engine_ro`. Casos de uso de lectura usan RO; escritura usa RW.
 - **Aceptación**:
-  - [ ] Dos `AsyncEngine` configurados desde `DATABASE_URL_RW` y `DATABASE_URL_RO`.
-  - [ ] `get_session_ro()` y `get_session_rw()` como dependencias de FastAPI.
-  - [ ] Test que verifica que una escritura va a RW y una lectura a RO.
-  - [ ] Sticky post-escritura: tras un `POST`, las lecturas del mismo usuario van a RW durante N segundos (configurable).
+  - [x] Dos `AsyncEngine` configurados desde `DATABASE_URL_RW` y `DATABASE_URL_RO`.
+  - [x] `get_session_ro()` y `get_session_rw()` como dependencias de FastAPI.
+  - [x] Test que verifica que una escritura va a RW y una lectura a RO.
+  - [x] Sticky post-escritura: tras un `POST`, las lecturas del mismo usuario van a RW durante N segundos (configurable).
 
 ---
 
@@ -974,12 +974,12 @@ Actualizar al cerrar cada tarea:
 |-------|-------------|-------|---|
 | 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 0 | 5 | 0% |
-| 2 — Modelo de datos | 1 | 6 | 17% |
+| 2 — Modelo de datos | 2 | 6 | 33% |
 | 3 — Ingesta | 0 | 8 | 0% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **7** | **53** | **13%** |
+| **Total MVP** | **8** | **53** | **15%** |
 
 ---
