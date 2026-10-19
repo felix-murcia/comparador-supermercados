@@ -63,6 +63,7 @@ def _resultado_ejemplo() -> dict[str, object]:
         "precio_por_litro_kg": "1.2900",
         "ambito": "nacional",
         "provincia": None,
+        "url_producto": "https://dia.test/leche-entera",
     }
 
 

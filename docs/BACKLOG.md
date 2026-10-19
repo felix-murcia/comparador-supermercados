@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 3/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 4/8)
 
 ---
 
@@ -40,7 +40,7 @@
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
-| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (3/8) |
+| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (4/8) |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
@@ -612,18 +612,19 @@
 
 ---
 
-### [ ] T5.4 — Cards de producto 🔴
+### [x] T5.4 — Cards de producto 🔴
 
 - **Depende de**: T5.3
 - **Estimación**: 2d
 - **Descripción**: Componente `CardProducto` con logo, ranking, imagen clicable, nombre, €, €/kg-L.
 - **Aceptación**:
-  - [ ] Imagen clicable → `url_producto` en nueva pestaña (`rel="noopener"`).
-  - [ ] Ranking visible (posición).
-  - [ ] € formateado con `Intl.NumberFormat("es-ES")`.
-  - [ ] €/kg-L con 2 decimales.
-  - [ ] Botón "Añadir a lista" (placeholder hasta Épica 6).
-  - [ ] Accesible: `alt` en imagen, foco visible.
+  - [x] Imagen clicable → `url_producto` en nueva pestaña (`rel="noopener"`).
+  - [x] Ranking visible (posición).
+  - [x] € formateado con `Intl.NumberFormat("es-ES")`.
+  - [x] €/kg-L con 2 decimales.
+  - [x] Botón "Añadir a lista" (placeholder hasta Épica 6).
+  - [x] Accesible: `alt` en imagen, foco visible.
+- **Nota**: `web/src/components/producto/CardProducto.tsx`. La imagen (el logo de la cadena mientras no haya foto del producto) enlaza a la ficha en el supermercado con `target="_blank"` y `rel="noopener noreferrer"`, y el `alt` describe el producto y la cadena. Los importes se formatean con `Intl.NumberFormat("es-ES")` (`1,12 €`) y el €/kg-L con dos decimales. La API ahora devuelve `url_producto` en la comparativa (columna `productos_cadena.url_producto`) y la vista `/buscar` carga los resultados en el servidor, de modo que las cards llegan ya renderizadas en el HTML.
 
 ---
 
@@ -1001,9 +1002,9 @@ Actualizar al cerrar cada tarea:
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
-| 5 — Frontend flujo principal | 3 | 8 | 38% |
+| 5 — Frontend flujo principal | 4 | 8 | 50% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **34** | **53** | **64%** |
+| **Total MVP** | **35** | **53** | **66%** |
 
 ---

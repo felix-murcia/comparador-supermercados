@@ -75,6 +75,7 @@ class ResultadoComparacion:
     precio_por_litro_kg: Decimal | None = None
     ambito: AmbitoPrecio = "nacional"
     provincia: str | None = None
+    url_producto: str | None = None
     posicion: int = 0
 
 

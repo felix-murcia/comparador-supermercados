@@ -49,6 +49,7 @@ class ResultadoResponse(BaseModel):
     precio_por_litro_kg: Decimal | None
     ambito: AmbitoPrecio
     provincia: str | None
+    url_producto: str | None = None
 
 
 class CompararResponse(BaseModel):

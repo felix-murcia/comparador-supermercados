@@ -42,6 +42,10 @@
   "listas": {
     "titulo": "Mis listas"
   },
+  "lista": {
+    "anadir": "Añadir a lista",
+    "proximamente": "Las listas llegan en la próxima versión."
+  },
   "perfil": {
     "titulo": "Mi perfil"
   },

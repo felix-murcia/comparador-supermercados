@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { BarraProgreso } from "@/components/buscador/BarraProgreso";
 import { SelectorCadenas } from "@/components/buscador/SelectorCadenas";
+import { CardProducto } from "@/components/producto/CardProducto";
 import { t } from "@/lib/i18n";
 
 type Props = {
@@ -12,15 +13,19 @@ type Props = {
   cadenas: string[];
   job: string | null;
   cacheHit: boolean;
+  resultadosIniciales?: Resultado[];
 };
 
 type Resultado = {
   posicion: number;
   producto_cadena_id: string;
   nombre: string;
+  marca: string | null;
+  formato: string | null;
   cadena: string;
   precio_eur: string;
   precio_por_litro_kg: string | null;
+  url_producto: string | null;
 };
 
 type Estado = "progreso" | "resultados" | "fallida";
@@ -36,6 +41,7 @@ export function VistaBusqueda({
   cadenas: cadenasIniciales,
   job,
   cacheHit,
+  resultadosIniciales = [],
 }: Props) {
   const router = useRouter();
   const [consulta, setConsulta] = useState(consultaInicial);
@@ -44,7 +50,7 @@ export function VistaBusqueda({
     cacheHit ? "resultados" : "progreso",
   );
   const [progreso, setProgreso] = useState(0);
-  const [resultados, setResultados] = useState<Resultado[]>([]);
+  const [resultados, setResultados] = useState<Resultado[]>(resultadosIniciales);
   const [error, setError] = useState<string | null>(null);
 
   const puedeBuscar = consulta.trim().length > 0 && cadenas.length > 0;
@@ -65,7 +71,7 @@ export function VistaBusqueda({
 
   useEffect(() => {
     if (cacheHit) {
-      void cargarResultados();
+      // Los resultados ya vienen del servidor en el HTML inicial.
       return;
     }
     if (!job) {
@@ -244,23 +250,8 @@ export function VistaBusqueda({
       ) : (
         <ul className="mt-6 space-y-3">
           {resultados.map((resultado) => (
-            <li
-              key={`${resultado.producto_cadena_id}-${resultado.cadena}`}
-              className="rounded-tarjeta border border-borde p-4"
-            >
-              <div className="flex items-baseline gap-3">
-                <span className="text-sm text-gris">#{resultado.posicion}</span>
-                <span className="font-medium text-texto">{resultado.nombre}</span>
-                <span className="ml-auto font-medium text-texto">
-                  {resultado.precio_eur} €
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-gris">
-                {resultado.cadena}
-                {resultado.precio_por_litro_kg
-                  ? ` · ${resultado.precio_por_litro_kg} €/kg-L`
-                  : ""}
-              </p>
+            <li key={`${resultado.producto_cadena_id}-${resultado.cadena}`}>
+              <CardProducto {...resultado} />
             </li>
           ))}
         </ul>

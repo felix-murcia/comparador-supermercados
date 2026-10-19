@@ -117,6 +117,7 @@ async def _resultado_json(resultado: ResultadoComparacion) -> dict[str, object]:
         ),
         "ambito": resultado.ambito,
         "provincia": resultado.provincia,
+        "url_producto": resultado.url_producto,
     }
 
 

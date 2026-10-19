@@ -147,6 +147,7 @@ class SQLAlchemyRepositorioPrecios:
                 ProductoModelo.categoria.label("categoria"),
                 ProductoModelo.ean.label("ean"),
                 CadenaModelo.slug.label("cadena"),
+                ProductoCadenaModelo.url_producto.label("url_producto"),
                 PrecioModelo.precio_eur.label("precio_eur"),
                 PrecioModelo.precio_por_litro_kg.label("precio_por_litro_kg"),
                 PrecioModelo.ambito.label("ambito"),
@@ -211,4 +212,5 @@ class SQLAlchemyRepositorioPrecios:
             precio_por_litro_kg=fila["precio_por_litro_kg"],
             ambito=cast(AmbitoPrecio, fila["ambito"]),
             provincia=fila["provincia"],
+            url_producto=fila["url_producto"],
         )

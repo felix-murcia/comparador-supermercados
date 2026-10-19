@@ -393,7 +393,7 @@ Si detectas una vulnerabilidad, **no abras un issue público**. Contacta al main
 | 2 — Modelo de datos | ✅ Completada | 6/6 |
 | 3 — Ingesta | ✅ Completada | 8/8 |
 | 4 — API búsqueda/comparativa | ✅ Completada | 6/6 |
-| 5 — Frontend flujo principal | 🟡 En curso | 3/8 |
+| 5 — Frontend flujo principal | 🟡 En curso | 4/8 |
 | 6 — Perfil y listas | ⚪ Pendiente | 0/6 |
 | 7 — Calidad y operación | ⚪ Pendiente | 0/6 |
 | 8 — Escala (post-MVP) | ⚪ Futuro | — |
