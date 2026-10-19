@@ -50,6 +50,7 @@ class ResultadoResponse(BaseModel):
     ambito: AmbitoPrecio
     provincia: str | None
     url_producto: str | None = None
+    disponible: bool | None = None
 
 
 class CompararResponse(BaseModel):

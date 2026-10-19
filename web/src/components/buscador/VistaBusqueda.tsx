@@ -1,31 +1,27 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { BarraProgreso } from "@/components/buscador/BarraProgreso";
+import { PanelFiltros } from "@/components/buscador/PanelFiltros";
 import { SelectorCadenas } from "@/components/buscador/SelectorCadenas";
 import { CardProducto } from "@/components/producto/CardProducto";
 import { t } from "@/lib/i18n";
+import {
+  aplicarFiltros,
+  opcionesDisponibles,
+  FILTROS_INICIALES,
+} from "@/lib/filtros";
+import type { Filtros, ResultadoComparacion } from "@/lib/filtros";
 
 type Props = {
   consulta: string;
   cadenas: string[];
   job: string | null;
   cacheHit: boolean;
-  resultadosIniciales?: Resultado[];
-};
-
-type Resultado = {
-  posicion: number;
-  producto_cadena_id: string;
-  nombre: string;
-  marca: string | null;
-  formato: string | null;
-  cadena: string;
-  precio_eur: string;
-  precio_por_litro_kg: string | null;
-  url_producto: string | null;
+  resultadosIniciales?: ResultadoComparacion[];
+  filtrosIniciales?: Filtros;
 };
 
 type Estado = "progreso" | "resultados" | "fallida";
@@ -42,6 +38,7 @@ export function VistaBusqueda({
   job,
   cacheHit,
   resultadosIniciales = [],
+  filtrosIniciales = FILTROS_INICIALES,
 }: Props) {
   const router = useRouter();
   const [consulta, setConsulta] = useState(consultaInicial);
@@ -50,10 +47,20 @@ export function VistaBusqueda({
     cacheHit ? "resultados" : "progreso",
   );
   const [progreso, setProgreso] = useState(0);
-  const [resultados, setResultados] = useState<Resultado[]>(resultadosIniciales);
+  const [resultados, setResultados] =
+    useState<ResultadoComparacion[]>(resultadosIniciales);
+  const [filtros, setFiltros] = useState<Filtros>(filtrosIniciales);
   const [error, setError] = useState<string | null>(null);
 
   const puedeBuscar = consulta.trim().length > 0 && cadenas.length > 0;
+  const visibles = useMemo(
+    () => aplicarFiltros(resultados, filtros),
+    [resultados, filtros],
+  );
+  const opciones = useMemo(
+    () => opcionesDisponibles(resultados),
+    [resultados],
+  );
 
   async function cargarResultados() {
     const parametros = new URLSearchParams({ q: consultaInicial });
@@ -113,6 +120,43 @@ export function VistaBusqueda({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job, cacheHit]);
+
+  function parametrosUrl(nuevos: Filtros): string {
+    const parametros = new URLSearchParams({ q: consultaInicial });
+    if (cadenasIniciales.length > 0) {
+      parametros.set("cadenas", cadenasIniciales.join(","));
+    }
+    if (job) {
+      parametros.set("job", job);
+    }
+    if (cacheHit) {
+      parametros.set("cache", "1");
+    }
+    if (nuevos.orden !== FILTROS_INICIALES.orden) {
+      parametros.set("orden", nuevos.orden);
+    }
+    if (nuevos.precioMin !== null) {
+      parametros.set("precio_min", String(nuevos.precioMin));
+    }
+    if (nuevos.precioMax !== null) {
+      parametros.set("precio_max", String(nuevos.precioMax));
+    }
+    if (nuevos.marca) {
+      parametros.set("marca", nuevos.marca);
+    }
+    if (nuevos.categoria) {
+      parametros.set("categoria", nuevos.categoria);
+    }
+    if (nuevos.soloConStock) {
+      parametros.set("solo_con_stock", "1");
+    }
+    return parametros.toString();
+  }
+
+  function cambiarFiltros(nuevos: Filtros) {
+    setFiltros(nuevos);
+    router.replace(`/buscar?${parametrosUrl(nuevos)}`, { scroll: false });
+  }
 
   async function relanzar() {
     if (!puedeBuscar) {
@@ -237,19 +281,34 @@ export function VistaBusqueda({
 
       <SelectorCadenas seleccionadas={cadenas} onChange={setCadenas} />
 
+      <PanelFiltros
+        filtros={filtros}
+        marcas={opciones.marcas}
+        categorias={opciones.categorias}
+        onChange={cambiarFiltros}
+        onLimpiar={() => cambiarFiltros(FILTROS_INICIALES)}
+      />
+
+      <p className="mt-3 text-sm text-gris">
+        {t("filtros.contador", {
+          visibles: visibles.length,
+          total: resultados.length,
+        })}
+      </p>
+
       {error ? (
         <p role="alert" className="mt-4 text-sm text-error">
           {error}
         </p>
       ) : null}
 
-      {resultados.length === 0 ? (
+      {visibles.length === 0 ? (
         <p className="mt-10 text-center text-sm text-gris">
           {t("buscar.sin_resultados")}
         </p>
       ) : (
-        <ul className="mt-6 space-y-3">
-          {resultados.map((resultado) => (
+        <ul className="mt-4 space-y-3">
+          {visibles.map((resultado) => (
             <li key={`${resultado.producto_cadena_id}-${resultado.cadena}`}>
               <CardProducto {...resultado} />
             </li>

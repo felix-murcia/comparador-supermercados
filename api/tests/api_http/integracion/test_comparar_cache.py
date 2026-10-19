@@ -64,6 +64,7 @@ def _resultado_ejemplo() -> dict[str, object]:
         "ambito": "nacional",
         "provincia": None,
         "url_producto": "https://dia.test/leche-entera",
+        "disponible": True,
     }
 
 

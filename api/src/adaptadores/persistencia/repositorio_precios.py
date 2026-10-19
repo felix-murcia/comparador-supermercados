@@ -213,4 +213,5 @@ class SQLAlchemyRepositorioPrecios:
             ambito=cast(AmbitoPrecio, fila["ambito"]),
             provincia=fila["provincia"],
             url_producto=fila["url_producto"],
+            disponible=fila["disponible"],
         )

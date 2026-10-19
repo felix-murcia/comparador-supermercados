@@ -39,6 +39,20 @@
     "error_busqueda": "La búsqueda ha fallado. Vuelve a intentarlo.",
     "error_resultados": "No se pudieron cargar los resultados."
   },
+  "filtros": {
+    "orden": "Orden",
+    "orden_precio_unitario": "Precio unitario",
+    "orden_precio_kg_l": "Precio por kg/L",
+    "orden_relevancia": "Relevancia",
+    "precio_min": "Precio mínimo",
+    "precio_max": "Precio máximo",
+    "marca": "Marca",
+    "categoria": "Categoría",
+    "todas": "Todas",
+    "solo_con_stock": "Solo con stock",
+    "limpiar": "Limpiar filtros",
+    "contador": "{visibles} de {total} resultados"
+  },
   "listas": {
     "titulo": "Mis listas"
   },

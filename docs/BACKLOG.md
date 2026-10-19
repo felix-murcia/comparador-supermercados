@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 4/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 5/8)
 
 ---
 
@@ -40,7 +40,7 @@
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
-| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (4/8) |
+| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (5/8) |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
@@ -628,16 +628,17 @@
 
 ---
 
-### [ ] T5.5 — Selector de orden y filtros 🟡
+### [x] T5.5 — Selector de orden y filtros 🟡
 
 - **Depende de**: T5.3
 - **Estimación**: 1.5d
 - **Descripción**: Panel de filtros (stock, rango precio, marca, categoría) y selector de orden. Cambios no relanzan búsqueda (datos ya en cliente).
 - **Aceptación**:
-  - [ ] Filtros aplicados en cliente sobre resultados ya cargados.
-  - [ ] Estado reflejado en URL (`?orden=precio_kg_l&marca=...`).
-  - [ ] "Limpiar filtros" restaura estado inicial.
-  - [ ] Contador de resultados visibles.
+  - [x] Filtros aplicados en cliente sobre resultados ya cargados.
+  - [x] Estado reflejado en URL (`?orden=precio_kg_l&marca=...`).
+  - [x] "Limpiar filtros" restaura estado inicial.
+  - [x] Contador de resultados visibles.
+- **Nota**: `web/src/lib/filtros.ts` contiene las reglas puras (`aplicarFiltros` filtra, ordena y renumera el ranking; `opcionesDisponibles` extrae marcas y categorías de lo cargado) y el panel es `web/src/components/buscador/PanelFiltros.tsx`. Los cambios se aplican en el cliente sin relanzar la búsqueda y se reflejan en la URL (`orden`, `precio_min`, `precio_max`, `marca`, `categoria`, `solo_con_stock`), que es la que devuelve el estado inicial al recargar. La API añade `disponible` a la comparativa para poder filtrar por stock.
 
 ---
 
@@ -1002,9 +1003,9 @@ Actualizar al cerrar cada tarea:
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
-| 5 — Frontend flujo principal | 4 | 8 | 50% |
+| 5 — Frontend flujo principal | 5 | 8 | 63% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **35** | **53** | **66%** |
+| **Total MVP** | **36** | **53** | **68%** |
 
 ---

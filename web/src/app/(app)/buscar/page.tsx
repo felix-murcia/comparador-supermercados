@@ -1,5 +1,7 @@
 import { VistaBusqueda } from "@/components/buscador/VistaBusqueda";
 import { llamarApiServidor } from "@/lib/api";
+import { FILTROS_INICIALES } from "@/lib/filtros";
+import type { Filtros, Orden, ResultadoComparacion } from "@/lib/filtros";
 
 type Props = {
   searchParams: {
@@ -7,25 +9,43 @@ type Props = {
     cadenas?: string;
     job?: string;
     cache?: string;
+    orden?: string;
+    precio_min?: string;
+    precio_max?: string;
+    marca?: string;
+    categoria?: string;
+    solo_con_stock?: string;
   };
 };
 
-type Resultado = {
-  posicion: number;
-  producto_cadena_id: string;
-  nombre: string;
-  marca: string | null;
-  formato: string | null;
-  cadena: string;
-  precio_eur: string;
-  precio_por_litro_kg: string | null;
-  url_producto: string | null;
-};
+function filtrosDesdeParams(params: Props["searchParams"]): Filtros {
+  const numero = (valor?: string): number | null => {
+    if (!valor) {
+      return null;
+    }
+    const parsed = Number(valor);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  const orden: Orden =
+    params.orden === "precio_kg_l" || params.orden === "relevancia"
+      ? params.orden
+      : FILTROS_INICIALES.orden;
+
+  return {
+    orden,
+    precioMin: numero(params.precio_min),
+    precioMax: numero(params.precio_max),
+    marca: params.marca ?? "",
+    categoria: params.categoria ?? "",
+    soloConStock: params.solo_con_stock === "1",
+  };
+}
 
 async function cargarResultados(
   consulta: string,
   cadenas: string[],
-): Promise<Resultado[]> {
+): Promise<ResultadoComparacion[]> {
   if (!consulta) {
     return [];
   }
@@ -35,7 +55,9 @@ async function cargarResultados(
   }
 
   try {
-    const respuesta = await llamarApiServidor(`/v1/comparar?${parametros.toString()}`);
+    const respuesta = await llamarApiServidor(
+      `/v1/comparar?${parametros.toString()}`,
+    );
     const datos = await respuesta.json();
     return Array.isArray(datos.resultados) ? datos.resultados : [];
   } catch {
@@ -49,7 +71,7 @@ export default async function PaginaBuscar({ searchParams }: Props) {
   const job = searchParams.job ?? null;
   const cacheHit = searchParams.cache === "1";
 
-  // Los resultados se cargan en el servidor para que las cards arrive en el HTML.
+  // Los resultados se cargan en el servidor para que las cards lleguen en el HTML.
   const resultados = await cargarResultados(consulta, cadenas);
 
   return (
@@ -59,6 +81,7 @@ export default async function PaginaBuscar({ searchParams }: Props) {
       job={job}
       cacheHit={cacheHit}
       resultadosIniciales={resultados}
+      filtrosIniciales={filtrosDesdeParams(searchParams)}
     />
   );
 }

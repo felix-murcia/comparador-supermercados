@@ -5,7 +5,10 @@ import es from "@/locales/es.json";
  * (`menu.buscar`) y el objeto de traducciones se puede ampliar con
  * `en.json` sin tocar los componentes.
  */
-export function t(clave: string): string {
+export function t(
+  clave: string,
+  valores?: Record<string, string | number>,
+): string {
   const valor = clave
     .split(".")
     .reduce<unknown>(
@@ -16,5 +19,13 @@ export function t(clave: string): string {
       es as unknown,
     );
 
-  return typeof valor === "string" ? valor : clave;
+  const texto = typeof valor === "string" ? valor : clave;
+  if (!valores) {
+    return texto;
+  }
+  return Object.entries(valores).reduce(
+    (resultado, [nombre, replacement]) =>
+      resultado.replaceAll(`{${nombre}}`, String(replacement)),
+    texto,
+  );
 }
