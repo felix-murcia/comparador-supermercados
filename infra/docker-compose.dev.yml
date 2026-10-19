@@ -13,6 +13,9 @@ services:
       - "${POSTGRES_REPLICA_PORT:-5433}:5432"
 
   api:
+    build:
+      target: dev
+    image: comparador-precios-api:${IMAGE_TAG:-0.1.0}-dev
     command:
       [
         "uvicorn",
@@ -35,18 +38,27 @@ services:
       - ../api/alembic:/app/alembic
 
   worker:
+    build:
+      target: dev
+    image: comparador-precios-api:${IMAGE_TAG:-0.1.0}-dev
     environment:
       <<: *dev-environment
     volumes:
       - ../api/src:/app/src
 
   scheduler:
+    build:
+      target: dev
+    image: comparador-precios-api:${IMAGE_TAG:-0.1.0}-dev
     environment:
       <<: *dev-environment
     volumes:
       - ../api/src:/app/src
 
   web:
+    build:
+      target: dev
+    image: comparador-precios-web:${IMAGE_TAG:-0.1.0}-dev
     command: ["npm", "run", "dev"]
     environment:
       <<: *dev-environment

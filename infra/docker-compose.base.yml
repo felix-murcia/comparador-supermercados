@@ -6,6 +6,7 @@ x-api-common: &api-common
   build:
     context: ../api
     dockerfile: Dockerfile
+    target: runtime
   image: comparador-precios-api:${IMAGE_TAG:-0.1.0}
   env_file:
     - path: ../.env
@@ -107,6 +108,8 @@ services:
   worker:
     <<: *api-common
     command: ["python", "-m", "src.worker"]
+    healthcheck:
+      disable: true
     depends_on:
       postgres-primary:
         condition: service_healthy
@@ -116,6 +119,8 @@ services:
   scheduler:
     <<: *api-common
     command: ["python", "-m", "src.scheduler"]
+    healthcheck:
+      disable: true
     depends_on:
       postgres-primary:
         condition: service_healthy
@@ -126,6 +131,7 @@ services:
     build:
       context: ../web
       dockerfile: Dockerfile
+      target: runner
     image: comparador-precios-web:${IMAGE_TAG:-0.1.0}
     environment:
       APP_ENV: ${APP_ENV:-dev}

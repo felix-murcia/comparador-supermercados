@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 en curso — 3/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 en curso — 4/8)
 
 ---
 
@@ -35,7 +35,7 @@
 
 | Épica | Tareas | Estimación | Estado |
 |-------|--------|-----------|--------|
-| 0 — Fundación | 8 | 8d | 🟡 En curso (3/8) |
+| 0 — Fundación | 8 | 8d | 🟡 En curso (4/8) |
 | 1 — Autenticación | 5 | 6d | ⚪ Pendiente |
 | 2 — Modelo de datos | 6 | 7d | ⚪ Pendiente |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
@@ -98,17 +98,17 @@
 
 ---
 
-### [ ] T0.4 — Dockerfiles de api, worker, scheduler, web 🔴
+### [x] T0.4 — Dockerfiles de api, worker, scheduler, web 🔴
 
 - **Depende de**: T0.1
 - **Estimación**: 1d
 - **Descripción**: Multi-stage builds. `api`, `worker`, `scheduler` comparten imagen base (mismo código, distinto `CMD`). `web` imagen propia.
 - **Aceptación**:
-  - [ ] `api/Dockerfile` multi-stage: builder (deps) + runtime (slim). Usuario no-root.
-  - [ ] `worker` y `scheduler` reutilizan la imagen de `api` con distinto `command`.
-  - [ ] `web/Dockerfile` multi-stage para Next.js (standalone output).
-  - [ ] Imágenes < 500 MB.
-  - [ ] `HEALTHCHECK` en `api`.
+  - [x] `api/Dockerfile` multi-stage: builder (deps) + runtime (slim). Usuario no-root.
+  - [x] `worker` y `scheduler` reutilizan la imagen de `api` con distinto `command`.
+  - [x] `web/Dockerfile` multi-stage para Next.js (standalone output).
+  - [x] Imágenes < 500 MB.
+  - [x] `HEALTHCHECK` en `api`.
 - **Notas**: no instalar dependencias de desarrollo en runtime.
 
 ---
@@ -969,7 +969,7 @@ Actualizar al cerrar cada tarea:
 
 | Épica | Completadas | Total | % |
 |-------|-------------|-------|---|
-| 0 — Fundación | 3 | 8 | 37.5% |
+| 0 — Fundación | 4 | 8 | 50% |
 | 1 — Autenticación | 0 | 5 | 0% |
 | 2 — Modelo de datos | 0 | 6 | 0% |
 | 3 — Ingesta | 0 | 8 | 0% |
@@ -977,6 +977,6 @@ Actualizar al cerrar cada tarea:
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **3** | **53** | **6%** |
+| **Total MVP** | **4** | **53** | **8%** |
 
 ---
