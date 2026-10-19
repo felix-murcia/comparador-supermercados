@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 3/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 4/8)
 
 ---
 
@@ -38,7 +38,7 @@
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
-| 3 — Ingesta | 8 | 12d | 🟡 En curso (3/8) |
+| 3 — Ingesta | 8 | 12d | 🟡 En curso (4/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
@@ -425,16 +425,17 @@
 
 ---
 
-### [ ] T3.6 — Implementación `RedisCache` 🟡
+### [x] T3.6 — Implementación `RedisCache` 🟡
 
 - **Depende de**: T2.5
 - **Estimación**: 1d
 - **Descripción**: Adaptador de caché con TTL, clave versionada (`v1:` + hash).
 - **Aceptación**:
-  - [ ] `get`, `set` con TTL, `invalidar_prefijo` (por versión, sin `SCAN`).
-  - [ ] Serialización JSON.
-  - [ ] Si Redis cae, `get` devuelve `None` (no rompe la app).
-  - [ ] Tests con Redis de test.
+  - [x] `get`, `set` con TTL, `invalidar_prefijo` (por versión, sin `SCAN`).
+  - [x] Serialización JSON.
+  - [x] Si Redis cae, `get` devuelve `None` (no rompe la app).
+  - [x] Tests con Redis de test.
+- **Nota**: `api/src/adaptadores/cache/redis_cache.py` (`RedisCache`). Cada versión de clave mantiene un conjunto índice (`cache:indices:v1:`), así que `invalidar_prefijo("v1:")` borra sus valores y el índice sin `SCAN`. Si Redis falla, `get` devuelve `None` y `set`/`invalidar_prefijo` registran el fallo sin propagarlo.
 
 ---
 
@@ -985,11 +986,11 @@ Actualizar al cerrar cada tarea:
 | 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
-| 3 — Ingesta | 3 | 8 | 38% |
+| 3 — Ingesta | 4 | 8 | 50% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **20** | **53** | **38%** |
+| **Total MVP** | **21** | **53** | **40%** |
 
 ---

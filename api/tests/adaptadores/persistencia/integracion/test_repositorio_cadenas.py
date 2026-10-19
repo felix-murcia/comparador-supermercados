@@ -8,11 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.adaptadores.persistencia.repositorio_cadenas import (
     SQLAlchemyRepositorioCadenas,
 )
-from src.adaptadores.persistencia.repositorio_productos_cadenas import (
-    SQLAlchemyRepositorioProductosCadenas,
-)
 from src.adaptadores.persistencia.repositorio_productos import (
     SQLAlchemyRepositorioProductos,
+)
+from src.adaptadores.persistencia.repositorio_productos_cadenas import (
+    SQLAlchemyRepositorioProductosCadenas,
 )
 from src.dominio.productos.entidades import ProductoNuevo
 
