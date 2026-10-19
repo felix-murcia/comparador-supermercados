@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 en curso — 1/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 en curso — 2/8)
 
 ---
 
@@ -35,7 +35,7 @@
 
 | Épica | Tareas | Estimación | Estado |
 |-------|--------|-----------|--------|
-| 0 — Fundación | 8 | 8d | 🟡 En curso (1/8) |
+| 0 — Fundación | 8 | 8d | 🟡 En curso (2/8) |
 | 1 — Autenticación | 5 | 6d | ⚪ Pendiente |
 | 2 — Modelo de datos | 6 | 7d | ⚪ Pendiente |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
@@ -71,15 +71,15 @@
 
 ---
 
-### [ ] T0.2 — `.env.example` completo 🔴
+### [x] T0.2 — `.env.example` completo 🔴
 
 - **Depende de**: T0.1
 - **Estimación**: 0.5d
 - **Descripción**: Crear `.env.example` con todas las variables definidas en `PLAN.md` §2.2, con valores vacíos y comentarios.
 - **Aceptación**:
-  - [ ] Incluye: `APP_ENV`, `APP_SECRET_KEY`, `POSTGRES_*`, `DATABASE_URL_RW`, `DATABASE_URL_RO`, `REDIS_URL`, `CACHE_TTL_SEGUNDOS`, `GOOGLE_*`, `MICROSOFT_*`, `LLM_*`, `SENTRY_DSN`, `LOG_LEVEL`, `RATE_LIMIT_*`.
-  - [ ] Comentarios explican cómo generar secretos (`openssl rand -hex 32`).
-  - [ ] No hay ningún valor real, solo placeholders vacíos.
+  - [x] Incluye: `APP_ENV`, `APP_SECRET_KEY`, `POSTGRES_*`, `DATABASE_URL_RW`, `DATABASE_URL_RO`, `REDIS_URL`, `CACHE_TTL_SEGUNDOS`, `GOOGLE_*`, `MICROSOFT_*`, `LLM_*`, `SENTRY_DSN`, `LOG_LEVEL`, `RATE_LIMIT_*`.
+  - [x] Comentarios explican cómo generar secretos (`openssl rand -hex 32`).
+  - [x] No hay ningún valor real, solo placeholders vacíos.
 - **Notas**: este archivo es la fuente de verdad de variables. Cualquier variable nueva debe añadirse aquí en el mismo PR.
 
 ---
@@ -969,7 +969,7 @@ Actualizar al cerrar cada tarea:
 
 | Épica | Completadas | Total | % |
 |-------|-------------|-------|---|
-| 0 — Fundación | 1 | 8 | 12.5% |
+| 0 — Fundación | 2 | 8 | 25% |
 | 1 — Autenticación | 0 | 5 | 0% |
 | 2 — Modelo de datos | 0 | 6 | 0% |
 | 3 — Ingesta | 0 | 8 | 0% |
@@ -977,6 +977,6 @@ Actualizar al cerrar cada tarea:
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **1** | **53** | **2%** |
+| **Total MVP** | **2** | **53** | **4%** |
 
 ---
