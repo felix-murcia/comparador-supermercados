@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 en curso — 6/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 2 en curso — 1/6)
 
 ---
 
@@ -37,7 +37,7 @@
 |-------|--------|-----------|--------|
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ⚪ Pendiente |
-| 2 — Modelo de datos | 6 | 7d | ⚪ Pendiente |
+| 2 — Modelo de datos | 6 | 7d | 🟡 En curso (1/6) |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
@@ -197,11 +197,12 @@
 
 - **Depende de**: T2.1
 - **Estimación**: 0.5d
-- **Descripción**: Migración Alembic con tabla `usuarios` según `PLAN.md` §6.
+- **Descripción**: Migración Alembic con tabla `usuarios` según `PLAN.md` §6 y las FK de `busquedas.usuario_id` y `listas.usuario_id`.
 - **Aceptación**:
   - [ ] Campos: `id`, `provider`, `provider_id`, `email`, `nombre`, `provincia`, `avatar_url`, `creado_en`.
   - [ ] `UNIQUE (provider, provider_id)`.
   - [ ] Índice en `email`.
+  - [ ] FK de `busquedas.usuario_id` y `listas.usuario_id` a `usuarios.id`.
 
 ---
 
@@ -252,18 +253,19 @@
 
 ---
 
-### [ ] T2.1 — Esquema SQL inicial 🔴
+### [x] T2.1 — Esquema SQL inicial 🔴
 
 - **Depende de**: T0.3
 - **Estimación**: 1.5d
 - **Descripción**: Migración Alembic con tablas de `PLAN.md` §6: `cadenas`, `productos`, `productos_cadena`, `precios`, `busquedas`, `listas`, `lista_items`.
 - **Aceptación**:
-  - [ ] Todas las columnas, tipos, constraints e índices de `PLAN.md` §6.
-  - [ ] `pg_trgm` activado; índice GIN en `productos.nombre`.
-  - [ ] Índice `(producto_cadena_id, fecha_consulta DESC)` en `precios`.
-  - [ ] Constraint `chk_precios_ambito_provincia`.
-  - [ ] `alembic upgrade head` limpio desde BD vacía.
-  - [ ] `alembic downgrade base` limpio.
+  - [x] Todas las columnas, tipos, constraints e índices de `PLAN.md` §6 de las tablas listadas arriba.
+  - [x] `pg_trgm` activado; índice GIN en `productos.nombre`.
+  - [x] Índice `(producto_cadena_id, fecha_consulta DESC)` en `precios`.
+  - [x] Constraint `chk_precios_ambito_provincia`.
+  - [x] `alembic upgrade head` limpio desde BD vacía.
+  - [x] `alembic downgrade base` limpio.
+- **Nota**: `usuarios` y las FK de `usuario_id` se difieren a T1.2, que depende de esta migración.
 
 ---
 
@@ -970,14 +972,14 @@ Actualizar al cerrar cada tarea:
 
 | Épica | Completadas | Total | % |
 |-------|-------------|-------|---|
-| 0 — Fundación | 4 | 8 | 50% |
+| 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 0 | 5 | 0% |
-| 2 — Modelo de datos | 0 | 6 | 0% |
+| 2 — Modelo de datos | 1 | 6 | 17% |
 | 3 — Ingesta | 0 | 8 | 0% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **4** | **53** | **8%** |
+| **Total MVP** | **7** | **53** | **13%** |
 
 ---

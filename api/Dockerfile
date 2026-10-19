@@ -30,6 +30,7 @@ RUN groupadd --system app \
 WORKDIR /app
 COPY --chown=app:app src ./src
 COPY --chown=app:app alembic ./alembic
+COPY --chown=app:app alembic.ini ./alembic.ini
 RUN chown app:app /app
 
 USER app
