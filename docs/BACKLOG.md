@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 en curso — 4/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6)
 
 ---
 
@@ -39,7 +39,7 @@
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
-| 4 — API búsqueda/comparativa | 6 | 8d | 🟡 En curso (4/6) |
+| 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
@@ -534,28 +534,30 @@
 
 ---
 
-### [ ] T4.5 — Cache de respuestas de comparación 🟢
+### [x] T4.5 — Cache de respuestas de comparación 🟢
 
 - **Depende de**: T4.3, T3.6
 - **Estimación**: 0.5d
 - **Descripción**: Cachear `GET /v1/comparar` con TTL corto (5 min) en Redis.
 - **Aceptación**:
-  - [ ] Clave incluye todos los query params + provincia.
-  - [ ] TTL 300 s.
-  - [ ] Invalidación tras ingesta.
+  - [x] Clave incluye todos los query params + provincia.
+  - [x] TTL 300 s.
+  - [x] Invalidación tras ingesta.
+- **Nota**: la comparativa se cachea con TTL de 300 s bajo el prefijo `v1:cmp:` (clave propia para no chocar con la de la búsqueda, pero dentro de la versión `v1:`), e incluye todos los query params —filtros, orden y paginación— más la provincia. La invalidación tras la ingesta (`invalidate_prefijo("v1:")`) la limpia. Si el valor cacheado no valida, se recalcula desde la BD.
 
 ---
 
-### [ ] T4.6 — Exception handlers globales 🟡
+### [x] T4.6 — Exception handlers globales 🟡
 
 - **Depende de**: T4.1
 - **Estimación**: 0.5d
 - **Descripción**: Traducir errores de dominio a HTTP con `{ code, message }`.
 - **Aceptación**:
-  - [ ] `ProductoNoEncontradoError` → 404.
-  - [ ] `UsuarioNoAutorizadoError` → 403.
-  - [ ] `RateLimitError` → 429.
-  - [ ] Errores inesperados → 500 con Sentry, sin stack trace al cliente.
+  - [x] `ProductoNoEncontradoError` → 404.
+  - [x] `UsuarioNoAutorizadoError` → 403.
+  - [x] `RateLimitError` → 429.
+  - [x] Errores inesperados → 500 con Sentry, sin stack trace al cliente.
+- **Nota**: manejadores en `api/src/api_http/errores.py`, registrados en `main.py`. Los errores inesperados se registran con traza en el log del servidor, se envían a Sentry si hay `SENTRY_DSN` y al cliente solo se le devuelve `{code: "ERROR_INTERNO", message: ...}`. Se añade `sentry-sdk` como dependencia y Sentry se activa en el lifespan de la API.
 
 ---
 
@@ -995,10 +997,10 @@ Actualizar al cerrar cada tarea:
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
-| 4 — API búsqueda/comparativa | 4 | 6 | 67% |
+| 4 — API búsqueda/comparativa | 6 | 6 | 100% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **29** | **53** | **55%** |
+| **Total MVP** | **31** | **53** | **58%** |
 
 ---

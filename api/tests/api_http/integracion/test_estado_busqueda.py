@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import os
 from collections.abc import AsyncIterator
-from typing import Any
 from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID, uuid4
 
 import jwt as pyjwt
@@ -199,7 +199,7 @@ async def test_otro_usuario_no_puede_ver_el_job(
     )
 
     assert respuesta.status_code == 403
-    assert respuesta.json()["code"] == "BUSQUEDA_NO_AUTORIZADA"
+    assert respuesta.json()["code"] == "NO_AUTORIZADO"
 
 
 async def test_job_inexistente_devuelve_404(

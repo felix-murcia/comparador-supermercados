@@ -34,6 +34,7 @@ from src.dominio.busquedas.entidades import PeticionBusqueda
 from src.dominio.busquedas.estados import EstadoBusqueda
 from src.dominio.precios.entidades import FiltrosComparacion, ResultadoComparacion
 from src.dominio.precios.estados import ORDEN_POR_DEFECTO, Orden
+from src.dominio.usuarios.errores import UsuarioNoAutorizadoError
 
 router = APIRouter(prefix="/v1", tags=["búsquedas"])
 
@@ -145,17 +146,13 @@ async def estado_busqueda(
         identidad.provider, identidad.provider_id
     )
     if usuario is None:
-        raise ErrorAPI(
-            403, "BUSQUEDA_NO_AUTORIZADA", "El job no pertenece a este usuario"
-        )
+        raise UsuarioNoAutorizadoError("El job no pertenece a este usuario")
 
     job = await SQLAlchemyRepositorioBusquedas(sesion).obtener(busqueda_id)
     if job is None:
         raise ErrorAPI(404, "BUSQUEDA_NO_ENCONTRADA", "El job no existe")
     if job.usuario_id != usuario.id:
-        raise ErrorAPI(
-            403, "BUSQUEDA_NO_AUTORIZADA", "El job no pertenece a este usuario"
-        )
+        raise UsuarioNoAutorizadoError("El job no pertenece a este usuario")
 
     resultados = await SQLAlchemyRepositorioPrecios(sesion).buscar_comparativa(
         FiltrosComparacion(

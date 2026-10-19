@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -10,9 +11,11 @@ from decimal import Decimal
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from redis.asyncio import Redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.adaptadores.cache.redis_cache import RedisCache
 from src.adaptadores.persistencia.modelos import (
     CadenaModelo,
     PrecioModelo,
@@ -172,6 +175,18 @@ async def datos(sesion_rw: AsyncSession, sesion_ro: AsyncSession) -> None:
     lsn = await sesion_rw.scalar(text("SELECT pg_current_wal_lsn()"))
     assert lsn is not None
     await _esperar_replica(sesion_ro, lsn)
+    await _limpiar_cache()
+
+
+async def _limpiar_cache() -> None:
+    """La comparativa se cachea: los tests necesitan datos frescos."""
+    if not os.getenv("REDIS_URL"):
+        return
+    redis = Redis.from_url(str(os.getenv("REDIS_URL")), decode_responses=True)
+    try:
+        await RedisCache(redis).invalidar_prefijo("v1:")
+    finally:
+        await redis.aclose()
 
 
 async def test_ordena_por_precio_unitario_por_defecto(

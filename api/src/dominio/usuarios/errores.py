@@ -9,3 +9,11 @@ class ProvinciaInvalidaError(Exception):
     def __init__(self, valor: object) -> None:
         self.valor = valor
         super().__init__(f"Provincia inválida: {valor!r}")
+
+
+class UsuarioNoAutorizadoError(Exception):
+    """El usuario no tiene permiso para la operación solicitada."""
+
+    def __init__(self, motivo: str = "operación no permitida") -> None:
+        self.motivo = motivo
+        super().__init__(motivo)
