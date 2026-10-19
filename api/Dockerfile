@@ -31,6 +31,7 @@ WORKDIR /app
 COPY --chown=app:app src ./src
 COPY --chown=app:app alembic ./alembic
 COPY --chown=app:app alembic.ini ./alembic.ini
+COPY --chown=app:app scripts ./scripts
 RUN chown app:app /app
 
 USER app

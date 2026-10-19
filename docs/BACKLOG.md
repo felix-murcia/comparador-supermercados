@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 2 en curso — 5/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 2 completada — 6/6)
 
 ---
 
@@ -37,7 +37,7 @@
 |-------|--------|-----------|--------|
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ⚪ Pendiente |
-| 2 — Modelo de datos | 6 | 7d | 🟡 En curso (5/6) |
+| 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
@@ -296,17 +296,18 @@
 
 ---
 
-### [ ] T2.4 — Seed dev con datos de prueba 🟡
+### [x] T2.4 — Seed dev con datos de prueba 🟡
 
 - **Depende de**: T2.1
 - **Estimación**: 1d
 - **Descripción**: Script `api/scripts/seed.py` que inserta 3 cadenas (DIA, Carrefour, Mercadona) y 100 productos de muestra.
 - **Aceptación**:
-  - [ ] 3 cadenas con slug y logo SVG path.
-  - [ ] 100 productos con nombre, marca, categoría, formato, litros_o_kg.
-  - [ ] `productos_cadena` con URL de producto.
-  - [ ] `precios` con al menos 1 precio por producto/cadena, estado `verificado`, ámbito `nacional`.
-  - [ ] Idempotente.
+  - [x] 3 cadenas con slug y logo SVG path.
+  - [x] 100 productos con nombre, marca, categoría, formato, litros_o_kg.
+  - [x] `productos_cadena` con URL de producto.
+  - [x] `precios` con al menos 1 precio por producto/cadena, estado `verificado`, ámbito `nacional`.
+  - [x] Idempotente.
+- **Nota**: se ejecuta con `python -m scripts.seed` (contenedor `api` o local con `.env` cargado). Idempotencia vía ids deterministas (uuid5) y `ON CONFLICT DO NOTHING`.
 
 ---
 
@@ -975,12 +976,12 @@ Actualizar al cerrar cada tarea:
 |-------|-------------|-------|---|
 | 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 0 | 5 | 0% |
-| 2 — Modelo de datos | 5 | 6 | 83% |
+| 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 0 | 8 | 0% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **11** | **53** | **21%** |
+| **Total MVP** | **12** | **53** | **23%** |
 
 ---
