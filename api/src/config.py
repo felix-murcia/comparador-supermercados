@@ -65,6 +65,9 @@ class Settings(BaseSettings):
     llm_api_key: SecretStr = SecretStr("")
     llm_model: str = ""
     llm_max_reintentos: int = 3
+    # URL base del proveedor (opcional; por defecto la oficial de cada uno).
+    llm_base_url: str = ""
+    llm_timeout_segundos: int = 60
 
     # ===== Observabilidad =====
     sentry_dsn: SecretStr = SecretStr("")

@@ -92,7 +92,11 @@ def test_validar_token_caducado_falla() -> None:
 
 
 def test_validar_token_con_firma_invalida_falla() -> None:
-    token = pyjwt.encode({"provider": "google"}, "otro-secreto-de-prueba-unit-32-bytes", algorithm="HS256")
+    token = pyjwt.encode(
+        {"provider": "google"},
+        "otro-secreto-de-prueba-unit-32-bytes",
+        algorithm="HS256",
+    )
 
     with pytest.raises(ErrorAPI) as excinfo:
         autenticacion.validar_token(token, _SECRETO)

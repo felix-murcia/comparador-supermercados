@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 1/8)
 
 ---
 
@@ -38,7 +38,7 @@
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
-| 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
+| 3 — Ingesta | 8 | 12d | 🟡 En curso (1/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
@@ -350,18 +350,19 @@
 
 ---
 
-### [ ] T3.1 — Implementación `LLMProductor` 🔴
+### [x] T3.1 — Implementación `LLMProductor` 🔴
 
 - **Depende de**: T2.5
 - **Estimación**: 2d
 - **Descripción**: Adaptador que llama al LLM con el prompt de `PLAN.md` §7 y parsea JSON estricto.
 - **Aceptación**:
-  - [ ] Prompt en constante separada.
-  - [ ] Respuesta parseada a `dict` con campos obligatorios.
-  - [ ] Si el LLM devuelve texto no-JSON → error controlado, no crash.
-  - [ ] `url_fuente` obligatoria cuando `encontrado=true`.
-  - [ ] Tests con respuestas mockeadas (válida, inválida, no encontrado).
-  - [ ] Retry con backoff exponencial ante errores 5xx.
+  - [x] Prompt en constante separada.
+  - [x] Respuesta parseada a `dict` con campos obligatorios.
+  - [x] Si el LLM devuelve texto no-JSON → error controlado, no crash.
+  - [x] `url_fuente` obligatoria cuando `encontrado=true`.
+  - [x] Tests con respuestas mockeadas (válida, inválida, no encontrado).
+  - [x] Retry con backoff exponencial ante errores 5xx.
+- **Nota**: `api/src/adaptadores/ingesta/llm_productor.py` (productor) + `prompts.py` (prompt en constante) + `cliente_llm.py` (clientes HTTP de `openai`/`xai` y `anthropic` tras el puerto `ClienteLLM`). El parseo es JSON estricto: si no es un objeto o faltan campos obligatorios (`nombre`, `formato`, `precio_eur`, `url_fuente`) se lanza `ErrorProductor` (error de dominio, sin crash). Los 5xx y fallos de red se reintentan con backoff 0.5 s, 1 s, 2 s; los 4xx no se reintentan.
 
 ---
 
@@ -982,11 +983,11 @@ Actualizar al cerrar cada tarea:
 | 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
-| 3 — Ingesta | 0 | 8 | 0% |
+| 3 — Ingesta | 1 | 8 | 13% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **17** | **53** | **32%** |
+| **Total MVP** | **18** | **53** | **34%** |
 
 ---
