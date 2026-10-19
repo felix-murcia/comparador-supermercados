@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 5/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 en curso — 6/8)
 
 ---
 
@@ -38,7 +38,7 @@
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
-| 3 — Ingesta | 8 | 12d | 🟡 En curso (5/8) |
+| 3 — Ingesta | 8 | 12d | 🟡 En curso (6/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
@@ -397,17 +397,18 @@
 
 ---
 
-### [ ] T3.4 — Cola de jobs en Postgres + worker 🔴
+### [x] T3.4 — Cola de jobs en Postgres + worker 🔴
 
 - **Depende de**: T3.3
 - **Estimación**: 2d
 - **Descripción**: Worker que hace polling a `busquedas` con `SKIP LOCKED` y ejecuta `BuscarProducto`.
 - **Aceptación**:
-  - [ ] `SELECT ... FOR UPDATE SKIP LOCKED` sobre `busquedas WHERE estado='pendiente'`.
-  - [ ] Actualiza `estado` (`en_progreso` → `completada`/`fallida`) y `progreso` (0–100).
-  - [ ] Si el worker cae, el job vuelve a `pendiente` tras timeout.
-  - [ ] `api/src/worker.py` como punto de entrada (`python -m src.worker`).
-  - [ ] Tests de concurrencia: 2 workers no procesan el mismo job.
+  - [x] `SELECT ... FOR UPDATE SKIP LOCKED` sobre `busquedas WHERE estado='pendiente'`.
+  - [x] Actualiza `estado` (`en_progreso` → `completada`/`fallida`) y `progreso` (0–100).
+  - [x] Si el worker cae, el job vuelve a `pendiente` tras timeout.
+  - [x] `api/src/worker.py` como punto de entrada (`python -m src.worker`).
+  - [x] Tests de concurrencia: 2 workers no procesan el mismo job.
+- **Nota**: cola en la propia tabla `busquedas` (ADR-007) tras el puerto `ColaJobs` (`api/src/puertos/cola.py`) y el adaptador `PostgresColaJobs`. El reclamo es un único `UPDATE ... WHERE id = (SELECT ... FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *`; un job en `en_progreso` con `creado_en` anterior al timeout (15 min) se vuelve a reclamar, así que si el worker cae el job no se pierde. El progreso se actualiza cadena a cadena.
 
 ---
 
@@ -987,11 +988,11 @@ Actualizar al cerrar cada tarea:
 | 0 — Fundación | 6 | 8 | 75% |
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
-| 3 — Ingesta | 5 | 8 | 63% |
+| 3 — Ingesta | 6 | 8 | 75% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **22** | **53** | **42%** |
+| **Total MVP** | **23** | **53** | **43%** |
 
 ---
