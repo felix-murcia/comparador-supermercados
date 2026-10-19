@@ -30,7 +30,14 @@
     "comparar": "Comparar",
     "cadenas": "Supermercados a comparar",
     "buscando": "Buscando…",
-    "error": "No se pudo lanzar la búsqueda. Inténtalo de nuevo."
+    "buscando_titulo": "Buscando precios",
+    "progreso": "Progreso de la búsqueda",
+    "progreso_texto": "Progreso:",
+    "volver": "Volver a la búsqueda",
+    "sin_resultados": "Todavía no hay precios para esta búsqueda.",
+    "error": "No se pudo lanzar la búsqueda. Inténtalo de nuevo.",
+    "error_busqueda": "La búsqueda ha fallado. Vuelve a intentarlo.",
+    "error_resultados": "No se pudieron cargar los resultados."
   },
   "listas": {
     "titulo": "Mis listas"

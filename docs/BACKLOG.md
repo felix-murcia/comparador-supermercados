@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 2/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 3/8)
 
 ---
 
@@ -40,7 +40,7 @@
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
-| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (2/8) |
+| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (3/8) |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
@@ -597,17 +597,18 @@
 
 ---
 
-### [ ] T5.3 — Flujo hero → resultados + barra de progreso 🔴
+### [x] T5.3 — Flujo hero → resultados + barra de progreso 🔴
 
 - **Depende de**: T5.2, T4.1, T4.2
 - **Estimación**: 2d
 - **Descripción**: Al comparar, si cache hit → resultados instantáneos. Si miss → barra de progreso con polling cada 1–2 s.
 - **Aceptación**:
-  - [ ] Cache hit: transición directa, sin barra.
-  - [ ] Cache miss: barra animada con % real del job.
-  - [ ] Al completar, transición a vista resultados (buscador arriba, flecha volver).
-  - [ ] Flecha volver resetea a hero.
-  - [ ] Re-búsqueda desde resultados mantiene filtros en URL.
+  - [x] Cache hit: transición directa, sin barra.
+  - [x] Cache miss: barra animada con % real del job.
+  - [x] Al completar, transición a vista resultados (buscador arriba, flecha volver).
+  - [x] Flecha volver resetea a hero.
+  - [x] Re-búsqueda desde resultados mantiene filtros en URL.
+- **Nota**: `web/src/components/buscador/VistaBusqueda.tsx` (cliente) decide el estado inicial a partir de `?cache=1` (resultados directos) o del `job` de la URL (barra de progreso con `role="progressbar"` y el % real del job, consultando cada 1,5 s). Al terminar carga la comparativa por el proxy `/api/comparar` y muestra el buscador arriba con la flecha de volver (que regresa al hero). La re-búsqueda vuelve a llamar a la API y reconstruye la URL con `q`, `cadenas` y `job`, así que los filtros quedan siempre en la URL. Los proxies `/api/busquedas` y `/api/busquedas/{id}` reenvían el token de sesión desde el servidor.
 
 ---
 
@@ -1000,9 +1001,9 @@ Actualizar al cerrar cada tarea:
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
-| 5 — Frontend flujo principal | 2 | 8 | 25% |
+| 5 — Frontend flujo principal | 3 | 8 | 38% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **33** | **53** | **62%** |
+| **Total MVP** | **34** | **53** | **64%** |
 
 ---
