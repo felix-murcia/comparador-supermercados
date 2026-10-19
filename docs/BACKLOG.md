@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 en curso — 2/6)
 
 ---
 
@@ -39,7 +39,7 @@
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
-| 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
+| 4 — API búsqueda/comparativa | 6 | 8d | 🟡 En curso (2/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ⚪ Pendiente |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
@@ -504,29 +504,31 @@
 
 ---
 
-### [ ] T4.3 — `GET /v1/comparar` 🔴
+### [x] T4.3 — `GET /v1/comparar` 🔴
 
 - **Depende de**: T2.3, T2.6
 - **Estimación**: 2d
 - **Descripción**: Endpoint que devuelve resultados con orden y filtros aplicados en SQL (desde RO).
 - **Aceptación**:
-  - [ ] Query params: `q`, `cadenas`, `orden` (`precio_unitario|precio_kg_l|relevancia`), `precio_min`, `precio_max`, `marca`, `categoria`, `solo_con_stock`, `provincia`.
-  - [ ] Orden por defecto: `precio_unitario`.
-  - [ ] Resolución de precio por provincia (ADR-009).
-  - [ ] Paginación `limit`/`offset`.
-  - [ ] Tests: cada filtro, cada orden, fallback provincia→nacional.
+  - [x] Query params: `q`, `cadenas`, `orden` (`precio_unitario|precio_kg_l|relevancia`), `precio_min`, `precio_max`, `marca`, `categoria`, `solo_con_stock`, `provincia`.
+  - [x] Orden por defecto: `precio_unitario`.
+  - [x] Resolución de precio por provincia (ADR-009).
+  - [x] Paginación `limit`/`offset`.
+  - [x] Tests: cada filtro, cada orden, fallback provincia→nacional.
+- **Nota**: `api/src/api_http/v1/comparar.py`. La consulta elige un precio por producto y cadena con `DISTINCT ON`, prefiriendo el provincial sobre el nacional y cayendo al nacional si no hay precio de la provincia (ADR-009). Los filtros de precio y stock se aplican sobre el precio ya elegido; la paginación va en la misma consulta. El repositorio (`buscar_comparativa`) devuelve entidades de dominio y la posición en el ranking la calcula el dominio.
 
 ---
 
-### [ ] T4.4 — Cálculo determinista €/L y ranking 🟡
+### [x] T4.4 — Cálculo determinista €/L y ranking 🟡
 
 - **Depende de**: T2.6
 - **Estimación**: 1d
 - **Descripción**: Función de dominio que calcula €/L y posición en ranking.
 - **Aceptación**:
-  - [ ] Redondeo a 4 decimales en BD, 2 en UI.
-  - [ ] Ranking estable (desempate por nombre).
-  - [ ] Tests con casos límite (formato desconocido, precio 0, etc.).
+  - [x] Redondeo a 4 decimales en BD, 2 en UI.
+  - [x] Ranking estable (desempate por nombre).
+  - [x] Tests con casos límite (formato desconocido, precio 0, etc.).
+- **Nota**: `api/src/dominio/precios/ranking.py` (`ordenar_resultados`, `posicionar`) sobre la entidad `ResultadoComparacion`. El €/L se calcula con 4 decimales (`calcular_precio_por_litro`); el redondeo a 2 decimales para la interfaz es del frontend. El desempate es por nombre y después cadena; con `relevancia` se respeta el orden del repositorio, que conoce la similitud con la consulta.
 
 ---
 
@@ -991,10 +993,10 @@ Actualizar al cerrar cada tarea:
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
-| 4 — API búsqueda/comparativa | 0 | 6 | 0% |
+| 4 — API búsqueda/comparativa | 2 | 6 | 33% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **25** | **53** | **47%** |
+| **Total MVP** | **27** | **53** | **51%** |
 
 ---
