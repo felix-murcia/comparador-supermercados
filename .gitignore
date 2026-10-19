@@ -1,0 +1,40 @@
+# Entorno (el ejemplo sí se commitea)
+.env
+.env.*
+!.env.example
+
+# CodeGraph (índice local)
+.codegraph/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Secretos y certificados
+*.pem
+*.key
+secrets/
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

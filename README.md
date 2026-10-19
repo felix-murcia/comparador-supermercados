@@ -1,0 +1,383 @@
+# Comparador de Precios de Supermercados Españoles
+
+Aplicación web para comparar precios de productos de supermercados en España (DIA, Carrefour, Mercadona), gestionar listas de la compra y calcular el ahorro real de comprar la misma cesta en distintas cadenas o de forma mixta.
+
+**Estado**: 🟡 En desarrollo (Épica 0 — Fundación)
+**Versión**: 0.1.0-dev
+**Licencia**: Por definir
+
+---
+
+## ¿Qué hace?
+
+- **Compara precios verificados** de productos entre supermercados (no estimados: cada precio tiene URL fuente y fecha).
+- **Calcula el ahorro real** de una cesta completa:
+  - % A: vs. la cadena más cara.
+  - % C: vs. la cesta óptima (mezclando lo más barato de cada cadena).
+- **Gestiona listas de la compra** con coste total y ahorro.
+- **Histórico de precios** por producto.
+- **Interfaz minimalista** tipo Google: buscar → comparar → decidir.
+
+**Público objetivo**: consumidores españoles que quieren optimizar el gasto de la compra.
+
+---
+
+## Stack
+
+| Capa | Tecnología |
+|------|-----------|
+| Backend | Python 3.12 + FastAPI |
+| Frontend | Next.js 14 (App Router) + React + TypeScript |
+| BD | PostgreSQL 16 (primario + réplica) |
+| Caché/Cola | Redis 7 |
+| Reverse proxy | Caddy 2 |
+| Contenedores | Docker + docker-compose |
+| Auth | Auth.js (OAuth Google + Microsoft) |
+| CI/CD | GitHub Actions |
+| Observabilidad | Sentry + UptimeRobot |
+
+Detalle completo en [`docs/decisions.md`](docs/decisions.md) (ADR-001).
+
+---
+
+## Documentación
+
+Antes de tocar código, lee en este orden:
+
+| Documento | Qué contiene |
+|-----------|--------------|
+| [`AGENTS.md`](AGENTS.md) | Contrato operativo para agentes de IA (reglas, flujo, checklist) |
+| [`docs/PLAN.md`](docs/PLAN.md) | Requisitos de negocio y plan de acción (fuente de verdad) |
+| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) | Convenciones de código, nombres, estructura, testing |
+| [`docs/decisions.md`](docs/decisions.md) | ADRs (el "por qué" de cada decisión arquitectónica) |
+| [`docs/BACKLOG.md`](docs/BACKLOG.md) | Tareas ejecutables por épicas con dependencias |
+
+**Regla**: si algo no está en estos documentos, no existe. Si necesitas una decisión nueva, propón un ADR antes de implementar.
+
+---
+
+## Requisitos previos
+
+- **Docker** ≥ 24 y **Docker Compose** ≥ 2.20
+- **Node.js** ≥ 20 (solo si trabajas en `web/` fuera de Docker)
+- **Python** ≥ 3.12 (solo si trabajas en `api/` fuera de Docker)
+- **Git** ≥ 2.40
+- **Make** (opcional, para atajos)
+
+Verifica:
+
+```bash
+docker --version
+docker compose version
+node --version
+python --version
+```
+
+---
+
+## Arranque rápido (dev)
+
+### 1. Clonar el repo
+
+```bash
+git clone <url-del-repo> comparador-precios
+cd comparador-precios
+```
+
+### 2. Configurar variables de entorno
+
+```bash
+cp .env.example .env
+```
+
+Edita `.env` y rellena **como mínimo**:
+
+```env
+APP_SECRET_KEY=<genera con: openssl rand -hex 32>
+POSTGRES_PASSWORD=<elige una contraseña>
+GOOGLE_CLIENT_ID=<de Google Cloud Console>
+GOOGLE_CLIENT_SECRET=<de Google Cloud Console>
+MICROSOFT_CLIENT_ID=<de Azure Portal>
+MICROSOFT_CLIENT_SECRET=<de Azure Portal>
+LLM_API_KEY=<de tu proveedor>
+```
+
+> ⚠️ **Nunca commitees `.env`**. Está en `.gitignore`. Si detectas un secreto en el repo, avisa: es una penalización grave según `AGENTS.md` §3.1.
+
+### 3. Levantar el entorno
+
+```bash
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml up -d --build
+```
+
+Espera a que todos los servicios estén `healthy`:
+
+```bash
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml ps
+```
+
+### 4. Aplicar migraciones y seed
+
+```bash
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api alembic upgrade head
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api python -m scripts.seed
+```
+
+### 5. Abrir la app
+
+- **Web**: http://localhost:3000
+- **API**: http://localhost:8000
+- **Health**: http://localhost:8000/health/ready
+- **Docs API (dev)**: http://localhost:8000/docs
+
+---
+
+## Comandos frecuentes
+
+### Levantar / parar
+
+```bash
+# Levantar
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml up -d
+
+# Parar sin borrar volúmenes
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml down
+
+# Parar y borrar todo (⚠️ borra BD)
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml down -v
+```
+
+### Logs
+
+```bash
+# Todos
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml logs -f
+
+# Solo API
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml logs -f api
+
+# Solo worker
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml logs -f worker
+```
+
+### Base de datos
+
+```bash
+# Migraciones
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api alembic upgrade head
+
+# Crear migración
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api alembic revision --autogenerate -m "descripcion"
+
+# Revertir una migración
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api alembic downgrade -1
+
+# Acceder a psql (primario)
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec postgres-primary psql -U app -d precios
+```
+
+### Tests y linters
+
+```bash
+# Backend: tests
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api pytest
+
+# Backend: lint + tipos
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api ruff check .
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api mypy src
+
+# Frontend: tests
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npm test
+
+# Frontend: lint + tipos
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npm run lint
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npx tsc --noEmit
+
+# Seguridad
+pre-commit run gitleaks --all-files
+```
+
+### Worker y scheduler
+
+```bash
+# Ver estado del worker
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml logs -f worker
+
+# Lanzar ingesta manualmente (dev)
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec worker python -m src.scheduler --run-now
+```
+
+---
+
+## Estructura del repositorio
+
+```
+/
+├── AGENTS.md                  ← contrato operativo para agentes
+├── README.md                  ← este archivo
+├── docs/
+│   ├── PLAN.md                ← plan de acción y requisitos
+│   ├── CONVENTIONS.md         ← convenciones de código
+│   ├── decisions.md           ← ADRs
+│   └── BACKLOG.md             ← tareas ejecutables
+├── api/                       ← backend FastAPI
+│   ├── src/
+│   │   ├── dominio/           ← entidades + reglas (sin frameworks)
+│   │   ├── aplicacion/        ← casos de uso
+│   │   ├── puertos/           ← interfaces
+│   │   ├── adaptadores/       ← implementaciones (SQLAlchemy, LLM, Redis)
+│   │   ├── api_http/          ← capa FastAPI
+│   │   ├── config.py
+│   │   └── main.py
+│   ├── tests/
+│   ├── alembic/
+│   ├── scripts/
+│   ├── Dockerfile
+│   └── pyproject.toml
+├── web/                       ← frontend Next.js 14
+│   ├── src/
+│   │   ├── app/
+│   │   ├── components/
+│   │   ├── lib/
+│   │   └── locales/
+│   ├── public/logos/
+│   ├── Dockerfile
+│   └── package.json
+├── infra/
+│   ├── docker-compose.base.yml
+│   ├── docker-compose.dev.yml
+│   ├── docker-compose.prod.yml
+│   ├── caddy/Caddyfile
+│   ├── postgres/init-replica.sh
+│   └── k8s/                   ← plantillas (no desplegar aún)
+├── .env.example
+├── .gitignore
+├── .pre-commit-config.yaml
+└── .github/workflows/ci.yml
+```
+
+---
+
+## Entornos
+
+| Entorno | Compose | Uso |
+|---------|---------|-----|
+| **dev** | `base.yml` + `dev.yml` | Desarrollo local, hot-reload, datos seed |
+| **prod** | `base.yml` + `prod.yml` | VPS, TLS, logs JSON, Sentry |
+
+### Deploy en prod (VPS)
+
+**Requisitos**: VPS con Docker, dominio apuntando al VPS, puertos 80/443 abiertos.
+
+```bash
+# En el VPS
+git clone <url-del-repo> /opt/comparador
+cd /opt/comparador
+cp .env.example .env
+# Editar .env con valores de producción (APP_ENV=prod, dominio, secretos reales)
+
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.prod.yml up -d --build
+docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.prod.yml exec api alembic upgrade head
+```
+
+**Backups**: configurar cron diario con `pg_dump` del primario. Ver `docs/PLAN.md` §RNF-06.
+
+**No commitear** el `.env` de prod. En el VPS, permisos `600`:
+
+```bash
+chmod 600 .env
+```
+
+---
+
+## Flujo de trabajo (desarrollo)
+
+1. **Lee** `AGENTS.md` y el issue correspondiente en `docs/BACKLOG.md`.
+2. **Crea rama**: `feat/epica-X-descripcion` o `fix/descripcion`.
+3. **Implementa** con tests.
+4. **Verifica** localmente:
+   ```bash
+   docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api pytest
+   docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api ruff check .
+   docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec api mypy src
+   docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npm test
+   docker compose -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec web npm run lint
+   ```
+5. **Commit** con Conventional Commits:
+   ```bash
+   git commit -m "feat(api): añadir endpoint POST /v1/busquedas"
+   ```
+6. **Abre PR** con descripción: qué, por qué, cómo probar.
+7. **CI verde** obligatorio antes de merge.
+8. **Actualiza** `docs/BACKLOG.md` marcando la tarea `[x]`.
+9. Si tomaste una decisión nueva → **ADR** en `docs/decisions.md`.
+
+Detalle completo en `AGENTS.md` §4.
+
+---
+
+## Seguridad
+
+- **Cero secretos en código**. Si encuentras uno, avisa: es penalización grave.
+- **`.env` nunca se commitea**. `.env.example` es la fuente de verdad de variables.
+- **Pre-commit hook** con `gitleaks` bloquea commits con secretos.
+- **Logs** redactan `authorization`, `api_key`, `password`, `token`, `cookie`.
+- **Rotación de secretos** documentada por proveedor (Google, Microsoft, LLM, Postgres).
+
+Si detectas una vulnerabilidad, **no abras un issue público**. Contacta al maintainer directamente.
+
+---
+
+## Estado del proyecto
+
+| Épica | Estado | Progreso |
+|-------|--------|----------|
+| 0 — Fundación | 🟡 En curso | 1/8 |
+| 1 — Autenticación | ⚪ Pendiente | 0/5 |
+| 2 — Modelo de datos | ⚪ Pendiente | 0/6 |
+| 3 — Ingesta | ⚪ Pendiente | 0/8 |
+| 4 — API búsqueda/comparativa | ⚪ Pendiente | 0/6 |
+| 5 — Frontend flujo principal | ⚪ Pendiente | 0/8 |
+| 6 — Perfil y listas | ⚪ Pendiente | 0/6 |
+| 7 — Calidad y operación | ⚪ Pendiente | 0/6 |
+| 8 — Escala (post-MVP) | ⚪ Futuro | — |
+
+Detalle en [`docs/BACKLOG.md`](docs/BACKLOG.md).
+
+---
+
+## Roadmap (post-MVP)
+
+- Más cadenas de supermercados (Alcampo, Eroski, Lidl, Aldi).
+- i18n completo (inglés, otros países).
+- App móvil (React Native o PWA).
+- API pública para terceros.
+- Alertas de bajada de precio.
+- Comparativa de cestas predefinidas (despensa básica, vegana, sin gluten).
+
+Priorización en `docs/PLAN.md` §8 (Épica 8).
+
+---
+
+## Contribuir
+
+Proyecto personal en fase MVP. Si quieres contribuir:
+
+1. Lee `AGENTS.md` y `docs/CONVENTIONS.md`.
+2. Abre un issue describiendo el cambio antes de implementar.
+3. Sigue el flujo de trabajo de la sección anterior.
+4. Un PR = un issue. No mezcles refactor con feature.
+
+---
+
+## Contacto
+
+- **Maintainer**: [por definir]
+- **Issues**: [url del repo]/issues
+- **Discusiones**: [url del repo]/discussions
+
+---
+
+## Licencia
+
+Por definir. Hasta entonces, todos los derechos reservados.
