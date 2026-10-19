@@ -1,0 +1,23 @@
+{
+  "app": {
+    "nombre": "Comparador de Precios"
+  },
+  "login": {
+    "titulo": "Entra para comparar precios",
+    "subtitulo": "Compara el precio real de tu cesta entre DIA, Carrefour y Mercadona.",
+    "google": "Continuar con Google",
+    "microsoft": "Continuar con Microsoft",
+    "legal": "Al continuar aceptas que guardemos tu email y nombre para mostrarte tu perfil."
+  },
+  "inicio": {
+    "titulo": "Compara el precio de tu cesta",
+    "subtitulo": "Busca un producto y compara precios verificados entre supermercados.",
+    "ir_a_buscar": "Buscar productos"
+  },
+  "buscar": {
+    "titulo": "Buscar productos",
+    "campo": "Producto a buscar",
+    "placeholder": "¿Qué quieres comprar?",
+    "boton": "Buscar"
+  }
+}

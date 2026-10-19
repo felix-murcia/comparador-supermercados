@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 en curso — 3/5; Épica 2 completada — 6/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6)
 
 ---
 
@@ -36,7 +36,7 @@
 | Épica | Tareas | Estimación | Estado |
 |-------|--------|-----------|--------|
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
-| 1 — Autenticación | 5 | 6d | 🟡 En curso (3/5) |
+| 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
@@ -223,28 +223,30 @@
 
 ---
 
-### [ ] T1.4 — Middleware de sesión en Next.js 🟡
+### [x] T1.4 — Middleware de sesión en Next.js 🟡
 
 - **Depende de**: T1.1
 - **Estimación**: 1d
 - **Descripción**: Rutas `(app)/*` protegidas. Redirección a `/login` si no hay sesión. Rutas `(auth)/*` públicas.
 - **Aceptación**:
-  - [ ] Usuario no logueado en `/buscar` → redirect a `/login`.
-  - [ ] Usuario logueado en `/login` → redirect a `/`.
-  - [ ] `session` accesible en Server Components.
+  - [x] Usuario no logueado en `/buscar` → redirect a `/login`.
+  - [x] Usuario logueado en `/login` → redirect a `/`.
+  - [x] `session` accesible en Server Components.
+- **Nota**: middleware en `web/src/middleware.ts`: protege todo salvo `/login`, `/api/auth/*` y assets; usa `getToken` con el mismo `decode` HS256 que Auth.js. La sesión se lee en Server Components con `getSession()` (`web/src/lib/session.ts`). Validado en runtime: sin sesión → 307 a `/login?callbackUrl=...`; con sesión en `/login` → 307 a `/`; el nombre del usuario se renderiza en el HTML.
 
 ---
 
-### [ ] T1.5 — Pantalla de login 🟡
+### [x] T1.5 — Pantalla de login 🟡
 
 - **Depende de**: T1.1
 - **Estimación**: 1d
 - **Descripción**: Página `/login` minimalista con dos botones: "Continuar con Google" y "Continuar con Microsoft". Logos SVG.
 - **Aceptación**:
-  - [ ] Ambos botones inician flujo OAuth.
-  - [ ] Estilo minimalista tipo Google.
-  - [ ] Strings en `locales/es.json` (`login.google`, `login.microsoft`).
-  - [ ] Accesible por teclado.
+  - [x] Ambos botones inician flujo OAuth.
+  - [x] Estilo minimalista tipo Google.
+  - [x] Strings en `locales/es.json` (`login.google`, `login.microsoft`).
+  - [x] Accesible por teclado.
+- **Nota**: página en `web/src/app/(auth)/login/page.tsx` (Server Component) y botones en `web/src/components/FormularioLogin.tsx` (client). Logos SVG propios en `web/src/components/logos.tsx`. Verificado: `POST /api/auth/signin/google` → 302 a `accounts.google.com` y `POST /api/auth/signin/microsoft` → 302 a `login.microsoftonline.com`, ambos con el `redirect_uri` correcto. El login real queda pendiente de credenciales OAuth.
 
 ---
 
@@ -978,13 +980,13 @@ Actualizar al cerrar cada tarea:
 | Épica | Completadas | Total | % |
 |-------|-------------|-------|---|
 | 0 — Fundación | 6 | 8 | 75% |
-| 1 — Autenticación | 3 | 5 | 60% |
+| 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 0 | 8 | 0% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **15** | **53** | **28%** |
+| **Total MVP** | **17** | **53** | **32%** |
 
 ---

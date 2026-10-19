@@ -1,0 +1,208 @@
+:root {
+  --borde: #dadce0;
+  --texto: #202124;
+  --gris: #5f6368;
+  --primario: #1a73e8;
+  --radio: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color: var(--texto);
+  background: #ffffff;
+  line-height: 1.5;
+}
+
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ===== Login ===== */
+
+.login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login__tarjeta {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login__titulo {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.login__subtitulo {
+  margin: 8px 0 24px;
+  color: var(--gris);
+  text-align: center;
+}
+
+.login__botones {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.login__boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: #ffffff;
+  color: var(--texto);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.login__boton:hover {
+  background: #f7f8f8;
+}
+
+.login__boton:focus-visible {
+  outline: 3px solid var(--primario);
+  outline-offset: 1px;
+}
+
+.login__logo {
+  flex: 0 0 auto;
+}
+
+.login__legal {
+  margin: 24px 0 0;
+  color: var(--gris);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* ===== Aplicación ===== */
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.app__marca {
+  font-weight: 500;
+  text-decoration: none;
+  color: inherit;
+}
+
+.app__usuario {
+  color: var(--gris);
+  font-size: 0.9rem;
+}
+
+.app__contenido {
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* ===== Inicio ===== */
+
+.inicio {
+  text-align: center;
+}
+
+.inicio__titulo {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 500;
+}
+
+.inicio__subtitulo {
+  color: var(--gris);
+}
+
+.inicio__enlace {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 20px;
+  border-radius: 24px;
+  background: var(--primario);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.inicio__enlace:focus-visible {
+  outline: 3px solid var(--primario);
+  outline-offset: 2px;
+}
+
+/* ===== Buscador ===== */
+
+.buscador {
+  display: flex;
+  gap: 8px;
+  max-width: 640px;
+}
+
+.buscador__campo {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--borde);
+  border-radius: 24px;
+  font-size: 1rem;
+}
+
+.buscador__campo:focus-visible {
+  outline: 3px solid var(--primario);
+  outline-offset: 1px;
+}
+
+.buscador__boton {
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--primario);
+  color: #ffffff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.buscador__boton:focus-visible {
+  outline: 3px solid var(--primario);
+  outline-offset: 1px;
+}
