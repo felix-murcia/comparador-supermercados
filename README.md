@@ -136,6 +136,23 @@ docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-
 
 ---
 
+## Autenticación (OAuth en dev)
+
+La web usa Auth.js (NextAuth) con Google y Microsoft Entra ID. La sesión se firma como JWT HS256 con `NEXTAUTH_SECRET` (ADR-012) y la API valida ese mismo token.
+
+1. **Google Cloud Console** → *APIs y servicios* → *Credenciales* → *ID de cliente de OAuth* (tipo "Aplicación web"):
+   - Orígenes autorizados: `http://localhost:3000`
+   - URI de redirección: `http://localhost:3000/api/auth/callback/google`
+2. **Azure Portal** → *Microsoft Entra ID* → *Registros de aplicaciones* → *URI de redirección* (plataforma Web):
+   - `http://localhost:3000/api/auth/callback/microsoft`
+   - `MICROSOFT_TENANT_ID=common` permite cuentas de cualquier tenant.
+3. Rellena en `.env`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` y `NEXTAUTH_SECRET` (`openssl rand -hex 32`).
+4. Reinicia la web (`docker compose ... up -d --build web`) y entra en http://localhost:3000/api/auth/signin.
+
+Sin credenciales OAuth la web arranca igual, pero el flujo de login no se completa.
+
+---
+
 ## Comandos frecuentes
 
 ### Levantar / parar
@@ -341,7 +358,7 @@ Si detectas una vulnerabilidad, **no abras un issue público**. Contacta al main
 | Épica | Estado | Progreso |
 |-------|--------|----------|
 | 0 — Fundación | 🟡 En curso | 6/8 |
-| 1 — Autenticación | 🟡 En curso | 1/5 |
+| 1 — Autenticación | 🟡 En curso | 2/5 |
 | 2 — Modelo de datos | ✅ Completada | 6/6 |
 | 3 — Ingesta | ⚪ Pendiente | 0/8 |
 | 4 — API búsqueda/comparativa | ⚪ Pendiente | 0/6 |

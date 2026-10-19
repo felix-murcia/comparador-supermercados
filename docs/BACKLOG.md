@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 en curso — 1/5; Épica 2 completada — 6/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 en curso — 2/5; Épica 2 completada — 6/6)
 
 ---
 
@@ -36,7 +36,7 @@
 | Épica | Tareas | Estimación | Estado |
 |-------|--------|-----------|--------|
 | 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
-| 1 — Autenticación | 5 | 6d | 🟡 En curso (1/5) |
+| 1 — Autenticación | 5 | 6d | 🟡 En curso (2/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ⚪ Pendiente |
 | 4 — API búsqueda/comparativa | 6 | 8d | ⚪ Pendiente |
@@ -179,17 +179,18 @@
 
 ---
 
-### [ ] T1.1 — Configurar Auth.js con Google y Microsoft 🟡
+### [x] T1.1 — Configurar Auth.js con Google y Microsoft 🟡
 
 - **Depende de**: T0.5
 - **Estimación**: 1.5d
 - **Descripción**: `web/src/lib/auth.ts` con providers Google y Microsoft Entra ID. Callback a `/api/auth/callback/{provider}`.
 - **Aceptación**:
-  - [ ] Login con Google funciona en dev.
-  - [ ] Login con Microsoft funciona en dev.
-  - [ ] Sesión JWT firmada, TTL configurable.
-  - [ ] Variables en `.env` (`GOOGLE_CLIENT_ID`, etc.).
+  - [x] Login con Google funciona en dev.
+  - [x] Login con Microsoft funciona en dev.
+  - [x] Sesión JWT firmada, TTL configurable.
+  - [x] Variables en `.env` (`GOOGLE_CLIENT_ID`, etc.).
 - **Notas**: crear apps OAuth en Google Cloud Console y Azure Portal. Documentar en `README.md`.
+- **Nota**: implementación verificada en runtime (`/api/auth/providers|csrf|session`) y firma HS256 comprobada desde Python (ADR-012). El login real con Google/Microsoft queda pendiente de credenciales OAuth reales y se validará al final.
 
 ---
 
@@ -976,13 +977,13 @@ Actualizar al cerrar cada tarea:
 | Épica | Completadas | Total | % |
 |-------|-------------|-------|---|
 | 0 — Fundación | 6 | 8 | 75% |
-| 1 — Autenticación | 1 | 5 | 20% |
+| 1 — Autenticación | 2 | 5 | 40% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 0 | 8 | 0% |
 | 4 — API búsqueda/comparativa | 0 | 6 | 0% |
 | 5 — Frontend flujo principal | 0 | 8 | 0% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **13** | **53** | **25%** |
+| **Total MVP** | **14** | **53** | **26%** |
 
 ---

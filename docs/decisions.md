@@ -335,6 +335,27 @@ Responde: "¿cuánto pierdo por no ir a 3 supermercados?" (coste de la comodidad
 
 ---
 
+## ADR-012: Token de sesión HS256 compartido entre Auth.js y FastAPI
+
+**Fecha**: 2026-10-19
+**Estado**: aceptado
+**Contexto**: Auth.js (NextAuth v4) cifra la sesión por defecto con un JWE (A256GCM + HKDF) que FastAPI no puede verificar sin reimplementar ese esquema. La Épica 1 exige validar el token en la API de forma stateless (RNF-02) con el mínimo código posible.
+
+**Decisión**: Sobrescribir `jwt.encode`/`jwt.decode` de Auth.js para firmar la sesión como JWS HS256 con `NEXTAUTH_SECRET` (`jose` en web; `PyJWT` en FastAPI, T1.3). El token lleva los claims estándar (`sub`, `email`, `name`, `picture`, `iat`, `exp`) más `provider` y `provider_id` del proveedor OAuth. FastAPI valida firma, `exp` y algoritmo sin consultar la base de datos para autenticar cada petición.
+
+**Consecuencias**:
+- ✅ Verificación stateless en ambos servicios con una sola pieza de secret management (`NEXTAUTH_SECRET`).
+- ✅ Rotar el secreto invalida todas las sesiones (aceptable en MVP; documentado).
+- ⚠️ Los claims son legibles (JWS, no JWE). No incluir datos sensibles en el token.
+- ⚠️ FastAPI debe rechazar explícitamente algoritmos distintos de HS256 (confusión de algoritmos).
+
+**Alternativas consideradas**:
+- **JWE por defecto de Auth.js**: la API necesitaría descifrar A256GCM+HKDF o consultar a Next.js en cada petición; más complejidad y acoplamiento.
+- **Validar llamando a `/api/auth/session` desde FastAPI**: una petición extra por request; rompe el modelo stateless.
+- **Sesiones en Redis**: descartado en MVP; añade estado y otro servicio que mantener.
+
+---
+
 ## Plantilla para nuevas decisiones
 
 ```markdown

@@ -1,0 +1,8 @@
+import type { DefaultJWT } from "next-auth/jwt";
+
+declare module "next-auth/jwt" {
+  interface JWT extends DefaultJWT {
+    provider?: string;
+    provider_id?: string;
+  }
+}
