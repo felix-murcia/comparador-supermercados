@@ -8,7 +8,7 @@ from decimal import Decimal
 from uuid import UUID
 
 from src.dominio.precios.errores import PrecioInvalidoError
-from src.dominio.precios.estados import AmbitoPrecio, EstadoPrecio
+from src.dominio.precios.estados import AmbitoPrecio, EstadoPrecio, Orden
 
 
 @dataclass(frozen=True)
@@ -57,3 +57,39 @@ class PrecioRegistrado:
     url_fuente: str
     fecha_consulta: datetime
     creado_en: datetime
+
+
+@dataclass(frozen=True)
+class ResultadoComparacion:
+    """Precio de un producto en una cadena, con su posición en el ranking."""
+
+    producto_id: UUID
+    producto_cadena_id: UUID
+    nombre: str
+    cadena: str
+    precio_eur: Decimal
+    marca: str | None = None
+    formato: str | None = None
+    categoria: str | None = None
+    ean: str | None = None
+    precio_por_litro_kg: Decimal | None = None
+    ambito: AmbitoPrecio = "nacional"
+    provincia: str | None = None
+    posicion: int = 0
+
+
+@dataclass(frozen=True)
+class FiltrosComparacion:
+    """Filtros, orden y paginación de la comparativa de precios."""
+
+    query: str
+    cadenas: tuple[str, ...] = ()
+    orden: Orden = "precio_unitario"
+    precio_min: Decimal | None = None
+    precio_max: Decimal | None = None
+    marca: str | None = None
+    categoria: str | None = None
+    solo_con_stock: bool = False
+    provincia: str | None = None
+    limite: int = 20
+    offset: int = 0

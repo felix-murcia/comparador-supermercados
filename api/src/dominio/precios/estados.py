@@ -15,3 +15,9 @@ ESTADOS_PRECIO: Final[tuple[EstadoPrecio, ...]] = (
 AmbitoPrecio = Literal["nacional", "provincia"]
 
 AMBITOS_PRECIO: Final[tuple[AmbitoPrecio, ...]] = ("nacional", "provincia")
+
+Orden = Literal["precio_unitario", "precio_kg_l", "relevancia"]
+
+ORDENES: Final[tuple[Orden, ...]] = ("precio_unitario", "precio_kg_l", "relevancia")
+
+ORDEN_POR_DEFECTO: Orden = "precio_unitario"

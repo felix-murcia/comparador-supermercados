@@ -16,7 +16,12 @@ from src.dominio.busquedas.estados import EstadoBusqueda
 from src.dominio.cadenas.entidades import Cadena
 from src.dominio.ingesta.entidades import MetricaIngesta, MetricasIngesta
 from src.dominio.listas.entidades import ItemLista, ItemListaNuevo, Lista
-from src.dominio.precios.entidades import PrecioNuevo, PrecioRegistrado
+from src.dominio.precios.entidades import (
+    FiltrosComparacion,
+    PrecioNuevo,
+    PrecioRegistrado,
+    ResultadoComparacion,
+)
 from src.dominio.productos.entidades import Producto, ProductoIngestable, ProductoNuevo
 from src.dominio.usuarios.entidades import IdentidadOAuth, Usuario
 
@@ -51,6 +56,10 @@ class RepositorioPrecios(Protocol):
     async def historico(
         self, producto_cadena_id: UUID, limite: int = 10
     ) -> list[PrecioRegistrado]: ...
+
+    async def buscar_comparativa(
+        self, filtros: FiltrosComparacion
+    ) -> list[ResultadoComparacion]: ...
 
 
 @runtime_checkable
