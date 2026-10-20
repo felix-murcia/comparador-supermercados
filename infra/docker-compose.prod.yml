@@ -25,7 +25,9 @@ services:
   caddy:
     environment:
       <<: *prod-environment
-      CADDY_SITE_ADDRESS: "${DOMAIN:-localhost}"
+      # Dirección del Caddy. Con "http://" o ":80" sirve en claro: útil detrás
+      # de un túnel o de un proxy que ya termina el TLS.
+      CADDY_SITE_ADDRESS: "${CADDY_SITE_ADDRESS:-${DOMAIN:-localhost}}"
     ports:
       - "${HTTP_PORT:-80}:80"
       - "${HTTPS_PORT:-443}:443"

@@ -422,27 +422,67 @@ docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-
 
 ### Deploy en prod (VPS)
 
-**Requisitos**: VPS con Docker, dominio apuntando al VPS, puertos 80/443 abiertos.
+**Requisitos**: servidor con Docker, dominio apuntando al servidor y puertos 80/443 abiertos (o un túnel tipo cloudflared delante).
 
 ```bash
-# En el VPS
+# En el servidor
 git clone <url-del-repo> /opt/comparador
 cd /opt/comparador
 cp .env.example .env
 # Editar .env con valores de producción:
-# APP_ENV=prod, DOMAIN=precios.example.com, secretos reales
+# APP_ENV=prod, DOMAIN=precios.example.com, WEB_BASE_URL=https://precios.example.com,
+# secretos reales (APP_SECRET_KEY, NEXTAUTH_SECRET, POSTGRES_PASSWORD, ...)
 
 docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.prod.yml up -d --build
 docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.prod.yml exec api alembic upgrade head
 ```
 
-**Backups**: configurar cron diario con `pg_dump` del primario. Ver `docs/PLAN.md` §RNF-06.
+**Backups**: el servicio `backup` del compose hace un `pg_dump` comprimido diario y aplica la retención (7 días por defecto). Ver `docs/PLAN.md` §RNF-06.
 
-**No commitear** el `.env` de prod. En el VPS, permisos `600`:
+**No commitear** el `.env` de prod. En el servidor, permisos `600`:
 
 ```bash
 chmod 600 .env
 ```
+
+#### Publicar detrás de un túnel (cloudflared)
+
+Si el servidor ya está detrás de un túnel de Cloudflare, el Caddy interno sirve en claro y el túnel termina el TLS:
+
+```bash
+# .env
+DOMAIN=demo.sagarebel.com
+WEB_BASE_URL=https://demo.sagarebel.com
+CADDY_SITE_ADDRESS=":80"        # sin TLS: lo aporta el túnel
+HTTP_PORT=8088                   # el 80 del host lo ocupa el proxy principal
+```
+
+Y en la configuración del túnel, una regla que apunte al Caddy:
+
+```yaml
+ingress:
+  - hostname: demo.sagarebel.com
+    service: http://localhost:8088
+    originRequest:
+      noTLSVerify: true
+```
+
+El proxy del host (nginx-proxy-manager) debe apuntar ese hostname al Caddy:
+
+```
+demo.sagarebel.com → http://172.17.0.1:8088
+```
+
+#### OAuth con el dominio público
+
+Las apps de Google y Microsoft se registran con estas URL de callback, que son las que usa la web:
+
+| Proveedor | URL de callback |
+|-----------|-----------------|
+| Google | `https://demo.sagarebel.com/api/auth/callback/google` |
+| Microsoft | `https://demo.sagarebel.com/api/auth/callback/microsoft` |
+
+y los mismos valores en `GOOGLE_CLIENT_ID/SECRET` y `MICROSOFT_CLIENT_ID/SECRET` del `.env`.
 
 ---
 
@@ -488,7 +528,7 @@ Si detectas una vulnerabilidad, **no abras un issue público**. Contacta al main
 
 | Épica | Estado | Progreso |
 |-------|--------|----------|
-| 0 — Fundación | 🟡 En curso | 7/8 |
+| 0 — Fundación | ✅ Completada | 8/8 |
 | 1 — Autenticación | ✅ Completada | 5/5 |
 | 2 — Modelo de datos | ✅ Completada | 6/6 |
 | 3 — Ingesta | ✅ Completada | 8/8 |
