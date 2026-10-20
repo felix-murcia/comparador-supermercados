@@ -3,7 +3,10 @@ import { getToken } from "next-auth/jwt";
 import { NextRequest } from "next/server";
 import type { NextRequest as NextRequestTipo } from "next/server";
 
-const BASE_API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// URL interna del servicio de API dentro de la red de Compose. Las llamadas
+// se hacen siempre desde el servidor (route handlers y Server Components),
+// nunca desde el navegador, que usa los proxies /api/* de Next.
+const BASE_API = process.env.API_INTERNAL_URL ?? "http://api:8000";
 
 /** Token JWT de la sesión actual (cookie de Auth.js), en crudo. */
 export async function tokenDeSesion(

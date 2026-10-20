@@ -35,7 +35,9 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  // Solo se protegen las páginas. Las rutas /api/* son proxies que
+  // devuelven JSON (401 de la API) y no deben redirigir al login.
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|xml|txt|webmanifest)$).*)",
+    "/((?!api/|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|xml|txt|webmanifest)$).*)",
   ],
 };

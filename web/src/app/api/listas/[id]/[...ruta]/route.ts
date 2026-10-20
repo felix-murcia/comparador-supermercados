@@ -21,6 +21,11 @@ async function reenviar(request: NextRequest, metodo: string, contexto: Contexto
     method: metodo,
     ...(cuerpo === undefined ? {} : { body: JSON.stringify(cuerpo) }),
   });
+
+  if (respuesta.status === 204) {
+    return new NextResponse(null, { status: 204 });
+  }
+
   const datos = await respuesta.json().catch(() => ({}));
 
   return NextResponse.json(datos, { status: respuesta.status });

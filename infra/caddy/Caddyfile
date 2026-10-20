@@ -7,11 +7,12 @@
 {$CADDY_SITE_ADDRESS} {
 	encode zstd gzip
 
-	# Límite por IP para el endpoint costoso de búsquedas.
+	# Límite por IP para el endpoint costoso de búsquedas (directo a la API
+	# o a través del proxy de la web).
 	rate_limit {
 		zone busquedas {
 			match {
-				path /api/v1/busquedas*
+				path /api/v1/busquedas* /api/busquedas*
 			}
 			key {remote_host}
 			events {$RATE_LIMIT_BUSQUEDAS_POR_MINUTO:10}
@@ -21,6 +22,25 @@
 
 	# Auth.js gestiona sus callbacks en Next.js, no en FastAPI.
 	handle /api/auth/* {
+		reverse_proxy web:3000
+	}
+
+	# Proxies autenticados de Next.js: inyectan el token de sesión para que
+	# el navegador nunca lo vea (ver ADR-016). Deben resolverse antes que el
+	# comodín /api/* que envía el resto a FastAPI.
+	handle /api/comparar* {
+		reverse_proxy web:3000
+	}
+
+	handle /api/busquedas* {
+		reverse_proxy web:3000
+	}
+
+	handle /api/me* {
+		reverse_proxy web:3000
+	}
+
+	handle /api/listas* {
 		reverse_proxy web:3000
 	}
 
