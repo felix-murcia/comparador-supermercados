@@ -1,6 +1,7 @@
 # Comparador de Precios de Supermercados Españoles
 
 [![CI](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml)
+[![Licencia](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
 [![Seguridad (Trivy)](https://img.shields.io/badge/seguridad-Trivy%200%20HIGH%2FCRITICAL-009485?logo=aquasec&logoColor=white)](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml)
 [![gitleaks](https://img.shields.io/badge/gitleaks-sin%20fugas-blue?logo=gitguardian&logoColor=white)](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)](api/pyproject.toml)
@@ -15,7 +16,7 @@ Aplicación web para comparar precios de productos de supermercados en España (
 
 **Estado**: 🟢 MVP completado (Épicas 0–7 — 53/53 tareas)
 **Versión**: 0.1.0-dev
-**Licencia**: Por definir
+**Licencia**: MIT
 
 ---
 
@@ -629,4 +630,4 @@ Proyecto personal en fase MVP. Si quieres contribuir:
 
 ## Licencia
 
-Por definir. Hasta entonces, todos los derechos reservados.
+[MIT](LICENSE) — ver el fichero `LICENSE` para el texto completo.
