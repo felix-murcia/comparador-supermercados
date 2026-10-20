@@ -805,16 +805,17 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T7.1 — Postgres primario + réplica en compose dev 🟡
+### [x] T7.1 — Postgres primario + réplica en compose dev 🟡
 
 - **Depende de**: T0.3, T2.2
 - **Estimación**: 1d
 - **Descripción**: Script `infra/postgres/init-replica.sh` con `pg_basebackup` y configuración de streaming replication.
 - **Aceptación**:
-  - [ ] Réplica arranca y sincroniza desde primario.
-  - [ ] `pg_stat_replication` muestra la réplica en estado `streaming`.
-  - [ ] Test: escritura en primario visible en réplica tras lag < 1 s.
-  - [ ] Documentado en `README.md` cómo verificar.
+  - [x] Réplica arranca y sincroniza desde primario.
+  - [x] `pg_stat_replication` muestra la réplica en estado `streaming`.
+  - [x] Test: escritura en primario visible en réplica tras lag < 1 s.
+  - [x] Documentado en `README.md` cómo verificar.
+- **Nota**: el servicio `postgres-replica` del compose ya usa `infra/postgres/init-replica.sh` (hace el `pg_basebackup` y configura el streaming con `synchronous_commit = on` en el primario). Verificado sobre el stack de desarrollo: `pg_stat_replication` devuelve `streaming` / `async` y el test `test_replica.py` mide que una escritura en el primario es visible en la réplica en menos de 1 s. El README explica los tres comandos para comprobarlo a mano.
 
 ---
 

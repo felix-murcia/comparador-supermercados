@@ -228,6 +228,37 @@ docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-
 docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml exec postgres-primary psql -U app -d precios
 ```
 
+### Réplica de Postgres (dev)
+
+El compose levanta un **primario** y una **réplica** en streaming replication (`infra/postgres/init-replica.sh` hace el `pg_basebackup` y configura el streaming). La API escribe siempre en el primario y lee de la réplica.
+
+Cómo verificar que la réplica está viva y sincronizada:
+
+```bash
+# 1. Estado de la replicación (debe salir "streaming")
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml \
+  exec postgres-primary psql -U app -d precios \
+  -c "SELECT client_addr, state, sync_state FROM pg_stat_replication;"
+
+# 2. Confirmar que la réplica está en modo recuperación
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml \
+  exec postgres-replica psql -U app -d precios -c "SELECT pg_is_in_recovery();"
+
+# 3. El lag de la réplica (en la réplica)
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml \
+  exec postgres-replica psql -U app -d precios \
+  -c "SELECT now() - pg_last_xact_replay_timestamp() AS lag;"
+```
+
+El test `tests/adaptadores/persistencia/integracion/test_replica.py` comprueba el estado `streaming` y que una escritura en el primario es visible en la réplica con ** menos de 1 s** de lag.
+
+```bash
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml \
+  exec api pytest tests/adaptadores/persistencia/integracion/test_replica.py
+```
+
+> En dev la réplica se reconstruye vacía: `docker compose ... down -v` borra los volúmenes y la siguiente vez que levantes hace el `pg_basebackup` de nuevo.
+
 ### Tests y linters
 
 ```bash
