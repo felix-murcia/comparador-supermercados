@@ -19,7 +19,8 @@
     "subtitulo": "Compara el precio real de tu cesta entre DIA, Carrefour y Mercadona.",
     "google": "Continuar con Google",
     "microsoft": "Continuar con Microsoft",
-    "legal": "Al continuar aceptas que guardemos tu email y nombre para mostrarte tu perfil."
+    "legal": "Al continuar aceptas que guardemos tu email y nombre para mostrarte tu perfil.",
+    "microsoft_no_disponible": "El acceso con Microsoft aún no está disponible en esta instalación."
   },
   "inicio": {
     "titulo": "Compara el precio de tu cesta",

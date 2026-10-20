@@ -9,6 +9,10 @@ export default function PaginaLogin({ searchParams }: Props) {
   const destino =
     typeof searchParams.callbackUrl === "string" ? searchParams.callbackUrl : "/";
 
+  // Sin credenciales configuradas, el botón de Microsoft se muestra
+  // deshabilitado en lugar de fallar al pulsar.
+  const microsoftDisponible = Boolean(process.env.MICROSOFT_CLIENT_ID);
+
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
       <div className="flex w-full max-w-sm flex-col items-center">
@@ -16,7 +20,10 @@ export default function PaginaLogin({ searchParams }: Props) {
           {t("login.titulo")}
         </h1>
         <p className="mt-2 text-center text-sm text-gris">{t("login.subtitulo")}</p>
-        <FormularioLogin destino={destino} />
+        <FormularioLogin
+          destino={destino}
+          microsoftDisponible={microsoftDisponible}
+        />
         <p className="mt-6 text-center text-xs text-gris">{t("login.legal")}</p>
       </div>
     </main>
