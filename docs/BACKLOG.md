@@ -42,7 +42,7 @@
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ✅ Completada (8/8) |
 | 6 — Perfil y listas | 6 | 11d | ✅ Completada (6/6) |
-| 7 — Calidad y operación | 6 | 7d | 🟡 En curso (3/6) |
+| 7 — Calidad y operación | 6 | 7d | 🟡 En curso (4/6) |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
 | **Total MVP** | **53** | **~72d** | |
 
@@ -863,17 +863,18 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T7.5 — Tests de integración end-to-end 🟢
+### [x] T7.5 — Tests de integración end-to-end 🟢
 
 - **Depende de**: T4.1, T4.2, T4.3, T6.5
 - **Estimación**: 1.5d
 - **Descripción**: Suite de tests que cubre el flujo completo: login → búsqueda → comparar → añadir a lista → resumen.
 - **Aceptación**:
-  - [ ] Test E2E con `httpx` + BD de test + Redis de test.
-  - [ ] Cubre cache hit y cache miss.
-  - [ ] Cubre cálculo de % A y % C.
-  - [ ] Cubre fallback provincia → nacional.
-  - [ ] Ejecutado en CI.
+  - [x] Test E2E con `httpx` + BD de test + Redis de test.
+  - [x] Cubre cache hit y cache miss.
+  - [x] Cubre cálculo de % A y % C.
+  - [x] Cubre fallback provincia → nacional.
+  - [x] Ejecutado en CI.
+- **Nota**: `api/tests/e2e/test_flujo_completo.py` recorre el flujo con `httpx` contra la app real y la BD/Redis de test: encola una búsqueda (cache miss), consulta el job, pide la comparativa (precio provincial y fallback nacional), crea una lista, añade el producto con su `precio_snapshot` y pide el resumen con el % C, y termina con una búsqueda que acierta en caché. Se conecta al job `api-test` de la CI de T0.7 (pendiente de credenciales de GitHub).
 
 ---
 
@@ -1017,7 +1018,7 @@ Actualizar al cerrar cada tarea:
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
 | 5 — Frontend flujo principal | 8 | 8 | 100% |
 | 6 — Perfil y listas | 6 | 6 | 100% |
-| 7 — Calidad y operación | 3 | 6 | 50% |
-| **Total MVP** | **48** | **53** | **91%** |
+| 7 — Calidad y operación | 4 | 6 | 67% |
+| **Total MVP** | **49** | **53** | **92%** |
 
 ---

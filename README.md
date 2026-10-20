@@ -459,7 +459,7 @@ Si detectas una vulnerabilidad, **no abras un issue público**. Contacta al main
 | 4 — API búsqueda/comparativa | ✅ Completada | 6/6 |
 | 5 — Frontend flujo principal | ✅ Completada | 8/8 |
 | 6 — Perfil y listas | ✅ Completada | 6/6 |
-| 7 — Calidad y operación | 🟡 En curso | 3/6 |
+| 7 — Calidad y operación | 🟡 En curso | 4/6 |
 | 8 — Escala (post-MVP) | ⚪ Futuro | — |
 
 Detalle en [`docs/BACKLOG.md`](docs/BACKLOG.md).
