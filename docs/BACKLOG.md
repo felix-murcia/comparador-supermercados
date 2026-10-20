@@ -42,7 +42,7 @@
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ✅ Completada (8/8) |
 | 6 — Perfil y listas | 6 | 11d | ✅ Completada (6/6) |
-| 7 — Calidad y operación | 6 | 7d | 🟡 En curso (4/6) |
+| 7 — Calidad y operación | 6 | 7d | 🟡 En curso (5/6) |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
 | **Total MVP** | **53** | **~72d** | |
 
@@ -834,16 +834,17 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T7.3 — Métricas de ingesta y dashboard interno 🟢
+### [x] T7.3 — Métricas de ingesta y dashboard interno 🟢
 
 - **Depende de**: T3.8
 - **Estimación**: 1d
 - **Descripción**: Vista interna `/admin/metricas` (protegida) con % verificado, motivos de rechazo y duración de ingesta.
 - **Aceptación**:
-  - [ ] Solo accesible para usuario admin (lista blanca en `.env`).
-  - [ ] Gráficas de últimos 7 días.
-  - [ ] Tabla de motivos de rechazo más frecuentes.
-  - [ ] Sin datos personales en métricas.
+  - [x] Solo accesible para usuario admin (lista blanca en `.env`).
+  - [x] Gráficas de últimos 7 días.
+  - [x] Tabla de motivos de rechazo más frecuentes.
+  - [x] Sin datos personales en métricas.
+- **Nota**: `GET /v1/admin/metricas` (protegido con la lista blanca `ADMIN_EMAILS` de `.env.example`; un email fuera de la lista recibe 403) devuelve el reparto por estado, la serie de los últimos 7 días (`resumen_por_dia`) y los motivos más frecuentes (`motivos_frecuentes`). La web añade `/admin/metricas` con la gráfica de barras por día (Recharts) y la tabla de motivos. Las métricas solo contienen estados, motivos y fechas: ningún dato personal.
 
 ---
 
@@ -1018,7 +1019,7 @@ Actualizar al cerrar cada tarea:
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
 | 5 — Frontend flujo principal | 8 | 8 | 100% |
 | 6 — Perfil y listas | 6 | 6 | 100% |
-| 7 — Calidad y operación | 4 | 6 | 67% |
-| **Total MVP** | **49** | **53** | **92%** |
+| 7 — Calidad y operación | 5 | 6 | 83% |
+| **Total MVP** | **50** | **53** | **94%** |
 
 ---

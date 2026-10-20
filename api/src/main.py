@@ -22,6 +22,7 @@ from src.api_http.errores import (
     manejador_provincia_invalida,
     manejador_rate_limit,
 )
+from src.api_http.v1.admin import router as admin_router
 from src.api_http.v1.busquedas import router as busquedas_router
 from src.api_http.v1.comparar import router as comparar_router
 from src.api_http.v1.listas import router as listas_router
@@ -74,6 +75,7 @@ app.include_router(comparar_router)
 app.include_router(busquedas_router)
 app.include_router(productos_router)
 app.include_router(listas_router)
+app.include_router(admin_router)
 
 
 async def check_database(url: str) -> bool:

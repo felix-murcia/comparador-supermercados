@@ -89,6 +89,19 @@
   "listas": {
     "titulo": "Mis listas"
   },
+  "admin": {
+    "titulo": "Métricas de ingesta",
+    "total": "Ingestas",
+    "verificados": "Verificados",
+    "sospechosos": "Sospechosos",
+    "rechazados": "Rechazados",
+    "motivos": "Motivos más frecuentes",
+    "motivo": "Motivo",
+    "frecuencia": "Veces",
+    "sin_motivos": "Todavía no hay motivos registrados.",
+    "sin_acceso": "Acceso restringido",
+    "sin_acceso_detalle": "Estas métricas solo están disponibles para los administradores."
+  },
   "lista": {
     "anadir": "Añadir a lista",
     "proximamente": "Las listas llegan en la próxima versión.",

@@ -12,7 +12,11 @@ from src.aplicacion.ingesta.buscar_producto import ResultadoBusqueda
 from src.aplicacion.ingesta.procesar_busqueda import ProcesarBusqueda
 from src.dominio.busquedas.entidades import Busqueda
 from src.dominio.busquedas.estados import EstadoBusqueda
-from src.dominio.ingesta.entidades import MetricaIngesta, MetricasIngesta
+from src.dominio.ingesta.entidades import (
+    MetricaDia,
+    MetricaIngesta,
+    MetricasIngesta,
+)
 
 
 class BusquedasFake:
@@ -47,6 +51,12 @@ class MetricasFake:
 
     async def registrar(self, metrica: MetricaIngesta) -> None:
         self.registradas.append(metrica)
+
+    async def resumen_por_dia(self, dias: int) -> list[MetricaDia]:
+        return []
+
+    async def motivos_frecuentes(self, limite: int = 10) -> list[tuple[str, int]]:
+        return []
 
     async def resumen(self, desde: datetime | None = None) -> MetricasIngesta:
         return MetricasIngesta(total=0, verificado=0, sospechoso=0, rechazado=0)

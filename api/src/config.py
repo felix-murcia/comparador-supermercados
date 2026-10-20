@@ -70,6 +70,7 @@ class Settings(BaseSettings):
     llm_timeout_segundos: int = 60
 
     # ===== Observabilidad =====
+    admin_emails: str = ""
     sentry_dsn: SecretStr = SecretStr("")
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 

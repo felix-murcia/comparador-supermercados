@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
@@ -50,3 +51,13 @@ class MetricasIngesta:
     @property
     def porcentaje_rechazado(self) -> float:
         return self.porcentaje(self.rechazado)
+
+
+@dataclass(frozen=True)
+class MetricaDia:
+    """Reparto por estado de la ingesta en un día."""
+
+    dia: date
+    verificado: int
+    sospechoso: int
+    rechazado: int

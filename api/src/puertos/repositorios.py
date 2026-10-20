@@ -14,7 +14,11 @@ from uuid import UUID
 from src.dominio.busquedas.entidades import Busqueda, BusquedaNueva
 from src.dominio.busquedas.estados import EstadoBusqueda
 from src.dominio.cadenas.entidades import Cadena
-from src.dominio.ingesta.entidades import MetricaIngesta, MetricasIngesta
+from src.dominio.ingesta.entidades import (
+    MetricaDia,
+    MetricaIngesta,
+    MetricasIngesta,
+)
 from src.dominio.listas.entidades import (
     ItemLista,
     ItemListaDetalle,
@@ -182,3 +186,7 @@ class RepositorioMetricas(Protocol):
     async def registrar(self, metrica: MetricaIngesta) -> None: ...
 
     async def resumen(self, desde: datetime | None = None) -> MetricasIngesta: ...
+
+    async def resumen_por_dia(self, dias: int) -> list[MetricaDia]: ...
+
+    async def motivos_frecuentes(self, limite: int = 10) -> list[tuple[str, int]]: ...
