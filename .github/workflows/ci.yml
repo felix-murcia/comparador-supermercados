@@ -121,17 +121,26 @@ jobs:
         uses: zricethezav/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Trivy sobre las imágenes
+      - name: Construir las imágenes
         run: |
           docker build -f api/Dockerfile -t comparador-precios-api:ci api
           docker build -f web/Dockerfile -t comparador-precios-web:ci web
-          aquasecurity/trivy-action@0.28.0
-          with:
-            image-ref: comparador-precios-api:ci
-            format: table
-            exit-code: "1"
-            severity: CRITICAL,HIGH
-            ignore-unfixed: true
+      - name: Trivy sobre la imagen de la API
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: comparador-precios-api:ci
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+      - name: Trivy sobre la imagen de la web
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: comparador-precios-web:ci
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
 
   compose-validate:
     name: Compose · configuración

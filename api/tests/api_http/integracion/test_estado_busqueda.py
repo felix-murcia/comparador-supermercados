@@ -99,6 +99,7 @@ async def test_devuelve_el_estado_del_job(
         )
     )
     await sesion_rw.commit()
+    await esperar_replica(sesion_rw, sesion_ro)
 
     respuesta = await cliente.get(
         f"/v1/busquedas/{job.id}",
