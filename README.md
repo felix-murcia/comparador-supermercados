@@ -330,7 +330,15 @@ El pipeline es `productor (LLM) → verificador (fetch determinista) → BD`:
 2. El **verificador** descarga esa URL (con cabeceras de navegador real: los sitios con protección anti-bot responden 403 a peticiones simples) y comprueba que el precio aparece en el HTML, que el €/L es coherente con el formato (±5 %) y que la desviación frente al último precio conocido es razonable (>30 % → `sospechoso`).
 3. Lo verificado se guarda en `precios` y se registra la métrica de ingesta.
 
-**El modelo del LLM importa**: un modelo sin búsqueda web se inventa las URLs de las fichas y el verificador las rechaza con 404. Usa un modelo con búsqueda (en OpenRouter, por ejemplo `openai/gpt-4o-mini:online` o `perplexity/sonar`) y configura `LLM_PROVIDER`, `LLM_API_KEY` y `LLM_MODEL` en el `.env`.
+**El modelo del LLM importa**: un modelo sin búsqueda web se inventa las URLs de las fichas y el verificador las rechaza con 404 (o 403 por la protección anti-bot del retailer). Usa un modelo **con búsqueda web**: en OpenRouter se activa añadiendo el sufijo `:online` al identificador del modelo.
+
+```bash
+# .env
+LLM_PROVIDER=openrouter
+LLM_MODEL=openai/gpt-4o-mini:online
+```
+
+Probado en producción con `openai/gpt-4o-mini:online`: el productor encuentra la ficha real (`https://www.dia.es/huevos-leche-y-mantequilla/leche/p/73676`), el verificador confirma el precio en el HTML y el job pasa a `completada` en ~10 s. Los modelos gratuitos de OpenRouter (`:free`) no traen búsqueda y además estánlimitedos por el proveedor (429), así que no sirven para la ingesta.
 
 ```bash
 # Lanzar una búsqueda y ver el resultado
