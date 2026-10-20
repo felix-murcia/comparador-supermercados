@@ -23,6 +23,7 @@ function resultado(
     producto_cadena_id: "22222222-2222-2222-2222-222222222222",
     nombre,
     cadena: "dia",
+    cadena_id: "33333333-3333-3333-3333-333333333333",
     precio_eur: precio,
     precio_por_litro_kg: precio,
     marca: "Pascual",
@@ -30,7 +31,6 @@ function resultado(
     formato: "1L",
     disponible: true,
     url_producto: null,
-    cadena_id: null,
     ...extras,
   };
 }

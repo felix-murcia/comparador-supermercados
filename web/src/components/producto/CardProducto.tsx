@@ -1,11 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 
 import { t } from "@/lib/i18n";
-import { aSlug } from "@/lib/slug";
+
+type Item = {
+  id: string;
+  producto_id: string;
+  cantidad: number;
+  precio_snapshot: string | null;
+  producto_nombre: string | null;
+  producto_marca: string | null;
+  cadena_compra: string | null;
+};
 
 type Props = {
   posicion: number;
@@ -13,9 +21,16 @@ type Props = {
   marca: string | null;
   formato: string | null;
   cadena: string;
+  cadena_id: string | null;
+  producto_id: string;
   precio_eur: string;
   precio_por_litro_kg: string | null;
   url_producto: string | null;
+};
+
+type Lista = {
+  id: string;
+  nombre: string;
 };
 
 const PRECIO = new Intl.NumberFormat("es-ES", {
@@ -28,18 +43,61 @@ const UNIDAD = new Intl.NumberFormat("es-ES", {
   maximumFractionDigits: 2,
 });
 
-/** Card de producto: logo de la cadena, ranking, precio y enlace a la ficha. */
+/** Card de producto: logo de la cadena, ranking, precio y alta en una lista. */
 export function CardProducto({
   posicion,
   nombre,
   marca,
   formato,
   cadena,
+  cadena_id,
+  producto_id,
   precio_eur,
   precio_por_litro_kg,
   url_producto,
 }: Props) {
-  const [aviso, setAviso] = useState(false);
+  const [modal, setModal] = useState(false);
+  const [listas, setListas] = useState<Lista[]>([]);
+  const [estado, setEstado] = useState<"inactivo" | "cargando" | "anadido" | "error">(
+    "inactivo",
+  );
+
+  async function abrirModal() {
+    setModal(true);
+    setEstado("cargando");
+    try {
+      const respuesta = await fetch("/api/listas");
+      const datos = await respuesta.json().catch(() => []);
+      setListas(Array.isArray(datos) ? datos : []);
+      setEstado("inactivo");
+    } catch {
+      setEstado("error");
+    }
+  }
+
+  async function anadir(lista: Lista) {
+    setEstado("cargando");
+    try {
+      const respuesta = await fetch(`/api/listas/${lista.id}/items`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          producto_id,
+          cantidad: 1,
+          ...(cadena_id ? { cadena_compra_id: cadena_id } : {}),
+        }),
+      });
+      if (!respuesta.ok) {
+        setEstado("error");
+        return;
+      }
+      setEstado("anadido");
+      setModal(false);
+    } catch {
+      setEstado("error");
+    }
+  }
+
   const descripcion = [marca, formato].filter(Boolean).join(" · ");
   const logo = (
     <Image
@@ -70,14 +128,7 @@ export function CardProducto({
         )}
 
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-medium text-texto">
-            <Link
-              href={`/producto/${aSlug(nombre)}`}
-              className="hover:underline"
-            >
-              {nombre}
-            </Link>
-          </h3>
+          <h3 className="truncate font-medium text-texto">{nombre}</h3>
           <p className="truncate text-sm text-gris">
             {[descripcion, cadena].filter(Boolean).join(" · ")}
           </p>
@@ -96,19 +147,65 @@ export function CardProducto({
       </div>
 
       <div className="mt-3 flex items-center justify-end gap-3">
-        {aviso ? (
+        {estado === "anadido" ? (
           <p role="status" className="text-xs text-gris">
-            {t("lista.proximamente")}
+            {t("lista.anadida")}
+          </p>
+        ) : null}
+        {estado === "error" ? (
+          <p role="alert" className="text-xs text-error">
+            {t("lista.error")}
           </p>
         ) : null}
         <button
           type="button"
-          onClick={() => setAviso(true)}
+          onClick={() => void abrirModal()}
           className="rounded-pill border border-borde px-4 py-1.5 text-sm text-texto hover:bg-primario-suave"
         >
           {t("lista.anadir")}
         </button>
       </div>
+
+      {modal ? (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("lista.elegir")}
+        >
+          <div className="w-full max-w-md rounded-tarjeta bg-white p-5">
+            <h2 className="text-lg font-medium text-texto">{t("lista.elegir")}</h2>
+
+            {listas.length === 0 ? (
+              <p className="mt-3 text-sm text-gris">{t("listas.vacias")}</p>
+            ) : (
+              <ul className="mt-3 space-y-2">
+                {listas.map((lista) => (
+                  <li key={lista.id}>
+                    <button
+                      type="button"
+                      onClick={() => void anadir(lista)}
+                      className="w-full rounded-pill border border-borde px-4 py-2 text-left text-sm text-texto hover:bg-primario-suave"
+                    >
+                      {lista.nombre}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setModal(false)}
+                className="rounded-pill border border-borde px-4 py-2 text-sm text-texto hover:bg-primario-suave"
+              >
+                {t("lista.cerrar")}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </article>
   );
 }

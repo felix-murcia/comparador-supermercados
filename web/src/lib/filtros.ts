@@ -28,12 +28,14 @@ export const FILTROS_INICIALES: Filtros = {
 
 export type ResultadoComparacion = {
   posicion: number;
+  producto_id: string;
   producto_cadena_id: string;
   nombre: string;
   marca: string | null;
   categoria: string | null;
   formato: string | null;
   cadena: string;
+  cadena_id: string | null;
   precio_eur: string;
   precio_por_litro_kg: string | null;
   disponible: boolean | null;

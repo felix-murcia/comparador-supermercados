@@ -1,10 +1,26 @@
-import { t } from "@/lib/i18n";
+import { ListarListas } from "@/components/listas/ListarListas";
+import { llamarApiServidor } from "@/lib/api";
 
-export default function PaginaListas() {
-  return (
-    <section className="mx-auto max-w-lectura">
-      <h1 className="text-2xl font-medium text-texto">{t("listas.titulo")}</h1>
-      <p className="mt-2 text-gris">{t("proximamente")}</p>
-    </section>
-  );
+type Lista = {
+  id: string;
+  nombre: string;
+};
+
+async function cargarListas(): Promise<Lista[]> {
+  try {
+    const respuesta = await llamarApiServidor("/v1/listas");
+    if (!respuesta.ok) {
+      return [];
+    }
+    const datos = await respuesta.json();
+    return Array.isArray(datos) ? datos : [];
+  } catch {
+    return [];
+  }
+}
+
+export default async function PaginaListas() {
+  const listas = await cargarListas();
+
+  return <ListarListas listas={listas} />;
 }

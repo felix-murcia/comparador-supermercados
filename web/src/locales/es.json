@@ -87,7 +87,11 @@
     "error": "No se pudo guardar el perfil."
   },
   "listas": {
-    "titulo": "Mis listas"
+    "titulo": "Mis listas",
+    "nombre": "Nombre de la lista",
+    "nombre_placeholder": "Por ejemplo: Compra semanal",
+    "crear": "Crear lista",
+    "vacias": "Todavía no tienes listas."
   },
   "admin": {
     "titulo": "Métricas de ingesta",
@@ -123,7 +127,9 @@
     "buscando": "Buscando…",
     "cerrar": "Cerrar",
     "error": "No se pudo guardar el cambio. Inténtalo de nuevo.",
-    "tooltip_porcentaje_c": "Cuánto pagarías de más respecto a comprar cada producto en el supermercado más barato."
+    "tooltip_porcentaje_c": "Cuánto pagarías de más respecto a comprar cada producto en el supermercado más barato.",
+    "anadida": "Añadido a la lista.",
+    "elegir": "Elegir lista"
   },
   "proximamente": "Disponible en la próxima versión."
 }
