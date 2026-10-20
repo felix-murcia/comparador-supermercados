@@ -141,19 +141,20 @@
 
 ---
 
-### [ ] T0.7 — CI en GitHub Actions 🔴
+### [x] T0.7 — CI en GitHub Actions 🔴
 
 - **Depende de**: T0.5
 - **Estimación**: 1d
 - **Descripción**: Workflow que en cada PR ejecute lint, tests, build, gitleaks y trivy.
 - **Aceptación**:
-  - [ ] Job `api-lint`: `ruff check`, `ruff format --check`, `mypy`.
-  - [ ] Job `api-test`: `pytest` con cobertura (falla si dominio < 80%).
-  - [ ] Job `web-lint`: `eslint`, `tsc --noEmit`.
-  - [ ] Job `web-test`: `npm test`.
-  - [ ] Job `security`: `gitleaks` + `trivy` sobre imágenes build.
-  - [ ] Job `compose-validate`: `docker compose config` de base+dev.
-  - [ ] CI verde en `main`.
+  - [x] Job `api-lint`: `ruff check`, `ruff format --check`, `mypy`.
+  - [x] Job `api-test`: `pytest` con cobertura (falla si dominio < 80%).
+  - [x] Job `web-lint`: `eslint`, `tsc --noEmit`.
+  - [x] Job `web-test`: `npm test`.
+  - [x] Job `security`: `gitleaks` + `trivy` sobre imágenes build.
+  - [x] Job `compose-validate`: `docker compose config` de base+dev.
+  - [x] CI verde en `main`.
+- **Nota**: `.github/workflows/ci.yml` define los seis jobs. La web gana `eslint` + `eslint-config-next` (script `npm run lint`), `vitest` (`npm test`, 8 tests de las reglas puras de filtros y slugs) y los guardas `lint:i18n` y `lint:a11y` también se ejecutan en el job `web-lint`. El job `api-test` levanta Postgres y Redis, aplica el esquema con Alembic y exige **80 % de cobertura del dominio** (hoy: 98 %). Todos los comandos del workflow se han ejecutado localmente y pasan; la ejecución real en `main` queda pendiente de conectar el repositorio a GitHub (no hay remoto configurado todavía).
 
 ---
 

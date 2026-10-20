@@ -347,6 +347,8 @@ docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-
 pre-commit run gitleaks --all-files
 ```
 
+La CI (`.github/workflows/ci.yml`) ejecuta exactamente estos comandos en cada PR: `api-lint`, `api-test` (con Postgres y Redis de servicio y un mínimo del 80 % de cobertura del dominio), `web-lint`, `web-test`, `security` (gitleaks + trivy sobre las imágenes) y `compose-validate`.
+
 ### Worker y scheduler
 
 ```bash
