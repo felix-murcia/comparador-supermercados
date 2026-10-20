@@ -192,6 +192,7 @@ services:
       APP_ENV: ${APP_ENV:-dev}
       CADDY_SITE_ADDRESS: ":80"
       RATE_LIMIT_BUSQUEDAS_POR_MINUTO: ${RATE_LIMIT_BUSQUEDAS_POR_MINUTO:-10}
+      RATE_LIMIT_POLLING_POR_MINUTO: ${RATE_LIMIT_POLLING_POR_MINUTO:-120}
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

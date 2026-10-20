@@ -538,6 +538,17 @@ Las apps de Google y Microsoft se registran con estas URL de callback, que son l
 
 y los mismos valores en `GOOGLE_CLIENT_ID/SECRET` y `MICROSOFT_CLIENT_ID/SECRET` del `.env`.
 
+#### Límite de peticiones
+
+Caddy limita por IP real del cliente (detalle en ADR-020):
+
+| Zona | Qué limita | Límite | Variable |
+|------|------------|--------|----------|
+| `busquedas` | `POST /api/busquedas` (crear búsqueda: lanza un job con LLM) | 10/min | `RATE_LIMIT_BUSQUEDAS_POR_MINUTO` |
+| `polling` | `GET /api/busquedas/{id}` (consultar el estado de un job) | 120/min | `RATE_LIMIT_POLLING_POR_MINUTO` |
+
+Son dos zonas porque la web consulta el estado cada 1,5 s mientras espera (ADR-014): con un único límite, el polling consumía el cupo del endpoint caro y devolvía 429 con la barra de progreso congelada. Además, la API limita por usuario (`RedisLimitador`) para que varias personas detrás de la misma IP no compartan el presupuesto de LLM.
+
 ---
 
 ## Flujo de trabajo (desarrollo)

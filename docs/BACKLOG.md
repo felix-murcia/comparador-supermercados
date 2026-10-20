@@ -489,7 +489,7 @@
   - [x] Sin JWT → 401.
   - [x] Rate limit aplicado.
   - [x] Tests: hit, miss, sin auth, rate limit.
-- **Nota**: `api/src/api_http/v1/busquedas.py` sobre el caso de uso `CrearBusqueda` (`api/src/aplicacion/busquedas/crear_busqueda.py`). El límite de peticiones se aplica en la aplicación con un contador por usuario en Redis (`RedisLimitador`, `RATE_LIMIT_BUSQUEDAS_POR_MINUTO`); en el borde, Caddy limita `/api/v1/busquedas` por IP (ADR-011). El worker cachea el resultado de cada job con la `cache_key` para que la siguiente petición sea un acierto.
+- **Nota**: `api/src/api_http/v1/busquedas.py` sobre el caso de uso `CrearBusqueda` (`api/src/aplicacion/busquedas/crear_busqueda.py`). El límite de peticiones se aplica en la aplicación con un contador por usuario en Redis (`RedisLimitador`, `RATE_LIMIT_BUSQUEDAS_POR_MINUTO`); en el borde, Caddy limita por IP (ADR-011) y lo hace en **dos zonas** (ADR-020): `busquedas` (POST, 10/min) y `polling` (GET del estado de un job, 120/min), con la clave en la IP real del cliente (`CF-Connecting-IP`) en lugar de la del proxy. El worker cachea el resultado de cada job con la `cache_key` para que la siguiente petición sea un acierto.
 
 ---
 

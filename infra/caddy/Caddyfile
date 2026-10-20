@@ -7,15 +7,40 @@
 {$CADDY_SITE_ADDRESS} {
 	encode zstd gzip
 
-	# Límite por IP para el endpoint costoso de búsquedas (directo a la API
-	# o a través del proxy de la web).
+	# IP real del cliente. Con Cloudflare delante, todas las peticiones
+	# llegan desde el proxy y {remote_host} sería el mismo para todo el
+	# mundo: sin esto, un usuario que agota su cuota bloquea a los demás.
+	# En dev (sin Cloudflare) no llega la cabecera y se usa la IP de conexión.
+	@con_cf header CF-Connecting-IP *
+	vars @con_cf ip_cliente {http.request.header.CF-Connecting-IP}
+	vars ip_cliente {http.request.remote.host}
+
+	# Límite por IP. Son dos zonas porque son dos cosas distintas:
+	#
+	# - busquedas: crear una búsqueda (POST) es lo caro: lanza un job de
+	#   ingesta con LLM. Solo se limita la creación.
+	# - polling: consultar el estado de un job (GET /busquedas/{id}) es una
+	#   lectura barata, pero la web la consulta cada 1,5 s mientras espera
+	#   (ADR-014). Con un único límite compartido, el polling consumía el
+	#   cupo de las búsquedas y devolvía 429 con la barra de progreso
+	#   congelada.
 	rate_limit {
 		zone busquedas {
 			match {
-				path /api/v1/busquedas* /api/busquedas*
+				method POST
+				path /api/v1/busquedas /api/busquedas
 			}
-			key {remote_host}
+			key {http.vars.ip_cliente}
 			events {$RATE_LIMIT_BUSQUEDAS_POR_MINUTO:10}
+			window 1m
+		}
+		zone polling {
+			match {
+				method GET
+				path /api/v1/busquedas/* /api/busquedas/*
+			}
+			key {http.vars.ip_cliente}
+			events {$RATE_LIMIT_POLLING_POR_MINUTO:120}
 			window 1m
 		}
 	}

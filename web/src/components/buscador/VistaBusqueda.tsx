@@ -88,9 +88,31 @@ export function VistaBusqueda({
 
     let cancelado = false;
 
+    // Cada consulta se agenda con setTimeout (y no setInterval) para poder
+    // alargar la espera cuando el servidor responde 429.
+    let espera = INTERVALO_MS;
+    let temporizador: ReturnType<typeof setTimeout> | undefined;
+
     const consultar = async () => {
       try {
         const respuesta = await fetch(`/api/busquedas/${job}`);
+        if (cancelado) {
+          return;
+        }
+        // Un 429 no es un fallo del job: se ha alcanzado el límite. Se
+        // espera lo que indica el servidor y se reintenta, en vez de seguir
+        // golpeando la API cada 1,5 s.
+        if (respuesta.status === 429) {
+          espera = Math.max(
+            INTERVALO_MS,
+            Number(respuesta.headers.get("retry-after") ?? 0) * 1000,
+          );
+          return;
+        }
+        if (!respuesta.ok) {
+          setEstado("fallida");
+          return;
+        }
         const datos = await respuesta.json();
         if (cancelado) {
           return;
@@ -101,22 +123,31 @@ export function VistaBusqueda({
         if (datos.estado === "completada") {
           setEstado("resultados");
           void cargarResultados();
-        } else if (datos.estado === "fallida") {
+          return;
+        }
+        if (datos.estado === "fallida") {
           setEstado("fallida");
+          return;
         }
       } catch {
         // El siguiente tick reintenta la consulta.
       }
+      espera = INTERVALO_MS;
     };
 
-    void consultar();
-    const intervalo = setInterval(() => {
-      void consultar();
-    }, INTERVALO_MS);
+    const agendar = () => {
+      temporizador = setTimeout(() => {
+        void consultar().finally(agendar);
+      }, espera);
+    };
+
+    void consultar().finally(agendar);
 
     return () => {
       cancelado = true;
-      clearInterval(intervalo);
+      if (temporizador !== undefined) {
+        clearTimeout(temporizador);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job, cacheHit]);

@@ -476,6 +476,34 @@ Responde: "¿cuánto pierdo por no ir a 3 supermercados?" (coste de la comodidad
 
 ---
 
+## ADR-020: El límite de peticiones separa creación de polling y usa la IP real
+
+**Fecha**: 2026-10-20
+**Estado**: aceptado
+**Contexto**: Al usar la app en producción, la consulta del estado de un job (`GET /v1/busquedas/{id}`) devolvía 429 de forma intercalada con respuestas correctas, y la barra de progreso se quedaba congelada. Dos causas, ambas en el rate limit de Caddy (ADR-015):
+
+1. La zona `busquedas` usaba el patrón `path /api/busquedas*`, que captura **tanto** la creación (POST) como la consulta del estado (GET). La web consulta el estado cada 1,5 s (ADR-014), así que el polling consumía el cupo de 10/min meant para el endpoint caro: bastaban 15 s de espera para agotarlo, y a partir de ahí las peticiones alternaban entre 429 y respuestas correctas según la ventana deslizante.
+2. La clave de la zona era `{remote_host}`, que en este despliegue es la IP del proxy (`192.168.16.1`): **todos los usuarios compartían el mismo cupo**, y el que lo agotara bloqueaba a los demás.
+
+**Decisión**:
+- Dos zonas en el `Caddyfile`: `busquedas` (método `POST`, ruta exacta) con 10/min, y `polling` (método `GET`, ruta con id) con 120/min. La web no debe agotar nunca el cupo del endpoint caro.
+- La clave pasa a ser la IP real del cliente: `CF-Connecting-IP` cuando llega (Cloudflare la sobrescribe con la del cliente real) y `{remote_host}` como respaldo cuando no hay cabecera (dev, o acceso directo).
+- La web deja de martillear ante un 429: respeta el `Retry-After` y reintenta con esa espera, en vez de insistir cada 1,5 s.
+
+**Consecuencias**:
+- ✅ El polling (40 peticiones/min con el intervalo de 1,5 s) entra de sobra en su cupo de 120/min y la barra de progreso avanza.
+- ✅ El endpoint caro sigue protegido: 10 creaciones/min por IP.
+- ✅ Cada usuario tiene su propio cupo: el de uno no bloquea al de otro.
+- ⚠️ El límite de polling se fija en el borde; si hubiera que ajustarlo, `RATE_LIMIT_POLLING_POR_MINUTO` en el `.env`.
+- ⚠️ `CF-Connecting-IP` solo es fiable si Caddy no es accesible sin pasar por Cloudflare. Aquí el puerto 8088 solo se publica en la red interna, así que lo es.
+
+**Alternativas consideradas**:
+- **Subir el límite único a 60/min**: habría que subirlo más cada vez que se acortase el intervalo de polling, y seguiría sin separar el tráfico barato del caro.
+- **Bajar el intervalo de polling a 4 s**: alarga la espera hasta que el usuario ve los resultados; no arregla que dos usuarios compartan cupo.
+- **Quitar el límite del borde y dejarlo solo en la aplicación**: el límite por IP del borde es lo que frena el ruido antes de que llegue a la API (ADR-015).
+
+---
+
 ## Plantilla para nuevas decisiones
 
 ```markdown
