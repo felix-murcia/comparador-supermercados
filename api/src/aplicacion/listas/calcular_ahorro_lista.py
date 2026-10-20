@@ -70,4 +70,9 @@ class CalcularAhorroLista:
                 )
             )
 
-        return calcular_ahorro(datos, cadenas)
+        seleccion = list(cadenas)
+        if not seleccion:
+            # Sin selección explícita, se comparan las cadenas donde hay precio.
+            seleccion = sorted({cadena for item in datos for cadena in item.precios})
+
+        return calcular_ahorro(datos, seleccion)

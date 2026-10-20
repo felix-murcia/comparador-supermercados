@@ -8,11 +8,16 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, Query, Response, status
 from pydantic import BaseModel, Field
 
+from src.adaptadores.cache.redis_cache import get_cache
+from src.adaptadores.persistencia.repositorio_cadenas import (
+    SQLAlchemyRepositorioCadenas,
+)
 from src.adaptadores.persistencia.repositorio_listas import (
     SQLAlchemyRepositorioListas,
 )
@@ -29,9 +34,11 @@ from src.adaptadores.persistencia.repositorio_usuarios import (
     SQLAlchemyRepositorioUsuarios,
 )
 from src.api_http.autenticacion import Identidad
-from src.api_http.dependencias import SessionRW
+from src.api_http.dependencias import SessionRO, SessionRW
 from src.api_http.errores import ErrorAPI
+from src.aplicacion.listas.calcular_ahorro_lista import CalcularAhorroLista
 from src.aplicacion.usuarios.obtener_perfil import ObtenerPerfil
+from src.dominio.listas.ahorro import ResumenAhorro
 from src.dominio.listas.entidades import (
     ItemLista,
     ItemListaDetalle,
@@ -41,8 +48,51 @@ from src.dominio.listas.entidades import (
 from src.dominio.productos.errores import ProductoNoEncontradoError
 from src.dominio.usuarios.entidades import Usuario
 from src.dominio.usuarios.errores import UsuarioNoAutorizadoError
+from src.puertos.cache import Cache
 
 router = APIRouter(prefix="/v1/listas", tags=["listas"])
+
+TTL_RESUMEN_SEGUNDOS = 60
+PREFIJO_RESUMEN = "v1:resumen"
+
+
+class ResumenCadenaResponse(BaseModel):
+    """Coste de la lista en una cadena y el % A frente a la más cara."""
+
+    cadena: str
+    coste: Decimal
+    porcentaje_a: Decimal | None = None
+    productos_no_disponibles: list[str] = Field(default_factory=list)
+
+
+class ResumenListaResponse(BaseModel):
+    """Resumen del ahorro de la lista."""
+
+    coste_total: Decimal
+    por_cadena: list[ResumenCadenaResponse] = Field(default_factory=list)
+    porcentaje_c: Decimal | None = None
+    coste_optimo: Decimal
+    coste_mixta_real: Decimal
+    avisos: list[str] = Field(default_factory=list)
+
+    @classmethod
+    def desde(cls, resumen: ResumenAhorro) -> ResumenListaResponse:
+        return cls(
+            coste_total=resumen.coste_total,
+            por_cadena=[
+                ResumenCadenaResponse(
+                    cadena=coste.cadena,
+                    coste=coste.coste,
+                    porcentaje_a=coste.porcentaje_a,
+                    productos_no_disponibles=list(coste.productos_no_disponibles),
+                )
+                for coste in resumen.por_cadena
+            ],
+            porcentaje_c=resumen.porcentaje_c,
+            coste_optimo=resumen.coste_optimo,
+            coste_mixta_real=resumen.coste_mixta_real,
+            avisos=list(resumen.avisos),
+        )
 
 
 class ListaRequest(BaseModel):
@@ -326,3 +376,51 @@ async def eliminar_item(
 
     await repositorio.eliminar_item(item_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def _cache_optional() -> Cache | None:
+    """Caché de resúmenes; sin Redis el endpoint funciona igual."""
+    try:
+        return get_cache()
+    except RuntimeError:
+        return None
+
+
+@router.get("/{lista_id}/resumen", response_model=ResumenListaResponse)
+async def resumen_lista(
+    lista_id: UUID,
+    identidad: Identidad,
+    sesion: SessionRO,
+    cadenas: Annotated[
+        list[str], Query(default_factory=list, description="Cadenas a comparar")
+    ],
+) -> ResumenListaResponse:
+    """Coste total, % A por cadena, % C y avisos del ahorro de la lista."""
+    usuario = await _usuario_para_lectura(
+        identidad, SQLAlchemyRepositorioUsuarios(sesion)
+    )
+    if usuario is None:
+        raise UsuarioNoAutorizadoError("El usuario no tiene perfil")
+
+    repositorio = SQLAlchemyRepositorioListas(sesion)
+    lista = await _lista_del_usuario(repositorio, lista_id, usuario.id)
+
+    clave = f"{PREFIJO_RESUMEN}:{lista_id}:{','.join(sorted(cadenas))}"
+    cache = _cache_optional()
+    if cache is not None:
+        cached = await cache.get(clave)
+        if cached is not None:
+            return ResumenListaResponse.model_validate(cached)
+
+    caso = CalcularAhorroLista(
+        repositorio_listas=repositorio,
+        repositorio_precios=SQLAlchemyRepositorioPrecios(sesion),
+        repositorio_cadenas=SQLAlchemyRepositorioCadenas(sesion),
+    )
+    resumen = await caso.ejecutar(lista.id, cadenas)
+    respuesta = ResumenListaResponse.desde(resumen)
+
+    if cache is not None:
+        await cache.set(clave, respuesta.model_dump(mode="json"), TTL_RESUMEN_SEGUNDOS)
+
+    return respuesta

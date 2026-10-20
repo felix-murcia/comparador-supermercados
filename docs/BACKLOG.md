@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8; Épica 6 en curso — 4/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8; Épica 6 en curso — 5/6)
 
 ---
 
@@ -41,7 +41,7 @@
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ✅ Completada (8/8) |
-| 6 — Perfil y listas | 6 | 11d | 🟡 En curso (4/6) |
+| 6 — Perfil y listas | 6 | 11d | 🟡 En curso (5/6) |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
 | **Total MVP** | **53** | **~72d** | |
@@ -765,16 +765,17 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T6.5 — Endpoint `GET /v1/listas/{id}/resumen` 🟡
+### [x] T6.5 — Endpoint `GET /v1/listas/{id}/resumen` 🟡
 
 - **Depende de**: T6.4
 - **Estimación**: 1d
 - **Descripción**: Endpoint que devuelve coste total, % A por cadena, % C y avisos.
 - **Aceptación**:
-  - [ ] Respuesta: `{ coste_total, por_cadena: [{ cadena, coste, porcentaje_a }], porcentaje_c, avisos }`.
-  - [ ] Lectura desde RO.
-  - [ ] Cache TTL corto (60 s).
-  - [ ] Tests de contrato.
+  - [x] Respuesta: `{ coste_total, por_cadena: [{ cadena, coste, porcentaje_a }], porcentaje_c, avisos }`.
+  - [x] Lectura desde RO.
+  - [x] Cache TTL corto (60 s).
+  - [x] Tests de contrato.
+- **Nota**: `GET /v1/listas/{id}/resumen?cadenas=dia&cadenas=carrefour` devuelve el coste total, el detalle por cadena (coste, % A y los productos que no están disponibles), el % C y los avisos. Sin cadenas explícitas se comparan las que tienen precio para los productos de la lista. La lectura es desde la réplica y el resultado se cachea 60 s con clave propia por lista y cadenas (`v1:resumen:…`), de modo que la invalidación tras la ingesta también lo limpia.
 
 ---
 
@@ -1011,8 +1012,8 @@ Actualizar al cerrar cada tarea:
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
 | 5 — Frontend flujo principal | 8 | 8 | 100% |
-| 6 — Perfil y listas | 4 | 6 | 67% |
+| 6 — Perfil y listas | 5 | 6 | 83% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **43** | **53** | **81%** |
+| **Total MVP** | **44** | **53** | **83%** |
 
 ---
