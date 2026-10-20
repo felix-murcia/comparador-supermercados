@@ -352,7 +352,7 @@ LLM_PROVIDER=openrouter
 LLM_MODEL=openai/gpt-4o-mini:online
 ```
 
-Probado en producción con `openai/gpt-4o-mini:online`: el productor encuentra la ficha real (`https://www.dia.es/huevos-leche-y-mantequilla/leche/p/73676`), el verificador confirma el precio en el HTML y el job pasa a `completada` en ~10 s. Los modelos gratuitos de OpenRouter (`:free`) no traen búsqueda y además estánlimitedos por el proveedor (429), así que no sirven para la ingesta.
+Probado en producción con `openai/gpt-4o-mini:online`: el productor encuentra la ficha real (`https://www.dia.es/huevos-leche-y-mantequilla/leche/p/73676`), el verificador confirma el precio en el HTML y el job pasa a `completada` en ~10 s. Los modelos gratuitos de OpenRouter (`:free`) no traen búsqueda y además están limitados por el proveedor (429), así que no sirven para la ingesta. Es el valor por defecto de `.env.example`.
 
 ```bash
 # Lanzar una búsqueda y ver el resultado

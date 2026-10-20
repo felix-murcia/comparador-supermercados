@@ -158,3 +158,34 @@ def test_la_fabrica_exige_api_key_y_modelo() -> None:
         crear_cliente_llm(
             proveedor="openai", api_key="clave", modelo="", cliente_http=cliente_http
         )
+
+
+def test_avisa_si_el_modelo_no_trae_busqueda_web(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Sin búsqueda web el productor se inventa las URLs de las fichas."""
+    with caplog.at_level("WARNING", logger="src.adaptadores.ingesta.cliente_llm"):
+        crear_cliente_llm(
+            proveedor="openrouter",
+            api_key="clave",
+            modelo="openai/gpt-4o-mini",
+            cliente_http=_cliente(_respuesta(200, {})),
+        )
+
+    assert any("búsqueda web" in registro.message for registro in caplog.records)
+
+
+def test_no_avisa_si_el_modelo_lleva_busqueda_web(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    with caplog.at_level("WARNING", logger="src.adaptadores.ingesta.cliente_llm"):
+        crear_cliente_llm(
+            proveedor="openrouter",
+            api_key="clave",
+            modelo="openai/gpt-4o-mini:online",
+            cliente_http=_cliente(_respuesta(200, {})),
+        )
+
+    assert not [
+        registro for registro in caplog.records if "búsqueda web" in registro.message
+    ]

@@ -394,7 +394,7 @@
   - [x] Si `rechazado` con motivo `agente_no_encontro` → no reintenta, devuelve fallo.
   - [x] Si `sospechoso` tras 3 pasadas → guarda con estado `sospechoso`.
   - [x] Tests con productor/verificador/repo mockeados.
-- **Nota**: `api/src/aplicacion/ingesta/buscar_producto.py`. Resuelve el producto canónico (por EAN o nombre exacto) y su ficha en la cadena antes de verificar, y pasa al verificador el último precio conocido (`precio_eur_anterior`) para la regla de desviación. Requiere los repositorios de cadenas y de productos por cadena (`RepositorioCadenas`, `RepositorioProductosCadenas`), añadidos en esta tarea con sus adaptadores SQLAlchemy.
+- **Nota**: `api/src/aplicacion/ingesta/buscar_producto.py`. Resuelve el producto canónico (por EAN o nombre exacto) y su ficha en la cadena antes de verificar, y pasa al verificador el último precio conocido (`precio_eur_anterior`) para la regla de desviación. Requiere los repositorios de cadenas y de productos por cadena (`RepositorioCadenas`, `RepositorioProductosCadenas`), añadidos en esta tarea con sus adaptadores SQLAlchemy. **El modelo del LLM debe traer búsqueda web**: sin ella el productor se inventa las URLs de las fichas (dominios inexistentes) y el verificador rechaza el precio. En OpenRouter se activa con el sufijo `:online`; el valor por defecto de `.env.example` es `openai/gpt-4o-mini:online`, validado en producción (job `completada` en ~10 s). `crear_cliente_llm` avisa por log si el modelo no lleva búsqueda.
 
 ---
 

@@ -172,6 +172,23 @@ class ClienteAnthropic:
         return _texto_de_bloques(datos)
 
 
+def _avisar_si_no_busca_web(proveedor: str, modelo: str) -> None:
+    """Avisa si el modelo no trae búsqueda web.
+
+    Sin búsqueda, el productor no puede conocer las URLs reales de las fichas
+    y se las inventa; el verificador las rechaza y la ingesta no produce
+    precios. En OpenRouter la búsqueda se activa con el sufijo `:online`.
+    """
+    if proveedor != "openrouter" or ":online" in modelo:
+        return
+    logger.warning(
+        "El modelo %s no lleva búsqueda web (falta el sufijo ':online'): "
+        "el productor puede inventar las URLs de las fichas y el verificador "
+        "rechazará los precios.",
+        modelo,
+    )
+
+
 def crear_cliente_llm(
     *,
     proveedor: str,
@@ -192,6 +209,8 @@ def crear_cliente_llm(
     url = base_url or BASE_URLS_POR_DEFECTO.get(proveedor)
     if not url:
         raise ValueError(f"Proveedor de LLM no soportado: {proveedor}")
+
+    _avisar_si_no_busca_web(proveedor, modelo)
 
     if proveedor == "anthropic":
         return ClienteAnthropic(
