@@ -1,8 +1,19 @@
 # Comparador de Precios de Supermercados Españoles
 
+[![CI](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml)
+[![Seguridad (Trivy)](https://img.shields.io/badge/seguridad-Trivy-0%20HIGH%2FCRITICAL-009485?logo=aquasec&logoColor=white)](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml)
+[![gitleaks](https://img.shields.io/badge/gitleaks-sin%20fugas-blue?logo=gitguardian&logoColor=white)](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)](api/pyproject.toml)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](api/pyproject.toml)
+[![Next.js](https://img.shields.io/badge/Next.js-14.2-000000?logo=nextdotjs&logoColor=white)](web/package.json)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](web/package.json)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](infra/docker-compose.base.yml)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)](infra/docker-compose.base.yml)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](infra/docker-compose.base.yml)
+
 Aplicación web para comparar precios de productos de supermercados en España (DIA, Carrefour, Mercadona), gestionar listas de la compra y calcular el ahorro real de comprar la misma cesta en distintas cadenas o de forma mixta.
 
-**Estado**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 — Autenticación completada; Épica 2 — Modelo de datos completada)
+**Estado**: 🟢 MVP completado (Épicas 0–7 — 53/53 tareas)
 **Versión**: 0.1.0-dev
 **Licencia**: Por definir
 
@@ -493,8 +504,8 @@ Si el servidor ya está detrás de un túnel de Cloudflare, el Caddy interno sir
 
 ```bash
 # .env
-DOMAIN=demo.sagarebel.com
-WEB_BASE_URL=https://demo.sagarebel.com
+DOMAIN=demo.aplication.com
+WEB_BASE_URL=https://demo.aplication.com
 CADDY_SITE_ADDRESS=":80"        # sin TLS: lo aporta el túnel
 HTTP_PORT=8088                   # el 80 del host lo ocupa el proxy principal
 ```
@@ -503,7 +514,7 @@ Y en la configuración del túnel, una regla que apunte al Caddy:
 
 ```yaml
 ingress:
-  - hostname: demo.sagarebel.com
+  - hostname: demo.aplication.com
     service: http://localhost:8088
     originRequest:
       noTLSVerify: true
@@ -512,7 +523,7 @@ ingress:
 El proxy del host (nginx-proxy-manager) debe apuntar ese hostname al Caddy:
 
 ```
-demo.sagarebel.com → http://172.17.0.1:8088
+demo.aplication.com → http://172.17.0.1:8088
 ```
 
 #### OAuth con el dominio público
@@ -521,8 +532,8 @@ Las apps de Google y Microsoft se registran con estas URL de callback, que son l
 
 | Proveedor | URL de callback |
 |-----------|-----------------|
-| Google | `https://demo.sagarebel.com/api/auth/callback/google` |
-| Microsoft | `https://demo.sagarebel.com/api/auth/callback/microsoft` |
+| Google | `https://demo.aplication.com/api/auth/callback/google` |
+| Microsoft | `https://demo.aplication.com/api/auth/callback/microsoft` |
 
 y los mismos valores en `GOOGLE_CLIENT_ID/SECRET` y `MICROSOFT_CLIENT_ID/SECRET` del `.env`.
 
