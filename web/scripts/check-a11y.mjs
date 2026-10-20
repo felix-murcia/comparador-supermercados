@@ -1,0 +1,149 @@
+#!/usr/bin/env node
+/**
+ * Auditoría de accesibilidad (WCAG AA) del frontend.
+ *
+ * Comprueba, sin navegador:
+ *   1. Cada `<img>` tiene `alt` (puede estar vacío si es decorativa).
+ *   2. Cada campo de formulario tiene nombre accesible (label, aria-label…).
+ *   3. La paleta de tokens cumple el contraste mínimo (4,5:1 texto, 3:1 UI).
+ *   4. No se usan sombras ni degradados (estilo minimalista tipo Google).
+ */
+
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { dirname, join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
+const SRC = join(RAIZ, "src");
+
+/** Pares de la paleta: [nombre, primer plano, fondo, mínimo]. */
+const PALETA = [
+  ["texto sobre blanco", "#202124", "#ffffff", 4.5],
+  ["gris sobre blanco", "#5f6368", "#ffffff", 4.5],
+  ["primario sobre blanco", "#1a73e8", "#ffffff", 4.5],
+  ["primario-oscuro sobre blanco", "#1558d6", "#ffffff", 4.5],
+  ["error sobre blanco", "#d93025", "#ffffff", 4.5],
+  ["texto sobre azul suave", "#202124", "#e8f0fe", 4.5],
+  ["gris sobre azul suave", "#5f6368", "#e8f0fe", 4.5],
+  ["primario-oscuro sobre azul suave", "#1558d6", "#e8f0fe", 4.5],
+  ["blanco sobre primario", "#ffffff", "#1a73e8", 4.5],
+  ["blanco sobre primario-oscuro", "#ffffff", "#1558d6", 4.5],
+  ["borde de campo sobre blanco", "#757575", "#ffffff", 3],
+];
+
+function luminancia(hex) {
+  const canales = [1, 3, 5].map((i) => {
+    const valor = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return valor <= 0.03928
+      ? valor / 12.92
+      : ((valor + 0.055) / 1.055) ** 2.4;
+  });
+  return (
+    0.2126 * canales[0] + 0.7152 * canales[1] + 0.0722 * canales[2]
+  );
+}
+
+function contraste(primero, segundo) {
+  const a = luminancia(primero);
+  const b = luminancia(segundo);
+  const [claro, oscuro] = a > b ? [a, b] : [b, a];
+  return (claro + 0.05) / (oscuro + 0.05);
+}
+
+function archivos(directorio, extension) {
+  const encontrados = [];
+  for (const entrada of readdirSync(directorio)) {
+    const ruta = join(directorio, entrada);
+    if (statSync(ruta).isDirectory()) {
+      encontrados.push(...archivos(ruta, extension));
+    } else if (ruta.endsWith(extension)) {
+      encontrados.push(ruta);
+    }
+  }
+  return encontrados;
+}
+
+const problemas = [];
+
+// 1 y 2: HTML de cada componente.
+for (const archivo of archivos(SRC, ".tsx")) {
+  const contenido = readFileSync(archivo, "utf8");
+  const lineas = contenido.split("\n");
+  const etiquetas = new Set();
+  for (const coincidencia of contenido.matchAll(/<label[^>]*htmlFor="([^"]+)"/g)) {
+    etiquetas.add(coincidencia[1]);
+  }
+
+  lineas.forEach((linea, indice) => {
+    for (const coincidencia of linea.matchAll(/<img\b[^>]*>/g)) {
+      if (!/\balt=/.test(coincidencia[0])) {
+        problemas.push(
+          `${relative(RAIZ, archivo)}:${indice + 1} imagen sin atributo alt`,
+        );
+      }
+    }
+
+    for (const coincidencia of linea.matchAll(
+      /<(input|select|textarea)\b[^>]*>/g,
+    )) {
+      const etiqueta = coincidencia[0];
+      if (/\btype="hidden"/.test(etiqueta)) {
+        continue;
+      }
+      const tieneNombre =
+        /\baria-label=/.test(etiqueta) ||
+        /\baria-labelledby=/.test(etiqueta) ||
+        /\bid="([^"]+)"/.test(etiqueta) &&
+          etiquetas.has(etiqueta.match(/\bid="([^"]+)"/)[1]);
+      const dentroDeLabel = cuentaEtiquetas(lineas, indice) > 0;
+      if (!tieneNombre && !dentroDeLabel) {
+        problemas.push(
+          `${relative(RAIZ, archivo)}:${indice + 1} ${coincidencia[1]} sin nombre accesible`,
+        );
+      }
+    }
+  });
+}
+
+function cuentaEtiquetas(lineas, indice) {
+  let abiertas = 0;
+  for (let i = 0; i <= indice; i += 1) {
+    const aperturas = lineas[i].match(/<label\b/g) ?? [];
+    const cierres = lineas[i].match(/<\/label>/g) ?? [];
+    abiertas += aperturas.length - cierres.length;
+  }
+  return abiertas;
+}
+
+// 3: contraste de la paleta.
+for (const [nombre, primero, segundo, minimo] of PALETA) {
+  const ratio = contraste(primero, segundo);
+  if (ratio < minimo) {
+    problemas.push(
+      `paleta: ${nombre} (${primero} sobre ${segundo}) ratio ${ratio.toFixed(2)} < ${minimo}`,
+    );
+  }
+}
+
+// 4: sin sombras ni degradados.
+for (const archivo of archivos(SRC, ".tsx")) {
+  const contenido = readFileSync(archivo, "utf8");
+  contenido.split("\n").forEach((linea, indice) => {
+    if (/\b(shadow-[a-z]+|bg-gradient-[a-z]+)\b/.test(linea)) {
+      problemas.push(
+        `${relative(RAIZ, archivo)}:${indice + 1} usa sombra o degradado`,
+      );
+    }
+  });
+}
+
+if (problemas.length === 0) {
+  console.log("a11y: todas las comprobaciones pasan");
+  process.exit(0);
+}
+
+console.error("a11y: se han encontrado problemas:");
+for (const problema of problemas) {
+  console.error(`  ${problema}`);
+}
+process.exit(1);

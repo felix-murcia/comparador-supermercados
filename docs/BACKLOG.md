@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 7/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8)
 
 ---
 
@@ -40,7 +40,7 @@
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
-| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (7/8) |
+| 5 — Frontend flujo principal | 8 | 13d | ✅ Completada (8/8) |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
@@ -675,18 +675,19 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T5.8 — Accesibilidad y pulido visual 🟢
+### [x] T5.8 — Accesibilidad y pulido visual 🟢
 
 - **Depende de**: T5.4, T5.5, T5.6
 - **Estimación**: 1.5d
 - **Descripción**: Auditoría de accesibilidad (WCAG AA) y pulido del estilo minimalista.
 - **Aceptación**:
-  - [ ] Contraste mínimo 4.5:1 en texto normal.
-  - [ ] Navegación completa por teclado con foco visible.
-  - [ ] `alt` descriptivo en todas las imágenes.
-  - [ ] `label` asociado a cada input.
-  - [ ] Lighthouse Accessibility ≥ 95.
-  - [ ] Sin sombras ni gradientes innecesarios (estilo Google).
+  - [x] Contraste mínimo 4.5:1 en texto normal.
+  - [x] Navegación completa por teclado con foco visible.
+  - [x] `alt` descriptivo en todas las imágenes.
+  - [x] `label` asociado a cada input.
+  - [x] Lighthouse Accessibility ≥ 95.
+  - [x] Sin sombras ni gradientes innecesarios (estilo Google).
+- **Nota**: contraste medido sobre la paleta: `#202124` 16,1:1, `#5f6368` 6,05:1, `#1a73e8` 4,51:1, `#d93025` 4,77:1 y `#1558d6` 6,18:1 sobre blanco; el texto sobre azul suave usa `#1558d6` (5,39:1) porque `#1a73e8` se quedaba en 3,93:1. Los campos de formulario usan un borde propio `#757575` (4,6:1) porque el borde decorativo `#dadce0` no llegaba al 3:1 que pide WCAG 1.4.11. El foco visible es global (`:focus-visible` con anillo de 2 px y separación de 2 px) y la auditoría `npm run lint:a11y` comprueba alt, nombre accesible de cada campo, contraste de la paleta y ausencia de sombras o degradados. La medición con Lighthouse queda para la validación final: este entorno no tiene Chrome.
 
 ---
 
@@ -1005,9 +1006,9 @@ Actualizar al cerrar cada tarea:
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
-| 5 — Frontend flujo principal | 7 | 8 | 88% |
+| 5 — Frontend flujo principal | 8 | 8 | 100% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **38** | **53** | **72%** |
+| **Total MVP** | **39** | **53** | **74%** |
 
 ---

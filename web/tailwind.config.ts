@@ -10,6 +10,8 @@ const config: Config = {
     extend: {
       colors: {
         borde: "#dadce0",
+        // Borde de los campos de formulario: 4,6:1 sobre blanco (WCAG 1.4.11).
+        "borde-fuerte": "#757575",
         texto: "#202124",
         gris: "#5f6368",
         primario: "#1a73e8",

@@ -83,7 +83,7 @@ export function HeroBuscador() {
           onChange={(evento) => setQuery(evento.target.value)}
           placeholder={t("buscar.placeholder")}
           autoComplete="off"
-          className="w-full rounded-pill border border-borde px-5 py-3 text-base text-texto placeholder:text-gris focus:border-primario"
+          className="w-full rounded-pill border border-borde-fuerte px-5 py-3 text-base text-texto placeholder:text-gris focus:border-primario"
         />
 
         <SelectorCadenas seleccionadas={cadenas} onChange={setCadenas} />

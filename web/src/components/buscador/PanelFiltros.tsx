@@ -12,7 +12,7 @@ type Props = {
 };
 
 const CLASE_CAMPO =
-  "mt-1 rounded-pill border border-borde px-3 py-1.5 text-sm text-texto focus:border-primario";
+  "mt-1 rounded-pill border border-borde-fuerte px-3 py-1.5 text-sm text-texto focus:border-primario";
 
 /** Panel de orden y filtros; se aplican en el cliente sobre lo ya cargado. */
 export function PanelFiltros({

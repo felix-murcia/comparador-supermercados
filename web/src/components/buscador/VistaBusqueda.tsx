@@ -267,7 +267,7 @@ export function VistaBusqueda({
             onChange={(evento) => setConsulta(evento.target.value)}
             placeholder={t("buscar.placeholder")}
             autoComplete="off"
-            className="min-w-0 flex-1 rounded-pill border border-borde px-4 py-2.5 text-sm text-texto placeholder:text-gris focus:border-primario"
+            className="min-w-0 flex-1 rounded-pill border border-borde-fuerte px-4 py-2.5 text-sm text-texto placeholder:text-gris focus:border-primario"
           />
           <button
             type="submit"
