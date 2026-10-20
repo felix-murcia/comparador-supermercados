@@ -1,5 +1,6 @@
 import { llamarApiServidor } from "@/lib/api";
 import { VistaLista } from "@/components/listas/VistaLista";
+import { SLUGS_CADENAS } from "@/lib/cadenas";
 import { t } from "@/lib/i18n";
 
 type Props = {
@@ -51,7 +52,14 @@ async function cargarLista(id: string): Promise<Lista | null> {
 
 async function cargarResumen(id: string): Promise<Resumen | null> {
   try {
-    const respuesta = await llamarApiServidor(`/v1/listas/${id}/resumen`);
+    // El resumen compara las cadenas elegidas: sin ellas no hay coste ni % A.
+    const parametros = new URLSearchParams();
+    for (const cadena of SLUGS_CADENAS) {
+      parametros.append("cadenas", cadena);
+    }
+    const respuesta = await llamarApiServidor(
+      `/v1/listas/${id}/resumen?${parametros.toString()}`,
+    );
     if (!respuesta.ok) {
       return null;
     }

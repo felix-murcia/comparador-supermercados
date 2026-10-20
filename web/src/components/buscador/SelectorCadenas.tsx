@@ -2,13 +2,8 @@
 
 import Image from "next/image";
 
+import { CADENAS } from "@/lib/cadenas";
 import { t } from "@/lib/i18n";
-
-const CADENAS = [
-  { slug: "dia", nombre: "DIA" },
-  { slug: "carrefour", nombre: "Carrefour" },
-  { slug: "mercadona", nombre: "Mercadona" },
-];
 
 export function SelectorCadenas({
   seleccionadas,

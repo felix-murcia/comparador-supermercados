@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { nombreCadena } from "@/lib/cadenas";
 import { t } from "@/lib/i18n";
 
 type Item = {
@@ -172,7 +173,7 @@ export function VistaLista({ lista, resumen }: Props) {
             {resumen.por_cadena.map((coste) => (
               <tr key={coste.cadena} className="border-b border-borde">
                 <th scope="row" className="py-2 text-left font-normal">
-                  {coste.cadena}
+                  {nombreCadena(coste.cadena)}
                 </th>
                 <td className="py-2">{PRECIO.format(Number(coste.coste))}</td>
                 <td className="py-2">
