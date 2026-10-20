@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8; Épica 6 completada — 6/6; Épica 7 en curso — 3/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épicas 1–7 completadas — 44/45; Épica 8 pendiente)
 
 ---
 
@@ -42,7 +42,7 @@
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ✅ Completada (8/8) |
 | 6 — Perfil y listas | 6 | 11d | ✅ Completada (6/6) |
-| 7 — Calidad y operación | 6 | 7d | 🟡 En curso (5/6) |
+| 7 — Calidad y operación | 6 | 7d | ✅ Completada (6/6) |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
 | **Total MVP** | **53** | **~72d** | |
 
@@ -848,19 +848,20 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T7.4 — Plantillas K8s/OpenShift 🟢
+### [x] T7.4 — Plantillas K8s/OpenShift 🟢
 
 - **Depende de**: T0.4, T0.5
 - **Estimación**: 2d
 - **Descripción**: Manifiestos en `infra/k8s/` para Deployment, Service, Ingress, HPA, ConfigMap y Secret. **No desplegar aún.**
 - **Aceptación**:
-  - [ ] `api-deployment.yaml`, `worker-deployment.yaml`, `scheduler-cronjob.yaml`, `web-deployment.yaml`.
-  - [ ] `postgres-cluster.yaml` (referencia a operador CloudNativePG).
-  - [ ] `ingress.yaml` con TLS.
-  - [ ] `hpa.yaml` para api y web.
-  - [ ] `configmap.yaml` + `secret.example.yaml` (sin valores reales).
-  - [ ] `kubectl apply --dry-run=client -f infra/k8s/` pasa sin errores.
-  - [ ] Documentado en `README.md` como "futuro", no como despliegue activo.
+  - [x] `api-deployment.yaml`, `worker-deployment.yaml`, `scheduler-cronjob.yaml`, `web-deployment.yaml`.
+  - [x] `postgres-cluster.yaml` (referencia a operador CloudNativePG).
+  - [x] `ingress.yaml` con TLS.
+  - [x] `hpa.yaml` para api y web.
+  - [x] `configmap.yaml` + `secret.example.yaml` (sin valores reales).
+  - [x] `kubectl apply --dry-run=client -f infra/k8s/` pasa sin errores.
+  - [x] Documentado en `README.md` como "futuro", no como despliegue activo.
+- **Nota**: los manifiestos de `infra/k8s/` cubren namespace, configmap, secret de ejemplo, clúster CloudNativePG, deployments de api/worker/web con sus Services, el CronJob del scheduler, el Ingress con TLS y los dos HPA. El MVP **no las usa** (el despliegue es con Compose) y así lo dice el README. Validación: `kubeconform -strict -summary -ignore-missing-schemas infra/k8s/` da 12 recursos válidos, 0 inválidos (el CRD de CloudNativePG se salta por no tener esquema público). `kubectl apply --dry-run=client` necesita un API server para resolver los tipos, así que su comprobación queda para cuando haya cluster.
 
 ---
 
@@ -1019,7 +1020,7 @@ Actualizar al cerrar cada tarea:
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
 | 5 — Frontend flujo principal | 8 | 8 | 100% |
 | 6 — Perfil y listas | 6 | 6 | 100% |
-| 7 — Calidad y operación | 5 | 6 | 83% |
-| **Total MVP** | **50** | **53** | **94%** |
+| 7 — Calidad y operación | 6 | 6 | 100% |
+| **Total MVP** | **51** | **53** | **96%** |
 
 ---

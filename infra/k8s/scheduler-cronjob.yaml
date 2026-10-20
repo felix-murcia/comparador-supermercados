@@ -1,0 +1,43 @@
+# Ingesta diaria: el scheduler corre dentro del clúster a la hora acordada.
+# Alternativa: un CronJob externo (cron de GitHub Actions, CronJob del
+# proveedor) que lance el scheduler en el momento exacto.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: scheduler
+  namespace: comparador-precios
+  labels:
+    app.kubernetes.io/name: scheduler
+    app.kubernetes.io/part-of: comparador-precios
+spec:
+  schedule: "0 3 * * *"
+  timeZone: Europe/Madrid
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: scheduler
+            app.kubernetes.io/part-of: comparador-precios
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: scheduler
+              image: ghcr.io/tu-usuario/comparador-precios-api:0.1.0
+              imagePullPolicy: IfNotPresent
+              command: ["python", "-m", "src.scheduler"]
+              envFrom:
+                - configMapRef:
+                    name: comparador-precios-config
+                - secretRef:
+                    name: comparador-precios-secret
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: "1"
+                  memory: 512Mi

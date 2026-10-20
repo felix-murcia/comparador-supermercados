@@ -1,0 +1,31 @@
+# Clúster de Postgres gestionado por el operador CloudNativePG.
+# Alternativa para el MVP: apuntar DATABASE_URL_RW/RO a un Postgres gestionado
+# fuera del clúster (RDS, Cloud SQL...) y no desplegar este manifiesto.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: comparador-precios
+  namespace: comparador-precios
+  labels:
+    app.kubernetes.io/part-of: comparador-precios
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:16
+  storage:
+    size: 20Gi
+  bootstrap:
+    initdb:
+      database: precios
+      owner: app
+  postgresql:
+    synchronous:
+      method: any
+    parameters:
+      wal_level: "replica"
+      max_wal_senders: "10"
+  monitoring:
+    enablePodMonitor: false
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi

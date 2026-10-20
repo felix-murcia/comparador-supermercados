@@ -288,6 +288,40 @@ docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-
 - **Sentry**: rellena `SENTRY_DSN` (API) y `NEXT_PUBLIC_SENTRY_DSN` (navegador) en `.env`. La API captura los errores 500 con el handler global; la web inicializa Sentry en `sentry.client.config.ts` (errores de cliente) y `sentry.server.config.ts` (errores de servidor). Sin DSN, Sentry queda desactivado.
 - **UptimeRobot** (servicio externo, cuenta propia): crea un monitor de tipo HTTP contra `https://TU_DOMINIO/api/health/ready` con **intervalo 5 minutos** y alerta tras **2 comprobaciones fallidas** (a los correos que quieras). El endpoint `/api/health/ready` responde 200 solo si Postgres (primario y réplica), Redis y la API están operativos.
 
+### Plantillas de Kubernetes (futuro)
+
+`infra/k8s/` tiene los manifiestos **preparedos para desplegar en el futuro, pero el MVP no los usa** (el despliegue actual es con Docker Compose en un VPS). No hay cluster configurado: son plantillas de referencia.
+
+| Fichero | Contenido |
+|----------|-----------|
+| `namespace.yaml` | Namespace `comparador-precios` |
+| `configmap.yaml` | Configuración no sensible (env, puertos, TTLs) |
+| `secret.example.yaml` | Plantilla de secretos **sin valores reales** |
+| `postgres-cluster.yaml` | Clúster CloudNativePG (2 instancias) |
+| `api-deployment.yaml` | Deployment + Service de la API |
+| `worker-deployment.yaml` | Deployment del worker de ingesta |
+| `scheduler-cronjob.yaml` | CronJob de la ingesta diaria (03:00 Europe/Madrid) |
+| `web-deployment.yaml` | Deployment + Service de la web |
+| `ingress.yaml` | Ingress con TLS (`/api` → API, resto → web) |
+| `hpa.yaml` | HPA de la API y de la web |
+
+Validación (no necesita cluster para la segunda):
+
+```bash
+# Con un cluster configurado
+kubectl apply --dry-run=client -f infra/k8s/
+
+# Sin cluster: valida contra los JSON schemas de Kubernetes
+kubeconform -strict -summary -ignore-missing-schemas infra/k8s/
+```
+
+Antes de desplegar hay que sustituir la imagen de ejemplo (`ghcr.io/tu-usuario/...`), el dominio, el `ingressClassName` y crear el secreto real:
+
+```bash
+kubectl apply -f infra/k8s/namespace.yaml
+kubectl -n comparador-precios create secret generic comparador-precios-secret --from-literal=...
+```
+
 ### Tests y linters
 
 ```bash
@@ -459,7 +493,7 @@ Si detectas una vulnerabilidad, **no abras un issue público**. Contacta al main
 | 4 — API búsqueda/comparativa | ✅ Completada | 6/6 |
 | 5 — Frontend flujo principal | ✅ Completada | 8/8 |
 | 6 — Perfil y listas | ✅ Completada | 6/6 |
-| 7 — Calidad y operación | 🟡 En curso | 5/6 |
+| 7 — Calidad y operación | ✅ Completada | 6/6 |
 | 8 — Escala (post-MVP) | ⚪ Futuro | — |
 
 Detalle en [`docs/BACKLOG.md`](docs/BACKLOG.md).

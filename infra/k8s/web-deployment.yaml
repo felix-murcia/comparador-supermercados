@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: comparador-precios
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: comparador-precios
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: web
+        app.kubernetes.io/part-of: comparador-precios
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/tu-usuario/comparador-precios-web:0.1.0
+          imagePullPolicy: IfNotPresent
+          command: ["node", "server.js"]
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: PORT
+              value: "3000"
+            - name: HOSTNAME
+              value: "0.0.0.0"
+            - name: NEXT_PUBLIC_API_URL
+              value: "http://api:8000"
+            - name: NEXTAUTH_URL
+              value: "https://precios.ejemplo.com"
+          envFrom:
+            - configMapRef:
+                name: comparador-precios-config
+            - secretRef:
+                name: comparador-precios-secret
+          livenessProbe:
+            httpGet:
+              path: /api/auth/csrf
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /api/auth/csrf
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: comparador-precios
+  labels:
+    app.kubernetes.io/name: web
+spec:
+  selector:
+    app.kubernetes.io/name: web
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

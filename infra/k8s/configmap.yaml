@@ -1,0 +1,24 @@
+# Configuración no sensible de la aplicación.
+# Los secretos (contraseñas, API keys, DSN de Sentry) van en secret.example.yaml.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: comparador-precios-config
+  namespace: comparador-precios
+  labels:
+    app.kubernetes.io/part-of: comparador-precios
+data:
+  APP_ENV: "prod"
+  LOG_LEVEL: "INFO"
+  API_PORT: "8000"
+  WEB_PORT: "3000"
+  CACHE_TTL_SEGUNDOS: "86400"
+  STICKY_READS_SEGUNDOS: "5"
+  RATE_LIMIT_BUSQUEDAS_POR_MINUTO: "10"
+  LLM_MAX_REINTENTOS: "3"
+  LLM_TIMEOUT_SEGUNDOS: "60"
+  SESSION_TTL_SEGUNDOS: "2592000"
+  BACKUP_RETENCION_DIAS: "7"
+  # Nombres de los secretos y del clúster de Postgres.
+  SECRET_NAME: "comparador-precios-secret"
+  POSTGRES_CLUSTER: "comparador-precios"
