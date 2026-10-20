@@ -7,6 +7,7 @@ Sin variables de entorno, los tests que las piden se saltan en lugar de fallar.
 
 from __future__ import annotations
 
+import asyncio
 import os
 from collections.abc import AsyncIterator, Awaitable, Callable
 from decimal import Decimal
@@ -28,6 +29,41 @@ from src.adaptadores.persistencia.modelos import (
     ProductoModelo,
     UsuarioModelo,
 )
+
+
+@pytest_asyncio.fixture
+async def esperar_replica() -> Callable[..., Awaitable[None]]:
+    """Devuelve un helper que espera a que la réplica alcance el LSN.
+
+    Los tests de integración escriben en el primario y leen por la réplica:
+    sin esta espera, la lectura puede no encontrar lo que se acaba de
+    escribir (y devolver 403 o 404 en vez del dato). Si la base de lectura
+    no es una réplica (Postgres único en la CI), no hay nada que esperar.
+    """
+
+    async def _esperar(
+        sesion_rw: AsyncSession,
+        sesion_ro: AsyncSession,
+        intentos: int = 100,
+    ) -> None:
+        if not await sesion_ro.scalar(text("SELECT pg_is_in_recovery()")):
+            return
+
+        lsn = await sesion_rw.scalar(text("SELECT pg_current_wal_lsn()"))
+        assert lsn is not None
+
+        for _ in range(intentos):
+            replicado = await sesion_ro.scalar(
+                text("SELECT pg_last_wal_replay_lsn() >= CAST(:lsn AS pg_lsn)"),
+                {"lsn": lsn},
+            )
+            if replicado:
+                return
+            await asyncio.sleep(0.1)
+        raise AssertionError("La réplica no alcanzó el LSN de la escritura a tiempo")
+
+    return _esperar
+
 
 _TABLAS = (
     "ingesta_metricas",

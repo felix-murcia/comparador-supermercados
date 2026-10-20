@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from datetime import UTC, datetime
 from decimal import Decimal
 
@@ -12,7 +11,6 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from redis.asyncio import Redis
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.adaptadores.cache.redis_cache import RedisCache
@@ -155,26 +153,14 @@ async def _preparar_datos(sesion: AsyncSession) -> None:
     await sesion.commit()
 
 
-async def _esperar_replica(
-    sesion_ro: AsyncSession, lsn: str, intentos: int = 100
-) -> None:
-    for _ in range(intentos):
-        replicado = await sesion_ro.scalar(
-            text("SELECT pg_last_wal_replay_lsn() >= CAST(:lsn AS pg_lsn)"),
-            {"lsn": lsn},
-        )
-        if replicado:
-            return
-        await asyncio.sleep(0.1)
-    raise AssertionError("La réplica no alcanzó el LSN de la escritura a tiempo")
-
-
 @pytest_asyncio.fixture
-async def datos(sesion_rw: AsyncSession, sesion_ro: AsyncSession) -> None:
+async def datos(
+    sesion_rw: AsyncSession,
+    sesion_ro: AsyncSession,
+    esperar_replica: Callable[..., Awaitable[None]],
+) -> None:
     await _preparar_datos(sesion_rw)
-    lsn = await sesion_rw.scalar(text("SELECT pg_current_wal_lsn()"))
-    assert lsn is not None
-    await _esperar_replica(sesion_ro, lsn)
+    await esperar_replica(sesion_rw, sesion_ro)
     await _limpiar_cache()
 
 

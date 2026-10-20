@@ -34,23 +34,6 @@ jobs:
   api-test:
     name: API · tests
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: app
-          POSTGRES_PASSWORD: testpass
-          POSTGRES_DB: precios
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd "pg_isready -U app" --health-interval 5s
-          --health-timeout 5s --health-retries 10
-      redis:
-        image: redis:7-alpine
-        ports: ["6379:6379"]
-        options: >-
-          --health-cmd "redis-cli ping" --health-interval 5s
-          --health-timeout 5s --health-retries 10
     defaults:
       run:
         working-directory: api
@@ -62,6 +45,16 @@ jobs:
           cache: pip
           cache-dependency-path: api/pyproject.toml
       - run: pip install -e ".[dev]"
+      # La suite necesita un Postgres primario y su réplica en streaming:
+      # los tests de comparativa, de estado de búsqueda y de métricas
+      # escriben en el primario y leen por la réplica (conftest.esperar_replica).
+      - name: Levantar Postgres (primario + réplica) y Redis
+        env:
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_REPLICATION_PASSWORD: testpass
+        run: |
+          docker compose -f ../infra/docker-compose.base.yml -f ../infra/docker-compose.dev.yml \
+            up -d --wait postgres-primary postgres-replica redis
       - name: Aplicar el esquema
         env:
           DATABASE_URL_RW: postgresql+asyncpg://app:testpass@localhost:5432/precios
@@ -69,11 +62,16 @@ jobs:
       - name: Tests
         env:
           DATABASE_URL_RW: postgresql+asyncpg://app:testpass@localhost:5432/precios
-          DATABASE_URL_RO: postgresql+asyncpg://app:testpass@localhost:5432/precios
+          DATABASE_URL_RO: postgresql+asyncpg://app:testpass@localhost:5433/precios
           REDIS_URL: redis://localhost:6379/0
           NEXTAUTH_SECRET: secreto-de-prueba-para-la-ci-32-bytes
         run: pytest --cov=src/dominio --cov=src/aplicacion --cov-report=term-missing
       - name: Cobertura mínima del dominio
+        env:
+          DATABASE_URL_RW: postgresql+asyncpg://app:testpass@localhost:5432/precios
+          DATABASE_URL_RO: postgresql+asyncpg://app:testpass@localhost:5433/precios
+          REDIS_URL: redis://localhost:6379/0
+          NEXTAUTH_SECRET: secreto-de-prueba-para-la-ci-32-bytes
         run: pytest --cov=src/dominio --cov-fail-under=80 --cov-report=term-missing
 
   web-lint:

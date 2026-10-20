@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import os
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from datetime import UTC, datetime
-from typing import Any
 from uuid import UUID, uuid4
 
 import jwt as pyjwt
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.adaptadores.persistencia.repositorio_busquedas import (
@@ -56,28 +54,6 @@ def _token(provider_id: str) -> str:
     )
 
 
-async def _lsn(sesion: AsyncSession) -> Any:
-    lsn = await sesion.scalar(text("SELECT pg_current_wal_lsn()"))
-    assert lsn is not None
-    return lsn
-
-
-async def _esperar_replica(
-    sesion_ro: AsyncSession, lsn: str, intentos: int = 100
-) -> None:
-    import asyncio
-
-    for _ in range(intentos):
-        replicado = await sesion_ro.scalar(
-            text("SELECT pg_last_wal_replay_lsn() >= CAST(:lsn AS pg_lsn)"),
-            {"lsn": lsn},
-        )
-        if replicado:
-            return
-        await asyncio.sleep(0.1)
-    raise AssertionError("La réplica no alcanzó el LSN de la escritura a tiempo")
-
-
 @pytest_asyncio.fixture
 async def cliente() -> AsyncIterator[AsyncClient]:
     transporte = ASGITransport(app=app)
@@ -86,7 +62,10 @@ async def cliente() -> AsyncIterator[AsyncClient]:
 
 
 async def _crear_usuario(
-    sesion: AsyncSession, sesion_ro: AsyncSession, provider_id: str
+    sesion: AsyncSession,
+    sesion_ro: AsyncSession,
+    provider_id: str,
+    esperar_replica: Callable[..., Awaitable[None]],
 ) -> UUID:
     usuario = await SQLAlchemyRepositorioUsuarios(sesion).upsert(
         IdentidadOAuth(
@@ -97,17 +76,20 @@ async def _crear_usuario(
         )
     )
     await sesion.commit()
-    lsn = await sesion.scalar(text("SELECT pg_current_wal_lsn()"))
-    assert lsn is not None
-    await _esperar_replica(sesion_ro, lsn)
+    await esperar_replica(sesion, sesion_ro)
     return usuario.id
 
 
 async def test_devuelve_el_estado_del_job(
-    cliente: AsyncClient, sesion_rw: AsyncSession, sesion_ro: AsyncSession
+    cliente: AsyncClient,
+    sesion_rw: AsyncSession,
+    sesion_ro: AsyncSession,
+    esperar_replica: Callable[..., Awaitable[None]],
 ) -> None:
     provider_id = f"estado-{uuid4().hex[:8]}"
-    usuario_id = await _crear_usuario(sesion_rw, sesion_ro, provider_id)
+    usuario_id = await _crear_usuario(
+        sesion_rw, sesion_ro, provider_id, esperar_replica
+    )
     job = await SQLAlchemyRepositorioBusquedas(sesion_rw).crear(
         BusquedaNueva(
             query="leche",
@@ -132,10 +114,15 @@ async def test_devuelve_el_estado_del_job(
 
 
 async def test_refleja_la_transicion_de_estados(
-    cliente: AsyncClient, sesion_rw: AsyncSession, sesion_ro: AsyncSession
+    cliente: AsyncClient,
+    sesion_rw: AsyncSession,
+    sesion_ro: AsyncSession,
+    esperar_replica: Callable[..., Awaitable[None]],
 ) -> None:
     provider_id = f"transicion-{uuid4().hex[:8]}"
-    usuario_id = await _crear_usuario(sesion_rw, sesion_ro, provider_id)
+    usuario_id = await _crear_usuario(
+        sesion_rw, sesion_ro, provider_id, esperar_replica
+    )
     repositorio = SQLAlchemyRepositorioBusquedas(sesion_rw)
     job = await repositorio.crear(
         BusquedaNueva(
@@ -149,7 +136,7 @@ async def test_refleja_la_transicion_de_estados(
 
     await repositorio.actualizar_estado(job.id, "en_progreso", 50)
     await sesion_rw.commit()
-    await _esperar_replica(sesion_ro, await _lsn(sesion_rw))
+    await esperar_replica(sesion_rw, sesion_ro)
 
     en_progreso = await cliente.get(
         f"/v1/busquedas/{job.id}",
@@ -163,7 +150,7 @@ async def test_refleja_la_transicion_de_estados(
         job.id, "completada", 100, completado_en=datetime.now(UTC)
     )
     await sesion_rw.commit()
-    await _esperar_replica(sesion_ro, await _lsn(sesion_rw))
+    await esperar_replica(sesion_rw, sesion_ro)
 
     completada = await cliente.get(
         f"/v1/busquedas/{job.id}",
@@ -176,12 +163,15 @@ async def test_refleja_la_transicion_de_estados(
 
 
 async def test_otro_usuario_no_puede_ver_el_job(
-    cliente: AsyncClient, sesion_rw: AsyncSession, sesion_ro: AsyncSession
+    cliente: AsyncClient,
+    sesion_rw: AsyncSession,
+    sesion_ro: AsyncSession,
+    esperar_replica: Callable[..., Awaitable[None]],
 ) -> None:
     duena_id = f"dueno-{uuid4().hex[:8]}"
     intruso_id = f"intruso-{uuid4().hex[:8]}"
-    usuario_id = await _crear_usuario(sesion_rw, sesion_ro, duena_id)
-    await _crear_usuario(sesion_rw, sesion_ro, intruso_id)
+    usuario_id = await _crear_usuario(sesion_rw, sesion_ro, duena_id, esperar_replica)
+    await _crear_usuario(sesion_rw, sesion_ro, intruso_id, esperar_replica)
     job = await SQLAlchemyRepositorioBusquedas(sesion_rw).crear(
         BusquedaNueva(
             query="leche",
@@ -191,7 +181,7 @@ async def test_otro_usuario_no_puede_ver_el_job(
         )
     )
     await sesion_rw.commit()
-    await _esperar_replica(sesion_ro, await _lsn(sesion_rw))
+    await esperar_replica(sesion_rw, sesion_ro)
 
     respuesta = await cliente.get(
         f"/v1/busquedas/{job.id}",
@@ -203,10 +193,13 @@ async def test_otro_usuario_no_puede_ver_el_job(
 
 
 async def test_job_inexistente_devuelve_404(
-    cliente: AsyncClient, sesion_rw: AsyncSession, sesion_ro: AsyncSession
+    cliente: AsyncClient,
+    sesion_rw: AsyncSession,
+    sesion_ro: AsyncSession,
+    esperar_replica: Callable[..., Awaitable[None]],
 ) -> None:
     provider_id = f"inexistente-{uuid4().hex[:8]}"
-    await _crear_usuario(sesion_rw, sesion_ro, provider_id)
+    await _crear_usuario(sesion_rw, sesion_ro, provider_id, esperar_replica)
 
     respuesta = await cliente.get(
         f"/v1/busquedas/{uuid4()}",

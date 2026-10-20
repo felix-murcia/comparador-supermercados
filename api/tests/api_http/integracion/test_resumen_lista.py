@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID, uuid4
@@ -151,9 +151,14 @@ async def _lista_con_precios(
 
 
 async def test_devuelve_el_resumen_de_la_lista(
-    cliente: AsyncClient, sesion_rw: AsyncSession, cadena_dia: UUID
+    cliente: AsyncClient,
+    sesion_rw: AsyncSession,
+    sesion_ro: AsyncSession,
+    cadena_dia: UUID,
+    esperar_replica: Callable[..., Awaitable[None]],
 ) -> None:
     provider_id, lista_id, _ = await _lista_con_precios(sesion_rw, cadena_dia)
+    await esperar_replica(sesion_rw, sesion_ro)
     cabeceras = {"Authorization": f"Bearer {_token(provider_id)}"}
 
     respuesta = await cliente.get(
@@ -182,9 +187,14 @@ async def test_devuelve_el_resumen_de_la_lista(
 
 
 async def test_el_resumen_se_cachea(
-    cliente: AsyncClient, sesion_rw: AsyncSession, cadena_dia: UUID
+    cliente: AsyncClient,
+    sesion_rw: AsyncSession,
+    sesion_ro: AsyncSession,
+    cadena_dia: UUID,
+    esperar_replica: Callable[..., Awaitable[None]],
 ) -> None:
     provider_id, lista_id, _ = await _lista_con_precios(sesion_rw, cadena_dia)
+    await esperar_replica(sesion_rw, sesion_ro)
     cabeceras = {"Authorization": f"Bearer {_token(provider_id)}"}
     parametros = {"cadenas": ["dia", "carrefour"]}
 
@@ -201,9 +211,14 @@ async def test_el_resumen_se_cachea(
 
 
 async def test_otra_usuario_no_puede_ver_el_resumen(
-    cliente: AsyncClient, sesion_rw: AsyncSession, cadena_dia: UUID
+    cliente: AsyncClient,
+    sesion_rw: AsyncSession,
+    sesion_ro: AsyncSession,
+    cadena_dia: UUID,
+    esperar_replica: Callable[..., Awaitable[None]],
 ) -> None:
     _, lista_id, _ = await _lista_con_precios(sesion_rw, cadena_dia)
+    await esperar_replica(sesion_rw, sesion_ro)
 
     respuesta = await cliente.get(
         f"/v1/listas/{lista_id}/resumen",

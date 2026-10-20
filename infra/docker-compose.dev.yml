@@ -12,6 +12,10 @@ services:
     ports:
       - "${POSTGRES_REPLICA_PORT:-5433}:5432"
 
+  redis:
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+
   api:
     build:
       target: dev

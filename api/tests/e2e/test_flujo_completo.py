@@ -8,7 +8,7 @@ resumen de ahorro. Requiere la BD y el Redis de test.
 from __future__ import annotations
 
 import os
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID, uuid4
@@ -114,8 +114,10 @@ async def _catalogo(sesion: AsyncSession, cadena_dia: UUID) -> tuple[UUID, UUID,
 async def test_flujo_completo_de_busqueda_lista_y_ahorro(
     cliente: AsyncClient,
     sesion_rw: AsyncSession,
+    sesion_ro: AsyncSession,
     redis: Redis,
     cadena_dia: UUID,
+    esperar_replica: Callable[..., Awaitable[None]],
 ) -> None:
     provider_id = f"e2e-{uuid4().hex[:8]}"
     cabeceras = {"Authorization": f"Bearer {_token(provider_id)}"}
@@ -148,16 +150,25 @@ async def test_flujo_completo_de_busqueda_lista_y_ahorro(
     )
     await sesion_rw.commit()
 
+    # La consulta lleva un sufijo único: su clave de caché no puede
+    # colisionar con la de otra ejecución (que dejaría el resultado cacheado
+    # y el endpoint respondería cache_hit sin encolar el job).
+    consulta = f"leche entera {uuid4().hex[:8]}"
+
     # 1. Búsqueda sin caché: encola un job.
     busqueda = await cliente.post(
         "/v1/busquedas",
-        json={"query": "leche entera", "cadenas": ["dia"]},
+        json={"query": consulta, "cadenas": ["dia"]},
         headers=cabeceras,
     )
     assert busqueda.status_code == 200
     assert busqueda.json()["cache_hit"] is False
     job_id = busqueda.json()["job_id"]
     assert job_id
+
+    # El estado del job se lee por la réplica: hay que esperar a que
+    # reproduzca el usuario y el job recién escritos.
+    await esperar_replica(sesion_rw, sesion_ro)
 
     # 2. El job se consulta y está pendiente.
     estado = await cliente.get(f"/v1/busquedas/{job_id}", headers=cabeceras)
@@ -211,12 +222,12 @@ async def test_flujo_completo_de_busqueda_lista_y_ahorro(
 
     # 6. Búsqueda con caché: no encola job.
     cache = RedisCache(redis)
-    clave = calcular_cache_key("leche entera", ("dia",), "precio_unitario", {}, None)
+    clave = calcular_cache_key(consulta, ("dia",), "precio_unitario", {}, None)
     await cache.set(clave, {"resultados": [{"nombre": "Leche entera"}]}, ttl=60)
 
     con_cache = await cliente.post(
         "/v1/busquedas",
-        json={"query": "leche entera", "cadenas": ["dia"]},
+        json={"query": consulta, "cadenas": ["dia"]},
         headers=cabeceras,
     )
     assert con_cache.status_code == 200
