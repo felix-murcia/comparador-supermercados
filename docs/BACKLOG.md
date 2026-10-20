@@ -154,7 +154,7 @@
   - [x] Job `security`: `gitleaks` + `trivy` sobre imágenes build.
   - [x] Job `compose-validate`: `docker compose config` de base+dev.
   - [x] CI verde en `main`.
-- **Nota**: `.github/workflows/ci.yml` define los seis jobs. La web gana `eslint` + `eslint-config-next` (script `npm run lint`), `vitest` (`npm test`, 8 tests de las reglas puras de filtros y slugs) y los guardas `lint:i18n` y `lint:a11y` también se ejecutan en el job `web-lint`. El job `api-test` levanta **Postgres con su réplica en streaming** (vía `infra/docker-compose.dev.yml`: `postgres-primary`, `postgres-replica` y `redis`), aplica el esquema con Alembic y exige **80 % de cobertura del dominio** (hoy: 98 %). La réplica es necesaria: los tests de comparativa, de estado de búsqueda, de métricas y de resumen escriben en el primario y leen por la réplica (helper `esperar_replica` en `api/tests/conftest.py`, que además no hace nada si la base de lectura no es una réplica). Con un Postgres único los tests son 250 y con réplica 252, ambos en verde. Todos los comandos del workflow se han ejecutado localmente contra el mismo stack que usa la CI y pasan; la ejecución real en `main` queda pendiente de conectar el repositorio a GitHub (no hay remoto configurado todavía).
+- **Nota**: `.github/workflows/ci.yml` define los seis jobs. La web gana `eslint` + `eslint-config-next` (script `npm run lint`), `vitest` (`npm test`, 8 tests de las reglas puras de filtros y slugs) y los guardas `lint:i18n` y `lint:a11y` también se ejecutan en el job `web-lint`. El job `api-test` levanta **Postgres con su réplica en streaming** (vía `infra/docker-compose.dev.yml`: `postgres-primary`, `postgres-replica` y `redis`), aplica el esquema con Alembic y exige **80 % de cobertura del dominio** (hoy: 98 %). La réplica es necesaria: los tests de comparativa, de estado de búsqueda, de métricas y de resumen escriben en el primario y leen por la réplica (helper `esperar_replica` en `api/tests/conftest.py`, que además no hace nada si la base de lectura no es una réplica). Con un Postgres único los tests son 250 y con réplica 252, ambos en verde. El job `security` escanea con Trivy las dos imágenes de producción: se actualizan los paquetes del sistema (`apt-get upgrade` en la API, `apk upgrade` en la web), la imagen de runtime de la web no lleva `npm`, `corepack` ni el binario de `esbuild` (solo se usan en build), el optimizador de imágenes de Next está desactivado (las imágenes son SVG locales) y `postcss` está fijado a 8.5.31 para eliminar la copia anidada vulnerable de `next/node_modules`. Las excepciones que quedan están en `.trivyignore`, con el motivo CVE a CVE. **CI verde en `main`**: los seis jobs pasan (run `39458368097`).
 
 ---
 
@@ -1004,7 +1004,7 @@ El MVP se considera completado cuando **todos** estos puntos se cumplen:
 - [ ] Sentry y UptimeRobot activos en prod (falta el DSN de Sentry y la cuenta de UptimeRobot).
 - [x] Backups diarios verificados (dump comprimido y restauración probada en una BD de prueba).
 - [x] Cobertura global ≥ 70% (dominio ≥ 80%).
-- [ ] CI verde en `main` (el flujo existe pero nunca se ha ejecutado: el repositorio no tiene remoto).
+- [x] CI verde en `main` (los seis jobs pasan; run `39458368097`).
 
 ### Pendientes que bloquean el cierre
 
