@@ -1,14 +1,20 @@
-import es from "@/locales/es.json";
+import { LOCALE_POR_DEFECTO, TRADUCCIONES } from "@/locales";
 
 /**
  * Cadenas de la interfaz. La clave usa puntos para la jerarquía
- * (`menu.buscar`) y el objeto de traducciones se puede ampliar con
- * `en.json` sin tocar los componentes.
+ * (`menu.buscar`) y los valores admiten marcadores `{nombre}`.
+ *
+ * La función es pura y no depende del contexto, así que sirve igual en
+ * Server Components y en Client Components.
  */
 export function t(
   clave: string,
   valores?: Record<string, string | number>,
 ): string {
+  const diccionario = TRADUCCIONES[LOCALE_POR_DEFECTO] as unknown as Record<
+    string,
+    unknown
+  >;
   const valor = clave
     .split(".")
     .reduce<unknown>(
@@ -16,7 +22,7 @@ export function t(
         actual && typeof actual === "object" && parte in actual
           ? (actual as Record<string, unknown>)[parte]
           : undefined,
-      es as unknown,
+      diccionario,
     );
 
   const texto = typeof valor === "string" ? valor : clave;

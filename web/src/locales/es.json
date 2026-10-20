@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "titulo": "Comparador de Precios de Supermercados",
+    "descripcion": "Compara precios de productos entre supermercados."
+  },
   "app": {
     "nombre": "Comparador de Precios"
   },

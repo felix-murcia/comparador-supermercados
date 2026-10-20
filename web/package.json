@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint:i18n": "node scripts/check-i18n.mjs"
   },
   "dependencies": {
     "jose": "^4.15.9",

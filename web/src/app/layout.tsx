@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import { t } from "@/lib/i18n";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Comparador de Precios de Supermercados",
-  description: "Compara precios de productos entre supermercados.",
+  title: t("meta.titulo"),
+  description: t("meta.descripcion"),
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

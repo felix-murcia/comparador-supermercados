@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 6/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 en curso — 7/8)
 
 ---
 
@@ -40,7 +40,7 @@
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
-| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (6/8) |
+| 5 — Frontend flujo principal | 8 | 13d | 🟡 En curso (7/8) |
 | 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
@@ -661,16 +661,17 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T5.7 — i18n base 🟢
+### [x] T5.7 — i18n base 🟢
 
 - **Depende de**: T5.1
 - **Estimación**: 1d
 - **Descripción**: `locales/es.json` con todos los strings. Función `t(key)` en `lib/i18n.ts`.
 - **Aceptación**:
-  - [ ] Todos los strings visibles en `locales/es.json`.
-  - [ ] `t("clave")` funciona en Server y Client Components.
-  - [ ] Sin strings hardcodeados en JSX (revisión manual + lint rule).
-  - [ ] Estructura preparada para añadir `en.json` sin refactor.
+  - [x] Todos los strings visibles en `locales/es.json`.
+  - [x] `t("clave")` funciona en Server y Client Components.
+  - [x] Sin strings hardcodeados en JSX (revisión manual + lint rule).
+  - [x] Estructura preparada para añadir `en.json` sin refactor.
+- **Nota**: `web/src/locales/index.ts` registra los diccionarios disponibles (`TRADUCCIONES` y `LOCALE_POR_DEFECTO`): añadir `en.json` es importar el archivo y añadirlo a ese registro, sin tocar `t()` ni los componentes. `t()` es pura y admite marcadores (`{visibles}`), y la usan tanto los Server Components (páginas, metadata) como los Client Components (cards, panel, hero). Como regla de lint, `web/scripts/check-i18n.mjs` (`npm run lint:i18n`) revisa el JSX y falla si queda un literal visible fuera de `locales/es.json`; se conectará al job `web-lint` de T0.7.
 
 ---
 
@@ -1004,9 +1005,9 @@ Actualizar al cerrar cada tarea:
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
-| 5 — Frontend flujo principal | 6 | 8 | 75% |
+| 5 — Frontend flujo principal | 7 | 8 | 88% |
 | 6 — Perfil y listas | 0 | 6 | 0% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **37** | **53** | **70%** |
+| **Total MVP** | **38** | **53** | **72%** |
 
 ---
