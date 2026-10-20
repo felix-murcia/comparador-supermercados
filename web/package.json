@@ -10,6 +10,7 @@
     "lint:a11y": "node scripts/check-a11y.mjs"
   },
   "dependencies": {
+    "@sentry/nextjs": "^8.55.2",
     "jose": "^4.15.9",
     "next": "14.2.35",
     "next-auth": "^4.24.15",

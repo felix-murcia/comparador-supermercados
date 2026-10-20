@@ -259,6 +259,35 @@ docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-
 
 > En dev la réplica se reconstruye vacía: `docker compose ... down -v` borra los volúmenes y la siguiente vez que levantes hace el `pg_basebackup` de nuevo.
 
+### Backups y restauración
+
+El servicio `backup` del compose hace un `pg_dump` comprimido **diario** y borra los ficheros con más de 7 días (`BACKUP_RETENCION_DIAS`). Los backups viven en el volumen `pg_backups`.
+
+```bash
+# Ver los backups
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml \
+  exec backup ls -lh /backups
+
+# Forzar un backup ahora
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml \
+  exec backup /usr/local/bin/backup.sh
+```
+
+Restaurar (⚠️ **borra los datos actuales** de la base de datos):
+
+```bash
+docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-compose.dev.yml \
+  exec postgres-primary bash -c \
+  'BACKUP=/backups/precios-YYYYMMDDTHHMMSSZ.sql.gz; gunzip -c "$BACKUP" | psql -v ON_ERROR_STOP=1 -U app -d precios'
+```
+
+`infra/postgres/restore.sh` hace lo mismo y además deja el esquema `public` listo para el Alembic (`alembic upgrade head` funciona después de restaurar).
+
+### Sentry y UptimeRobot
+
+- **Sentry**: rellena `SENTRY_DSN` (API) y `NEXT_PUBLIC_SENTRY_DSN` (navegador) en `.env`. La API captura los errores 500 con el handler global; la web inicializa Sentry en `sentry.client.config.ts` (errores de cliente) y `sentry.server.config.ts` (errores de servidor). Sin DSN, Sentry queda desactivado.
+- **UptimeRobot** (servicio externo, cuenta propia): crea un monitor de tipo HTTP contra `https://TU_DOMINIO/api/health/ready` con **intervalo 5 minutos** y alerta tras **2 comprobaciones fallidas** (a los correos que quieras). El endpoint `/api/health/ready` responde 200 solo si Postgres (primario y réplica), Redis y la API están operativos.
+
 ### Tests y linters
 
 ```bash

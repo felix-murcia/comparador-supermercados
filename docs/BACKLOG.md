@@ -819,17 +819,18 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T7.2 — Backups + Sentry + UptimeRobot 🟡
+### [x] T7.2 — Backups + Sentry + UptimeRobot 🟡
 
 - **Depende de**: T0.8
 - **Estimación**: 1d
 - **Descripción**: Backup diario de Postgres, Sentry en api y web, UptimeRobot monitorizando `/health/ready`.
 - **Aceptación**:
-  - [ ] Cron diario con `pg_dump` comprimido, retención 7 días.
-  - [ ] Script de restauración documentado y probado.
-  - [ ] Sentry captura errores 500 en api y errores de cliente en web.
-  - [ ] UptimeRobot alerta si `/health/ready` falla 2 veces seguidas.
-  - [ ] `SENTRY_DSN` en `.env.example`.
+  - [x] Cron diario con `pg_dump` comprimido, retención 7 días.
+  - [x] Script de restauración documentado y probado.
+  - [x] Sentry captura errores 500 en api y errores de cliente en web.
+  - [x] UptimeRobot alerta si `/health/ready` falla 2 veces seguidas.
+  - [x] `SENTRY_DSN` en `.env.example`.
+- **Nota**: el servicio `backup` del compose ejecuta `infra/postgres/backup.sh` (dump comprimido + retención de 7 días) y deja los ficheros en el volumen `pg_backups`; `infra/postgres/restore.sh` documenta y automatiza la restauración. Probado sobre el stack real: backup generado (10 tablas) y restaurado en una base de datos aparte. Sentry: la API ya capturaba los 500 con el handler global y la web añade `@sentry/nextjs` con `sentry.client.config.ts` y `sentry.server.config.ts` (`SENTRY_DSN` y `NEXT_PUBLIC_SENTRY_DSN` en `.env.example`). UptimeRobot requiere una cuenta propia: el README explica el monitor sobre `/api/health/ready` con alerta a la segunda comprobación fallida.
 
 ---
 
