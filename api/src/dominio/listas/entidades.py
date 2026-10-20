@@ -40,3 +40,13 @@ class ItemListaNuevo:
     cantidad: int = 1
     cadena_compra_id: UUID | None = None
     precio_snapshot: Decimal | None = None
+
+
+@dataclass(frozen=True)
+class ItemListaDetalle:
+    """Item de lista con los datos del producto, para mostrarlo en la interfaz."""
+
+    item: ItemLista
+    producto_nombre: str
+    producto_marca: str | None = None
+    producto_ean: str | None = None

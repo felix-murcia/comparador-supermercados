@@ -12,8 +12,17 @@ from src.adaptadores.persistencia.mapeo import (
     item_lista_desde_modelo,
     lista_desde_modelo,
 )
-from src.adaptadores.persistencia.modelos import ItemListaModelo, ListaModelo
-from src.dominio.listas.entidades import ItemLista, ItemListaNuevo, Lista
+from src.adaptadores.persistencia.modelos import (
+    ItemListaModelo,
+    ListaModelo,
+    ProductoModelo,
+)
+from src.dominio.listas.entidades import (
+    ItemLista,
+    ItemListaDetalle,
+    ItemListaNuevo,
+    Lista,
+)
 
 
 class SQLAlchemyRepositorioListas:
@@ -85,6 +94,35 @@ class SQLAlchemyRepositorioListas:
             )
         ).all()
         return [item_lista_desde_modelo(modelo) for modelo in modelos]
+
+    async def obtener_items_detallados(self, lista_id: UUID) -> list[ItemListaDetalle]:
+        """Items de la lista con el nombre del producto (para la interfaz)."""
+        filas = (
+            await self._session.execute(
+                select(ItemListaModelo, ProductoModelo)
+                .join(
+                    ProductoModelo,
+                    ProductoModelo.id == ItemListaModelo.producto_id,
+                )
+                .where(ItemListaModelo.lista_id == lista_id)
+                .order_by(ItemListaModelo.creado_en, ItemListaModelo.id)
+            )
+        ).all()
+        return [
+            ItemListaDetalle(
+                item=item_lista_desde_modelo(item),
+                producto_nombre=producto.nombre,
+                producto_marca=producto.marca,
+                producto_ean=producto.ean,
+            )
+            for item, producto in filas
+        ]
+
+    async def obtener_item(self, item_id: UUID) -> ItemLista | None:
+        modelo = await self._session.get(ItemListaModelo, item_id)
+        if modelo is None:
+            return None
+        return item_lista_desde_modelo(modelo)
 
     async def actualizar_item(
         self,

@@ -16,6 +16,15 @@ from pydantic import BaseModel, Field
 from src.adaptadores.persistencia.repositorio_listas import (
     SQLAlchemyRepositorioListas,
 )
+from src.adaptadores.persistencia.repositorio_precios import (
+    SQLAlchemyRepositorioPrecios,
+)
+from src.adaptadores.persistencia.repositorio_productos import (
+    SQLAlchemyRepositorioProductos,
+)
+from src.adaptadores.persistencia.repositorio_productos_cadenas import (
+    SQLAlchemyRepositorioProductosCadenas,
+)
 from src.adaptadores.persistencia.repositorio_usuarios import (
     SQLAlchemyRepositorioUsuarios,
 )
@@ -23,7 +32,13 @@ from src.api_http.autenticacion import Identidad
 from src.api_http.dependencias import SessionRW
 from src.api_http.errores import ErrorAPI
 from src.aplicacion.usuarios.obtener_perfil import ObtenerPerfil
-from src.dominio.listas.entidades import ItemLista, Lista
+from src.dominio.listas.entidades import (
+    ItemLista,
+    ItemListaDetalle,
+    ItemListaNuevo,
+    Lista,
+)
+from src.dominio.productos.errores import ProductoNoEncontradoError
 from src.dominio.usuarios.entidades import Usuario
 from src.dominio.usuarios.errores import UsuarioNoAutorizadoError
 
@@ -45,6 +60,46 @@ class ItemResponse(BaseModel):
     cadena_compra_id: UUID | None
     precio_snapshot: Decimal | None
     creado_en: datetime
+    producto_nombre: str | None = None
+    producto_marca: str | None = None
+
+    @classmethod
+    def desde(cls, item: ItemLista) -> ItemResponse:
+        return cls(
+            id=item.id,
+            producto_id=item.producto_id,
+            cantidad=item.cantidad,
+            cadena_compra_id=item.cadena_compra_id,
+            precio_snapshot=item.precio_snapshot,
+            creado_en=item.creado_en,
+        )
+
+    @classmethod
+    def desde_detalle(cls, detalle: ItemListaDetalle) -> ItemResponse:
+        return cls(
+            id=detalle.item.id,
+            producto_id=detalle.item.producto_id,
+            cantidad=detalle.item.cantidad,
+            cadena_compra_id=detalle.item.cadena_compra_id,
+            precio_snapshot=detalle.item.precio_snapshot,
+            creado_en=detalle.item.creado_en,
+            producto_nombre=detalle.producto_nombre,
+            producto_marca=detalle.producto_marca,
+        )
+
+
+class ItemRequest(BaseModel):
+    """Producto que se añade a la lista."""
+
+    producto_id: UUID
+    cantidad: int = Field(default=1, ge=1, le=999)
+    cadena_compra_id: UUID | None = None
+
+
+class ActualizarItemRequest(BaseModel):
+    """Nueva cantidad del item."""
+
+    cantidad: int = Field(ge=1, le=999)
 
 
 class ListaResponse(BaseModel):
@@ -56,22 +111,14 @@ class ListaResponse(BaseModel):
     items: list[ItemResponse] = Field(default_factory=list)
 
     @classmethod
-    def desde(cls, lista: Lista, items: list[ItemLista] | None = None) -> ListaResponse:
+    def desde(
+        cls, lista: Lista, items: list[ItemListaDetalle] | None = None
+    ) -> ListaResponse:
         return cls(
             id=lista.id,
             nombre=lista.nombre,
             creado_en=lista.creado_en,
-            items=[
-                ItemResponse(
-                    id=item.id,
-                    producto_id=item.producto_id,
-                    cantidad=item.cantidad,
-                    cadena_compra_id=item.cadena_compra_id,
-                    precio_snapshot=item.precio_snapshot,
-                    creado_en=item.creado_en,
-                )
-                for item in (items or [])
-            ],
+            items=[ItemResponse.desde_detalle(item) for item in (items or [])],
         )
 
 
@@ -149,7 +196,7 @@ async def obtener_lista(
         raise UsuarioNoAutorizadoError("El usuario no tiene perfil")
     repositorio = SQLAlchemyRepositorioListas(sesion)
     lista = await _lista_del_usuario(repositorio, lista_id, usuario.id)
-    items = await repositorio.obtener_items(lista.id)
+    items = await repositorio.obtener_items_detallados(lista.id)
     return ListaResponse.desde(lista, items)
 
 
@@ -185,4 +232,97 @@ async def eliminar_lista(
     repositorio = SQLAlchemyRepositorioListas(sesion)
     await _lista_del_usuario(repositorio, lista_id, usuario.id)
     await repositorio.eliminar(lista_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/{lista_id}/items",
+    response_model=ItemResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def agregar_item(
+    lista_id: UUID,
+    body: ItemRequest,
+    identidad: Identidad,
+    sesion: SessionRW,
+) -> ItemResponse:
+    """Añade un producto a la lista y guarda el precio del momento."""
+    usuario = await _usuario_para_escritura(
+        identidad, SQLAlchemyRepositorioUsuarios(sesion)
+    )
+    repositorio = SQLAlchemyRepositorioListas(sesion)
+    lista = await _lista_del_usuario(repositorio, lista_id, usuario.id)
+
+    producto = await SQLAlchemyRepositorioProductos(sesion).obtener(body.producto_id)
+    if producto is None:
+        raise ProductoNoEncontradoError(body.producto_id)
+
+    precio = None
+    if body.cadena_compra_id is not None:
+        # `cadena_compra_id` es la cadena donde compra el usuario; el precio
+        # del momento es el de ese producto en esa cadena.
+        producto_cadena_id = await SQLAlchemyRepositorioProductosCadenas(
+            sesion
+        ).obtener_por_producto_y_cadena(producto.id, body.cadena_compra_id)
+        if producto_cadena_id is not None:
+            precio = await SQLAlchemyRepositorioPrecios(sesion).ultimo_verificado(
+                producto_cadena_id
+            )
+
+    item = await repositorio.agregar_item(
+        ItemListaNuevo(
+            lista_id=lista.id,
+            producto_id=producto.id,
+            cantidad=body.cantidad,
+            cadena_compra_id=body.cadena_compra_id,
+            precio_snapshot=precio.importe_eur if precio is not None else None,
+        )
+    )
+    return ItemResponse.desde(item)
+
+
+@router.patch("/{lista_id}/items/{item_id}", response_model=ItemResponse)
+async def actualizar_item(
+    lista_id: UUID,
+    item_id: UUID,
+    body: ActualizarItemRequest,
+    identidad: Identidad,
+    sesion: SessionRW,
+) -> ItemResponse:
+    """Cambia la cantidad de un item de la lista."""
+    usuario = await _usuario_para_escritura(
+        identidad, SQLAlchemyRepositorioUsuarios(sesion)
+    )
+    repositorio = SQLAlchemyRepositorioListas(sesion)
+    lista = await _lista_del_usuario(repositorio, lista_id, usuario.id)
+
+    item = await repositorio.obtener_item(item_id)
+    if item is None or item.lista_id != lista.id:
+        raise ErrorAPI(404, "ITEM_NO_ENCONTRADO", "El item no está en la lista")
+
+    actualizado = await repositorio.actualizar_item(item_id, cantidad=body.cantidad)
+    if actualizado is None:
+        raise ErrorAPI(404, "ITEM_NO_ENCONTRADO", "El item no está en la lista")
+    return ItemResponse.desde(actualizado)
+
+
+@router.delete("/{lista_id}/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def eliminar_item(
+    lista_id: UUID,
+    item_id: UUID,
+    identidad: Identidad,
+    sesion: SessionRW,
+) -> Response:
+    """Quita un item de la lista."""
+    usuario = await _usuario_para_escritura(
+        identidad, SQLAlchemyRepositorioUsuarios(sesion)
+    )
+    repositorio = SQLAlchemyRepositorioListas(sesion)
+    lista = await _lista_del_usuario(repositorio, lista_id, usuario.id)
+
+    item = await repositorio.obtener_item(item_id)
+    if item is None or item.lista_id != lista.id:
+        raise ErrorAPI(404, "ITEM_NO_ENCONTRADO", "El item no está en la lista")
+
+    await repositorio.eliminar_item(item_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

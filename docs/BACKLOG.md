@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8; Épica 6 en curso — 2/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8; Épica 6 en curso — 3/6)
 
 ---
 
@@ -41,7 +41,7 @@
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ✅ Completada (8/8) |
-| 6 — Perfil y listas | 6 | 11d | 🟡 En curso (2/6) |
+| 6 — Perfil y listas | 6 | 11d | 🟡 En curso (3/6) |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
 | **Total MVP** | **53** | **~72d** | |
@@ -731,17 +731,18 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T6.3 — Añadir/quitar items de lista 🟡
+### [x] T6.3 — Añadir/quitar items de lista 🟡
 
 - **Depende de**: T6.2
 - **Estimación**: 1.5d
 - **Descripción**: Endpoints para añadir producto a lista (con cadena de compra y cantidad) y quitarlo.
 - **Aceptación**:
-  - [ ] `POST /v1/listas/{id}/items` con `{ producto_id, cadena_compra_id, cantidad }`.
-  - [ ] `DELETE /v1/listas/{id}/items/{item_id}`.
-  - [ ] `PATCH /v1/listas/{id}/items/{item_id}` para cambiar cantidad.
-  - [ ] `precio_snapshot` guardado al añadir (precio del momento).
-  - [ ] Tests: añadir, quitar, cambiar cantidad, producto inexistente.
+  - [x] `POST /v1/listas/{id}/items` con `{ producto_id, cadena_compra_id, cantidad }`.
+  - [x] `DELETE /v1/listas/{id}/items/{item_id}`.
+  - [x] `PATCH /v1/listas/{id}/items/{item_id}` para cambiar cantidad.
+  - [x] `precio_snapshot` guardado al añadir (precio del momento).
+  - [x] Tests: añadir, quitar, cambiar cantidad, producto inexistente.
+- **Nota**: `cadena_compra_id` es el id de la **cadena** donde compra el usuario (`lista_items.cadena_compra_id` → `cadenas.id`); al añadir se resuelve el producto en esa cadena y se guarda su último precio verificado como `precio_snapshot`. Un producto inexistente responde 404 `PRODUCTO_NO_ENCONTRADO` y una cantidad fuera de rango 422. El detalle de la lista incluye ahora el nombre y la marca del producto (`obtener_items_detallados`) para poder mostrarlos, y la comparativa devuelve también `cadena_id` para que la web pueda elegir dónde comprar.
 
 ---
 
@@ -1009,8 +1010,8 @@ Actualizar al cerrar cada tarea:
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
 | 5 — Frontend flujo principal | 8 | 8 | 100% |
-| 6 — Perfil y listas | 2 | 6 | 33% |
+| 6 — Perfil y listas | 3 | 6 | 50% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **41** | **53** | **77%** |
+| **Total MVP** | **42** | **53** | **79%** |
 
 ---

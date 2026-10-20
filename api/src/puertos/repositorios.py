@@ -15,7 +15,12 @@ from src.dominio.busquedas.entidades import Busqueda, BusquedaNueva
 from src.dominio.busquedas.estados import EstadoBusqueda
 from src.dominio.cadenas.entidades import Cadena
 from src.dominio.ingesta.entidades import MetricaIngesta, MetricasIngesta
-from src.dominio.listas.entidades import ItemLista, ItemListaNuevo, Lista
+from src.dominio.listas.entidades import (
+    ItemLista,
+    ItemListaDetalle,
+    ItemListaNuevo,
+    Lista,
+)
 from src.dominio.precios.entidades import (
     FiltrosComparacion,
     HistoricoPrecio,
@@ -91,6 +96,12 @@ class RepositorioListas(Protocol):
     async def agregar_item(self, datos: ItemListaNuevo) -> ItemLista: ...
 
     async def obtener_items(self, lista_id: UUID) -> list[ItemLista]: ...
+
+    async def obtener_items_detallados(
+        self, lista_id: UUID
+    ) -> list[ItemListaDetalle]: ...
+
+    async def obtener_item(self, item_id: UUID) -> ItemLista | None: ...
 
     async def actualizar_item(
         self,

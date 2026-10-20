@@ -77,6 +77,7 @@ class ResultadoComparacion:
     provincia: str | None = None
     url_producto: str | None = None
     disponible: bool | None = None
+    cadena_id: UUID | None = None
     posicion: int = 0
 
 

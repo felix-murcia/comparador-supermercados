@@ -51,6 +51,7 @@ class ResultadoResponse(BaseModel):
     provincia: str | None
     url_producto: str | None = None
     disponible: bool | None = None
+    cadena_id: UUID | None = None
 
 
 class CompararResponse(BaseModel):

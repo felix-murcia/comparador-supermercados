@@ -150,6 +150,7 @@ class SQLAlchemyRepositorioPrecios:
                 ProductoModelo.categoria.label("categoria"),
                 ProductoModelo.ean.label("ean"),
                 CadenaModelo.slug.label("cadena"),
+                CadenaModelo.id.label("cadena_id"),
                 ProductoCadenaModelo.url_producto.label("url_producto"),
                 PrecioModelo.precio_eur.label("precio_eur"),
                 PrecioModelo.precio_por_litro_kg.label("precio_por_litro_kg"),
@@ -217,6 +218,7 @@ class SQLAlchemyRepositorioPrecios:
             provincia=fila["provincia"],
             url_producto=fila["url_producto"],
             disponible=fila["disponible"],
+            cadena_id=fila["cadena_id"],
         )
 
     async def precios_actuales(
