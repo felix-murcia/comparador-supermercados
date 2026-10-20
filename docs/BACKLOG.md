@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épicas 1–7 completadas — 44/45; Épica 8 pendiente)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 7/8; Épicas 1–7 completadas — 45/45; Épica 8 pendiente)
 
 ---
 
@@ -35,7 +35,7 @@
 
 | Épica | Tareas | Estimación | Estado |
 |-------|--------|-----------|--------|
-| 0 — Fundación | 8 | 8d | 🟡 En curso (6/8) |
+| 0 — Fundación | 8 | 8d | 🟡 En curso (7/8) |
 | 1 — Autenticación | 5 | 6d | ✅ Completada (5/5) |
 | 2 — Modelo de datos | 6 | 7d | ✅ Completada (6/6) |
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
@@ -1014,7 +1014,7 @@ Actualizar al cerrar cada tarea:
 
 | Épica | Completadas | Total | % |
 |-------|-------------|-------|---|
-| 0 — Fundación | 6 | 8 | 75% |
+| 0 — Fundación | 7 | 8 | 88% |
 | 1 — Autenticación | 5 | 5 | 100% |
 | 2 — Modelo de datos | 6 | 6 | 100% |
 | 3 — Ingesta | 8 | 8 | 100% |
@@ -1022,6 +1022,6 @@ Actualizar al cerrar cada tarea:
 | 5 — Frontend flujo principal | 8 | 8 | 100% |
 | 6 — Perfil y listas | 6 | 6 | 100% |
 | 7 — Calidad y operación | 6 | 6 | 100% |
-| **Total MVP** | **51** | **53** | **96%** |
+| **Total MVP** | **52** | **53** | **98%** |
 
 ---
