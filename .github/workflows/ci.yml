@@ -133,6 +133,7 @@ jobs:
           exit-code: "1"
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+          trivyignores: .trivyignore
       - name: Trivy sobre la imagen de la web
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -141,6 +142,7 @@ jobs:
           exit-code: "1"
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+          trivyignores: .trivyignore
 
   compose-validate:
     name: Compose · configuración

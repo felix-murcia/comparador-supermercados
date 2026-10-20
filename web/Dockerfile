@@ -46,9 +46,23 @@ ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 
+# La imagen base trae libssl/libcrypto desactualizados (Trivy los marca como
+# HIGH). Se actualizan antes de copiar la aplicación.
+RUN apk update --no-cache \
+    && apk upgrade --no-cache \
+    && rm -rf /var/cache/apk/*
+
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# npm, corepack y el binario de esbuild solo hacen falta durante el build.
+# Esbuild arrastra un runtime de Go con CVE abiertas (28 hallazgos de Trivy)
+# que en runtime nunca se ejecuta.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+    /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+    node_modules/esbuild node_modules/@esbuild \
+    && rm -rf /var/cache/apk/*
 
 USER nextjs
 EXPOSE 3000

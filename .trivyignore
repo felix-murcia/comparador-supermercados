@@ -1,0 +1,52 @@
+# Falsos positivos de la imagen de la API.
+#
+# La imagen base `python:3.12-slim-bookworm` lleva un SBOM adjunto con las
+# versiones de sus paquetes de build. Trivy lo usa como fuente y reporta
+# paquetes que NO están en la imagen final:
+#
+#   - urllib3: el venv real trae 2.8.0 (parcheado); el SBOM dice 2.7.0.
+#   - msgpack y setuptools: no están instalados (se comprobó con `pip list`
+#     y `dpkg -l` sobre la imagen final).
+#
+# Se ignoran hasta que la imagen base actualice su SBOM.
+GHSA-6v7p-g79w-8964
+CVE-2025-47273
+CVE-2026-97687
+CVE-2026-97689
+
+# Next.js 14.2.35: no hay parche dentro de la rama 14.x; el arreglo llega en
+# 15.5.16+ / 16.2.5+ y exige Next 15 + React 19 + next-auth v5 (migración
+# mayor, planificada). Se revisa CVE a CVE contra la configuración real:
+#
+#   CVE-2026-75604       Solo afecta a servidores Windows. Despliegue Linux.
+#   GHSA-2xp9-vwfh-vxw4  RCE al optimizar AVIF con sharp. La app solo sirve
+#                        SVG locales y el optimizador está desactivado
+#                        (images.unoptimized en web/next.config.js).
+#   CVE-2026-44573       Pages Router con i18n. Aquí solo hay App Router y
+#                        el i18n es propio (locales/), no de Next.
+#   CVE-2026-44578       SSRF vía WebSocket upgrade. La app no usa
+#                        WebSockets; Caddy no reenvía cabeceras Upgrade.
+#   CVE-2026-64641       DoS con Server Actions. La app no define ninguna
+#                        ("use server" no aparece en el código).
+#   CVE-2026-64645       SSRF con rewrites()/redirects() que construyen el
+#                        host desde la petición. No hay rewrites ni redirects.
+#   CVE-2026-64649       SSRF cuando un Server Action hace forward/redirect.
+#                        No hay Server Actions.
+#   GHSA-8h8q-6873-q5fj  DoS por deserialización RSC (CVE-2026-23870 en
+#                        React). Afecta a "App Router Server Function
+#                        endpoints"; esta app no expone ninguno y el
+#                        manifiesto de server references sale vacío.
+#   GHSA-h25m-26qc-wcjf  Ídem, segunda variante del fallo de RSC.
+#   GHSA-q4gf-8mx6-v5v3  DoS con Server Components. Mitigado en el borde:
+#                        Caddy limita a 10 peticiones/minuto por IP las
+#                        rutas de búsqueda, que son las caras.
+CVE-2026-75604
+GHSA-2xp9-vwfh-vxw4
+CVE-2026-44573
+CVE-2026-44578
+CVE-2026-64641
+CVE-2026-64645
+CVE-2026-64649
+GHSA-8h8q-6873-q5fj
+GHSA-h25m-26qc-wcjf
+GHSA-q4gf-8mx6-v5v3

@@ -24,6 +24,12 @@ ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
+# La imagen base trae paquetes del sistema desactualizados (Trivy los marca
+# como HIGH). Se actualizan antes de instalar nada más.
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN groupadd --system app \
     && useradd --system --gid app --create-home app
 
