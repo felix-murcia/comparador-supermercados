@@ -1,7 +1,7 @@
 # Comparador de Precios de Supermercados Españoles
 
 [![CI](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml)
-[![Seguridad (Trivy)](https://img.shields.io/badge/seguridad-Trivy-0%20HIGH%2FCRITICAL-009485?logo=aquasec&logoColor=white)](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml)
+[![Seguridad (Trivy)](https://img.shields.io/badge/seguridad-Trivy%200%20HIGH%2FCRITICAL-009485?logo=aquasec&logoColor=white)](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml)
 [![gitleaks](https://img.shields.io/badge/gitleaks-sin%20fugas-blue?logo=gitguardian&logoColor=white)](https://github.com/felix-murcia/comparador-supermercados/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)](api/pyproject.toml)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](api/pyproject.toml)
