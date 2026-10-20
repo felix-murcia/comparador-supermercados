@@ -17,3 +17,11 @@ class UsuarioNoAutorizadoError(Exception):
     def __init__(self, motivo: str = "operación no permitida") -> None:
         self.motivo = motivo
         super().__init__(motivo)
+
+
+class UsuarioNoEncontradoError(Exception):
+    """El usuario solicitado no existe en la base de datos."""
+
+    def __init__(self, identificador: object) -> None:
+        self.identificador = identificador
+        super().__init__(f"Usuario no encontrado: {identificador!r}")

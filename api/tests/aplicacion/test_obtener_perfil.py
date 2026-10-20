@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -35,6 +35,11 @@ class RepositorioUsuariosFake:
         self, provider: str, provider_id: str
     ) -> Usuario | None:
         return None
+
+    async def actualizar(
+        self, usuario_id: UUID, nombre: str | None, provincia: str | None
+    ) -> Usuario:
+        raise NotImplementedError
 
 
 def test_el_fake_cumple_el_protocolo() -> None:

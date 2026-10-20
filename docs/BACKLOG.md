@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8; Épica 6 en curso — 1/6)
 
 ---
 
@@ -41,7 +41,7 @@
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ✅ Completada (8/8) |
-| 6 — Perfil y listas | 6 | 11d | ⚪ Pendiente |
+| 6 — Perfil y listas | 6 | 11d | 🟡 En curso (1/6) |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
 | **Total MVP** | **53** | **~72d** | |
@@ -699,17 +699,18 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T6.1 — `PATCH /v1/me` + página de perfil 🟡
+### [x] T6.1 — `PATCH /v1/me` + página de perfil 🟡
 
 - **Depende de**: T1.3
 - **Estimación**: 1.5d
 - **Descripción**: Endpoint para actualizar nombre, email y provincia. Página `/perfil` con formulario.
 - **Aceptación**:
-  - [ ] `PATCH /v1/me` acepta `nombre`, `provincia`.
-  - [ ] Validación de provincia contra lista de provincias españolas.
-  - [ ] Página `/perfil` con formulario y guardado.
-  - [ ] Al guardar provincia, se invalida caché del usuario.
-  - [ ] Tests: actualización válida, provincia inválida, sin auth.
+  - [x] `PATCH /v1/me` acepta `nombre`, `provincia`.
+  - [x] Validación de provincia contra lista de provincias españolas.
+  - [x] Página `/perfil` con formulario y guardado.
+  - [x] Al guardar provincia, se invalida caché del usuario.
+  - [x] Tests: actualización válida, provincia inválida, sin auth.
+- **Nota**: el catálogo de las 52 provincias vive en el dominio (`src/dominio/usuarios/provincias.py`) y se expone en `GET /v1/provincias` para el formulario; la comparación ignora mayúsculas, tildes y espacios, y una provincia desconocida responde 422 `PROVINCIA_INVALIDA`. Al cambiar la provincia se invalida la caché `v1:` (los resultados dependen de la zona). La página `/perfil` carga el perfil y el catálogo en el servidor y guarda con `PATCH /v1/me` a través del proxy `/api/me`.
 
 ---
 
@@ -1007,8 +1008,8 @@ Actualizar al cerrar cada tarea:
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
 | 5 — Frontend flujo principal | 8 | 8 | 100% |
-| 6 — Perfil y listas | 0 | 6 | 0% |
+| 6 — Perfil y listas | 1 | 6 | 17% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **39** | **53** | **74%** |
+| **Total MVP** | **40** | **53** | **75%** |
 
 ---

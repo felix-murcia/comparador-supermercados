@@ -19,6 +19,7 @@ from src.api_http.errores import (
     manejador_error_inesperado,
     manejador_no_autorizado,
     manejador_producto_no_encontrado,
+    manejador_provincia_invalida,
     manejador_rate_limit,
 )
 from src.api_http.v1.busquedas import router as busquedas_router
@@ -29,7 +30,10 @@ from src.api_http.v1.productos import router as productos_router
 from src.config import settings
 from src.dominio.errores import RateLimitError
 from src.dominio.productos.errores import ProductoNoEncontradoError
-from src.dominio.usuarios.errores import UsuarioNoAutorizadoError
+from src.dominio.usuarios.errores import (
+    ProvinciaInvalidaError,
+    UsuarioNoAutorizadoError,
+)
 
 CHECK_TIMEOUT_SEGUNDOS = 2.0
 
@@ -61,6 +65,7 @@ app.add_exception_handler(ErrorAPI, manejador_error_api)
 app.add_exception_handler(RateLimitError, manejador_rate_limit)
 app.add_exception_handler(ProductoNoEncontradoError, manejador_producto_no_encontrado)
 app.add_exception_handler(UsuarioNoAutorizadoError, manejador_no_autorizado)
+app.add_exception_handler(ProvinciaInvalidaError, manejador_provincia_invalida)
 app.add_exception_handler(Exception, manejador_error_inesperado)
 app.include_router(me_router)
 app.include_router(metricas_router)

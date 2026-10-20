@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.adaptadores.persistencia.mapeo import usuario_desde_modelo
 from src.adaptadores.persistencia.modelos import UsuarioModelo
 from src.dominio.usuarios.entidades import IdentidadOAuth, Usuario
+from src.dominio.usuarios.errores import UsuarioNoEncontradoError
 
 
 class SQLAlchemyRepositorioUsuarios:
@@ -54,4 +57,18 @@ class SQLAlchemyRepositorioUsuarios:
         )
         if modelo is None:
             return None
+        return usuario_desde_modelo(modelo)
+
+    async def actualizar(
+        self, usuario_id: UUID, nombre: str | None, provincia: str | None
+    ) -> Usuario:
+        modelo = await self._session.get(UsuarioModelo, usuario_id)
+        if modelo is None:
+            raise UsuarioNoEncontradoError(usuario_id)
+        if nombre is not None:
+            modelo.nombre = nombre
+        if provincia is not None:
+            modelo.provincia = provincia
+        await self._session.flush()
+        await self._session.refresh(modelo)
         return usuario_desde_modelo(modelo)

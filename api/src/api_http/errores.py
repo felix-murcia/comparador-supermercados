@@ -10,7 +10,10 @@ from fastapi.responses import JSONResponse
 
 from src.dominio.errores import RateLimitError
 from src.dominio.productos.errores import ProductoNoEncontradoError
-from src.dominio.usuarios.errores import UsuarioNoAutorizadoError
+from src.dominio.usuarios.errores import (
+    ProvinciaInvalidaError,
+    UsuarioNoAutorizadoError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +57,14 @@ def manejador_no_autorizado(_: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(
         status_code=403,
         content={"code": "NO_AUTORIZADO", "message": str(error)},
+    )
+
+
+def manejador_provincia_invalida(_: Request, exc: Exception) -> JSONResponse:
+    error = cast(ProvinciaInvalidaError, exc)
+    return JSONResponse(
+        status_code=422,
+        content={"code": "PROVINCIA_INVALIDA", "message": str(error)},
     )
 
 

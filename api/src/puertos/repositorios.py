@@ -129,6 +129,10 @@ class RepositorioUsuarios(Protocol):
         self, provider: str, provider_id: str
     ) -> Usuario | None: ...
 
+    async def actualizar(
+        self, usuario_id: UUID, nombre: str | None, provincia: str | None
+    ) -> Usuario: ...
+
 
 @runtime_checkable
 class RepositorioCadenas(Protocol):

@@ -96,6 +96,24 @@ function esPermitido(texto) {
 
 const problemas = [];
 
+// Claves duplicadas: en JSON la última gana y oculta las anteriores.
+for (const nombre of ["es.json"]) {
+  const ruta = join(RAIZ, "src", "locales", nombre);
+  let contenido;
+  try {
+    contenido = readFileSync(ruta, "utf8");
+  } catch {
+    continue;
+  }
+  const vistas = new Set();
+  for (const coincidencia of contenido.matchAll(/^\s{2}"([^"]+)":/gm)) {
+    if (vistas.has(coincidencia[1])) {
+      problemas.push(`locales/${nombre}: clave duplicada "${coincidencia[1]}"`);
+    }
+    vistas.add(coincidencia[1]);
+  }
+}
+
 for (const archivo of archivosTsx(SRC)) {
   const contenido = readFileSync(archivo, "utf8");
   const lineas = contenido.split("\n");

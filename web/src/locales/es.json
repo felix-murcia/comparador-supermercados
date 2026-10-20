@@ -74,15 +74,24 @@
     "limpiar": "Limpiar filtros",
     "contador": "{visibles} de {total} resultados"
   },
+  "perfil": {
+    "titulo": "Mi perfil",
+    "nombre": "Nombre",
+    "nombre_placeholder": "Tu nombre",
+    "provincia": "Provincia",
+    "provincia_sin_elegir": "Sin provincia (precios nacionales)",
+    "descripcion": "Con la provincia los precios se ajustan a tu zona.",
+    "guardar": "Guardar cambios",
+    "guardando": "Guardando…",
+    "guardado": "Perfil actualizado.",
+    "error": "No se pudo guardar el perfil."
+  },
   "listas": {
     "titulo": "Mis listas"
   },
   "lista": {
     "anadir": "Añadir a lista",
     "proximamente": "Las listas llegan en la próxima versión."
-  },
-  "perfil": {
-    "titulo": "Mi perfil"
   },
   "proximamente": "Disponible en la próxima versión."
 }
