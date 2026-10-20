@@ -15,6 +15,8 @@ VARIABLES_SOLO_WEB = {
     "sentry_org",
     "sentry_project",
     "session_ttl_segundos",
+    # Solo la usa el Caddy (limite del polling), no la API.
+    "rate_limit_polling_por_minuto",
 }
 
 
