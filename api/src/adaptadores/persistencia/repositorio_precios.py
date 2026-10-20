@@ -27,6 +27,13 @@ from src.dominio.precios.entidades import (
 )
 from src.dominio.precios.estados import AmbitoPrecio
 
+# Umbral de similitud de trigramas para encontrar un producto por nombre.
+# Por debajo de 0,5 la similitud da falsos positivos ("leche" parecería con
+# "leche de avena"); con consultas de menos de 6 letras solo se admite la
+# coincidencia literal.
+UMBRAL_SIMILITUD = 0.5
+LONGITUD_MINIMA_SIMILITUD = 6
+
 
 class SQLAlchemyRepositorioPrecios:
     """Solo `insertar` escribe; el histórico nunca se actualiza ni borra."""
@@ -102,6 +109,25 @@ class SQLAlchemyRepositorioPrecios:
         filas = (await self._session.execute(sentencia)).mappings().all()
         return [self._a_resultado(fila) for fila in filas]
 
+    @staticmethod
+    def _coincide_con_el_nombre(consulta: str) -> Any:
+        """Condición SQL que encuentra el producto pedido.
+
+        El `icontains` solo encuentra el nombre si la consulta aparece tal
+        cual, así que "leche entera Pascual 1L" no encontraba "Leche entera
+        Pascual 1 L". Se añade la similitud de trigramas (con el índice GIN
+        que hay sobre `productos.nombre`), que ya usa el repositorio de
+        productos para resolver el producto canónico.
+        """
+        literal = ProductoModelo.nombre.icontains(consulta, autoescape=True)
+        if len(consulta) < LONGITUD_MINIMA_SIMILITUD:
+            # Con poche letras la similitud da falsos positivos ("leche"
+            # parecería con "leche de avena"): solo se admite la coincidencia
+            # literal.
+            return literal
+        similitud = func.similarity(ProductoModelo.nombre, consulta)
+        return or_(literal, similitud >= UMBRAL_SIMILITUD)
+
     def _consulta_elegidos(self, filtros: FiltrosComparacion) -> Any:
         """Un precio por producto y cadena, prefiriendo el de la provincia."""
         preferencia = case(
@@ -117,7 +143,7 @@ class SQLAlchemyRepositorioPrecios:
         )
         condiciones = [
             PrecioModelo.estado == "verificado",
-            ProductoModelo.nombre.icontains(filtros.query, autoescape=True),
+            self._coincide_con_el_nombre(filtros.query),
         ]
         if filtros.cadenas:
             condiciones.append(CadenaModelo.slug.in_(filtros.cadenas))

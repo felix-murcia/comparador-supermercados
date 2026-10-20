@@ -48,6 +48,7 @@ from src.config import settings
 from src.dominio.busquedas.entidades import Busqueda
 from src.dominio.precios.entidades import FiltrosComparacion, ResultadoComparacion
 from src.dominio.precios.ranking import posicionar
+from src.logging_config import configurar_logging
 from src.puertos.cache import Cache
 
 logger = logging.getLogger(__name__)
@@ -147,7 +148,7 @@ async def _cachear_resultados(
     posicionados = posicionar(resultados, "precio_unitario")
     await cache.set(
         busqueda.cache_key,
-        {"resultados": [_resultado_json(r) for r in posicionados]},
+        {"resultados": [await _resultado_json(r) for r in posicionados]},
         settings.cache_ttl_segundos,
     )
     logger.info("Resultado cacheado para %s", busqueda.cache_key)
@@ -200,6 +201,7 @@ async def _cerrar() -> None:
 
 async def main() -> None:
     """Bucle del worker: reclama y procesa jobs hasta que se pare."""
+    configurar_logging()
     logger.info("Worker de ingesta arrancado")
     sessionmaker = get_sessionmaker_rw()
     try:

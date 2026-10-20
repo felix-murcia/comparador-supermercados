@@ -71,6 +71,27 @@ async def test_invalida_todas_las_claves_del_prefijo(cache: RedisCache) -> None:
 
 
 @pytest.mark.asyncio
+async def test_el_indice_no_caduca_antes_que_sus_claves(
+    cache: RedisCache, redis: Redis
+) -> None:
+    """Guardar una clave con TTL corto no puede acortar el índice.
+
+    La búsqueda se cachea 24 h y la comparativa 5 min: si la segunda renewa
+    el índice con su TTL corto, el índice caduca antes que la clave larga y
+    esa clave queda huérfana (la invalidación por prefijo deja de encontrarla).
+    """
+    await cache.set("v1:larga", {"resultados": [1]}, ttl=3600)
+    await cache.set("v1:corta", {"resultados": [2]}, ttl=60)
+
+    ttl_indice = await redis.ttl("cache:indices:v1:")
+
+    assert ttl_indice > 60, "el índice caducaría antes que sus claves"
+    await cache.invalidar_prefijo("v1:")
+    assert await cache.get("v1:larga") is None
+    assert await cache.get("v1:corta") is None
+
+
+@pytest.mark.asyncio
 async def test_no_rompe_si_redis_no_esta_disponible() -> None:
     cliente = Redis.from_url("redis://127.0.0.1:1/0", decode_responses=True)
     cache = RedisCache(cliente)

@@ -290,3 +290,20 @@ async def test_sin_resultados_devuelve_lista_vacia(
 
     assert respuesta.status_code == 200
     assert respuesta.json()["resultados"] == []
+
+
+async def test_encuentra_el_producto_sea_espacio_o_no_antes_de_la_unidad(
+    cliente: AsyncClient, datos: None
+) -> None:
+    """La unidad se escribe "1L" o "1 L": las dos consultas deben encontrarlo.
+
+    El nombre en la base de datos es "Leche entera" con formato "1L", y el
+    usuario escribe "leche entera 1L" o "leche entera 1 L".
+    """
+    sin_espacio = await cliente.get("/v1/comparar", params={"q": "leche entera 1L"})
+    con_espacio = await cliente.get("/v1/comparar", params={"q": "leche entera 1 L"})
+
+    assert sin_espacio.status_code == 200
+    assert con_espacio.status_code == 200
+    assert sin_espacio.json()["resultados"], "no encontró 'leche entera 1L'"
+    assert con_espacio.json()["resultados"], "no encontró 'leche entera 1 L'"

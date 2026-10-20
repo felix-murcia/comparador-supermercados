@@ -409,7 +409,7 @@
   - [x] Si el worker cae, el job vuelve a `pendiente` tras timeout.
   - [x] `api/src/worker.py` como punto de entrada (`python -m src.worker`).
   - [x] Tests de concurrencia: 2 workers no procesan el mismo job.
-- **Nota**: cola en la propia tabla `busquedas` (ADR-007) tras el puerto `ColaJobs` (`api/src/puertos/cola.py`) y el adaptador `PostgresColaJobs`. El reclamo es un único `UPDATE ... WHERE id = (SELECT ... FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *`; un job en `en_progreso` con `creado_en` anterior al timeout (15 min) se vuelve a reclamar, así que si el worker cae el job no se pierde. El progreso se actualiza cadena a cadena.
+- **Nota**: cola en la propia tabla `busquedas` (ADR-007) tras el puerto `ColaJobs` (`api/src/puertos/cola.py`) y el adaptador `PostgresColaJobs`. El reclamo es un único `UPDATE ... WHERE id = (SELECT ... FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *`; un job en `en_progreso` con `creado_en` anterior al timeout (15 min) se vuelve a reclamar, así que si el worker cae el job no se pierde. El progreso se actualiza cadena a cadena. Al terminar, el worker cachea el resultado de la búsqueda con la `cache_key` del job para que la próxima petición idéntica sea un acierto de caché (`POST /v1/busquedas` responde `cache_hit: true` y no lanza otro job al LLM).
 
 ---
 

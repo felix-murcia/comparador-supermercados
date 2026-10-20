@@ -10,6 +10,15 @@ from src.dominio.productos.entidades import Formato
 
 _PATRON_FORMATO = re.compile(r"(\d+(?:[.,]\d+)?)\s*(l|ml|kg|g)\b")
 
+# Espacio entre la cantidad y la unidad: "1 L" y "1L" son el mismo producto.
+# Se cubren todas las unidades que usan los retailers (litros, kilos, gramos,
+# mililitros, unidades, rollos...). El "x" del multiplicador ("4x120 g") se
+# deja aparte: no es una unidad.
+_ESPACIO_ANTES_UNIDAD = re.compile(r"(\d)\s+(?!x\b)([a-záéíóúñ]+)\b")
+
+# Multiplicador sin espacio: "4x120 g" y "4 x 120 g" son el mismo formato.
+_MULTIPLICADOR = re.compile(r"(\d)\s*x\s*(\d)")
+
 _UNIDADES = {"l": "L", "ml": "ml", "kg": "kg", "g": "g"}
 
 
@@ -36,5 +45,13 @@ def familia_unidad(unidad: str) -> str:
 
 
 def normalizar_nombre(texto: str) -> str:
-    """Minúsculas, sin tildes y sin espacios repetidos, para comparar nombres."""
-    return normalizar_texto(texto)
+    """Minúsculas, sin tildes y sin espacios repetidos, para comparar nombres.
+
+    Además quita el espacio entre la cantidad y la unidad ("1 L" y "1L" son el
+    mismo producto): los retailers escriben la unidad de las dos formas y, sin
+    esta normalización, la ingesta crearía dos productos distintos para el
+    mismo artículo y el precio se quedaría solo en uno de ellos.
+    """
+    normalizado = normalizar_texto(texto)
+    normalizado = _MULTIPLICADOR.sub(r"\1x\2", normalizado)
+    return _ESPACIO_ANTES_UNIDAD.sub(r"\1\2", normalizado)

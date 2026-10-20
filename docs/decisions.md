@@ -504,6 +504,38 @@ Responde: "¿cuánto pierdo por no ir a 3 supermercados?" (coste de la comodidad
 
 ---
 
+## ADR-021: La caché de búsquedas se escribe con el resultado del job y el nombre del producto se normaliza
+
+**Fecha**: 2026-10-20
+**Estado**: aceptado
+**Contexto**: Al repetir la misma búsqueda en producción, la web volvía a lanzar el job al LLM en vez de responder con la caché (ADR-005). Tres defectos encadenados, ninguno cubierto por los tests:
+
+1. **La caché nunca se escribía.** En el worker, `_resultado_json` es `async` pero se invocaba sin `await` dentro de la comprehension, así que la lista contenía coroutines y `json.dumps` fallaba con `TypeError`. El error se silenciaba en el `except` de `RedisCache.set` (un `WARNING` que, además, el worker no mostraba porque nunca configuraba el logging). Resultado: ni una clave de búsqueda en Redis, siempre `cache_hit: false`.
+2. **El índice de invalidación caducaba antes que sus claves.** `RedisCache.set` renewaba el TTL del índice con el de cada valor: guardar la comparativa (5 min) acortaba el índice de la búsqueda (24 h), y al expirar el índice sus claves quedaban huérfanas, fuera del alcance de `invalidar_prefijo`.
+3. **El nombre del producto no se normalizaba por completo.** "1 L" y "1L" son el mismo artículo, pero `normalizar_nombre` los trataba como distintos, así que la ingesta creaba dos productos y el precio se quedaba en uno. Además, la comparativa buscaba con `icontains` literal, de modo que "leche entera Pascual 1L" no encontraba "Leche entera Pascual 1 L".
+
+**Decisión**:
+- El worker cachea el resultado del job con la `cache_key` que se calculó al crear la búsqueda, serializando cada resultado con `await`.
+- El índice de invalidación solo renueva su TTL cuando el nuevo TTL es mayor: así vive al menos lo que la clave más longeva.
+- `normalizar_nombre` quita el espacio entre la cantidad y la unidad ("1 L" = "1L") y unifica el multiplicador ("4x125 g" = "4 x 125 g"), para que la ingesta reutilice el producto existente.
+- La comparativa acepta además del `icontains` literal la similitud de trigramas (umbral 0,5 y mínimo 6 caracteres), apoyándose en el índice GIN que ya existe sobre `productos.nombre`.
+- `api/scripts/reparar_duplicados.py` fusiona los duplicados que ya había en la base de datos. **No toca la tabla `precios`**: hay un trigger `trg_precios_append_only` que la hace inmutable; lo que se mueve es la ficha (`productos_cadena`).
+- El worker y el scheduler configuran el logging (`api/src/logging_config.py`), que hasta ahora solo hacía uvicorn para la API.
+
+**Consecuencias**:
+- ✅ Repetir una búsqueda responde `cache_hit: true` y no consume LLM (verificado en producción).
+- ✅ La invalidación por prefijo vuelve a encontrar todas las claves.
+- ✅ "1L" y "1 L" encuentran el mismo producto y la comparativa no lo duplica.
+- ⚠️ La similitud de trigramas puede devolver productos parecidos al que se busca; con el umbral de 0,5 y el mínimo de 6 caracteres, los falsos positivos medidos ("leche entera" vs "Leche desnatada", 0,26) quedan fuera.
+- ⚠️ El script de reparación es manual: en un despliegue nuevo no hay duplicados que reparar.
+
+**Alternativas consideradas**:
+- **Bajar el TTL de la caché de búsquedas**: no arreglaba que la caché no se escribiera.
+- **No cachear y confiar en el límite por usuario**: el límite protege el presupuesto de LLM, pero cada repetición repetía el coste.
+- **Borrar los precios duplicados para fusionar productos**: la tabla `precios` es append-only por diseño (ADR-005 y el trigger de la base de datos); se mueve la ficha, que es la que agrupa los precios.
+
+---
+
 ## Plantilla para nuevas decisiones
 
 ```markdown

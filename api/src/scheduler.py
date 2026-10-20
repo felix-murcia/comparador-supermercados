@@ -32,6 +32,7 @@ from src.adaptadores.persistencia.repositorio_productos import (
 )
 from src.dominio.busquedas.entidades import BusquedaNueva
 from src.dominio.busquedas.reglas import calcular_cache_key
+from src.logging_config import configurar_logging
 from src.puertos.cache import Cache
 
 logger = logging.getLogger(__name__)
@@ -130,6 +131,7 @@ def construir_scheduler(
 
 async def main() -> None:
     """Arranca el scheduler y espera hasta que se pare el proceso."""
+    configurar_logging()
     sessionmaker = get_sessionmaker_rw()
     cache = get_cache()
     scheduler = construir_scheduler(sessionmaker, cache)

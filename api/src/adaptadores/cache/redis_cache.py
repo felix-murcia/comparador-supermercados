@@ -69,7 +69,12 @@ class RedisCache:
         try:
             await self._redis.set(key, json.dumps(value), ex=ttl)
             await cast(Awaitable[Any], self._redis.sadd(indice, key))
-            await cast(Awaitable[Any], self._redis.expire(indice, ttl))
+            # El índice no puede caducar antes que las claves que lista: si
+            # expires, la invalidación por prefijo deja de encontrar las
+            # claves huérfanas. Se renueva solo si el TTL nuevo es mayor.
+            restante = await cast(Awaitable[int], self._redis.ttl(indice))
+            if restante < 0 or ttl > restante:
+                await cast(Awaitable[Any], self._redis.expire(indice, ttl))
         except (RedisError, TypeError, ValueError) as error:
             logger.warning(
                 "No se pudo guardar en caché %s: %s", key, type(error).__name__
