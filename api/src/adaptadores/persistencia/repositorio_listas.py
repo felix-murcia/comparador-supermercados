@@ -45,6 +45,24 @@ class SQLAlchemyRepositorioListas:
         ).all()
         return [lista_desde_modelo(modelo) for modelo in modelos]
 
+    async def renombrar(self, lista_id: UUID, nombre: str) -> Lista | None:
+        modelo = await self._session.get(ListaModelo, lista_id)
+        if modelo is None:
+            return None
+        modelo.nombre = nombre
+        await self._session.flush()
+        await self._session.refresh(modelo)
+        return lista_desde_modelo(modelo)
+
+    async def eliminar(self, lista_id: UUID) -> bool:
+        """Borra la lista; sus items caen en cascada (FK `ON DELETE CASCADE`)."""
+        resultado = await self._session.execute(
+            delete(ListaModelo)
+            .where(ListaModelo.id == lista_id)
+            .returning(ListaModelo.id)
+        )
+        return resultado.first() is not None
+
     async def agregar_item(self, datos: ItemListaNuevo) -> ItemLista:
         modelo = ItemListaModelo(
             lista_id=datos.lista_id,

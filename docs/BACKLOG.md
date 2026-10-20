@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8; Épica 6 en curso — 1/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8; Épica 6 en curso — 2/6)
 
 ---
 
@@ -41,7 +41,7 @@
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ✅ Completada (8/8) |
-| 6 — Perfil y listas | 6 | 11d | 🟡 En curso (1/6) |
+| 6 — Perfil y listas | 6 | 11d | 🟡 En curso (2/6) |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
 | **Total MVP** | **53** | **~72d** | |
@@ -714,19 +714,20 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T6.2 — CRUD listas (`/v1/listas`) 🟡
+### [x] T6.2 — CRUD listas (`/v1/listas`) 🟡
 
 - **Depende de**: T2.3, T1.3
 - **Estimación**: 2d
 - **Descripción**: Endpoints para crear, listar, obtener, renombrar y borrar listas.
 - **Aceptación**:
-  - [ ] `POST /v1/listas` → crea lista.
-  - [ ] `GET /v1/listas` → lista del usuario autenticado.
-  - [ ] `GET /v1/listas/{id}` → detalle con items.
-  - [ ] `PATCH /v1/listas/{id}` → renombrar.
-  - [ ] `DELETE /v1/listas/{id}` → borrar (cascade en items).
-  - [ ] Solo el dueño puede acceder (403 si no).
-  - [ ] Tests: CRUD completo + autorización.
+  - [x] `POST /v1/listas` → crea lista.
+  - [x] `GET /v1/listas` → lista del usuario autenticado.
+  - [x] `GET /v1/listas/{id}` → detalle con items.
+  - [x] `PATCH /v1/listas/{id}` → renombrar.
+  - [x] `DELETE /v1/listas/{id}` → borrar (cascade en items).
+  - [x] Solo el dueño puede acceder (403 si no).
+  - [x] Tests: CRUD completo + autorización.
+- **Nota**: `api/src/api_http/v1/listas.py` (crear, listar, detalle con items, renombrar y borrar) con el perfil del usuario resuelto por proveedor. El borrado arrastra los items por la FK `ON DELETE CASCADE` ✓ y el repositorio gana `renombrar` y `eliminar`. Las listas son datos privados: se leen del primario para que el usuario vea sus cambios al instante. Una lista ajena responde 403 `NO_AUTORIZADO` y una inexistente 404 `LISTA_NO_ENCONTRADA`.
 
 ---
 
@@ -1008,8 +1009,8 @@ Actualizar al cerrar cada tarea:
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
 | 5 — Frontend flujo principal | 8 | 8 | 100% |
-| 6 — Perfil y listas | 1 | 6 | 17% |
+| 6 — Perfil y listas | 2 | 6 | 33% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **40** | **53** | **75%** |
+| **Total MVP** | **41** | **53** | **77%** |
 
 ---

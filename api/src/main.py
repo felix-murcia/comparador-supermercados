@@ -24,6 +24,7 @@ from src.api_http.errores import (
 )
 from src.api_http.v1.busquedas import router as busquedas_router
 from src.api_http.v1.comparar import router as comparar_router
+from src.api_http.v1.listas import router as listas_router
 from src.api_http.v1.me import router as me_router
 from src.api_http.v1.metricas import router as metricas_router
 from src.api_http.v1.productos import router as productos_router
@@ -72,6 +73,7 @@ app.include_router(metricas_router)
 app.include_router(comparar_router)
 app.include_router(busquedas_router)
 app.include_router(productos_router)
+app.include_router(listas_router)
 
 
 async def check_database(url: str) -> bool:
