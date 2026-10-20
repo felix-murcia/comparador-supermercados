@@ -13,6 +13,7 @@ from src.adaptadores.persistencia.mapeo import (
     lista_desde_modelo,
 )
 from src.adaptadores.persistencia.modelos import (
+    CadenaModelo,
     ItemListaModelo,
     ListaModelo,
     ProductoModelo,
@@ -99,10 +100,14 @@ class SQLAlchemyRepositorioListas:
         """Items de la lista con el nombre del producto (para la interfaz)."""
         filas = (
             await self._session.execute(
-                select(ItemListaModelo, ProductoModelo)
+                select(ItemListaModelo, ProductoModelo, CadenaModelo.slug)
                 .join(
                     ProductoModelo,
                     ProductoModelo.id == ItemListaModelo.producto_id,
+                )
+                .outerjoin(
+                    CadenaModelo,
+                    CadenaModelo.id == ItemListaModelo.cadena_compra_id,
                 )
                 .where(ItemListaModelo.lista_id == lista_id)
                 .order_by(ItemListaModelo.creado_en, ItemListaModelo.id)
@@ -114,8 +119,9 @@ class SQLAlchemyRepositorioListas:
                 producto_nombre=producto.nombre,
                 producto_marca=producto.marca,
                 producto_ean=producto.ean,
+                cadena_compra=cadena,
             )
-            for item, producto in filas
+            for item, producto, cadena in filas
         ]
 
     async def obtener_item(self, item_id: UUID) -> ItemLista | None:

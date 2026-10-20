@@ -112,6 +112,7 @@ class ItemResponse(BaseModel):
     creado_en: datetime
     producto_nombre: str | None = None
     producto_marca: str | None = None
+    cadena_compra: str | None = None
 
     @classmethod
     def desde(cls, item: ItemLista) -> ItemResponse:
@@ -135,6 +136,7 @@ class ItemResponse(BaseModel):
             creado_en=detalle.item.creado_en,
             producto_nombre=detalle.producto_nombre,
             producto_marca=detalle.producto_marca,
+            cadena_compra=detalle.cadena_compra,
         )
 
 
@@ -391,13 +393,16 @@ async def resumen_lista(
     lista_id: UUID,
     identidad: Identidad,
     sesion: SessionRO,
+    sesion_usuario: SessionRW,
     cadenas: Annotated[
         list[str], Query(default_factory=list, description="Cadenas a comparar")
     ],
 ) -> ResumenListaResponse:
     """Coste total, % A por cadena, % C y avisos del ahorro de la lista."""
+    # El perfil se resuelve en el primario: si el usuario se acaba de registrar,
+    # la réplica puede ir retrasada y la lectura de sus datos fallaría.
     usuario = await _usuario_para_lectura(
-        identidad, SQLAlchemyRepositorioUsuarios(sesion)
+        identidad, SQLAlchemyRepositorioUsuarios(sesion_usuario)
     )
     if usuario is None:
         raise UsuarioNoAutorizadoError("El usuario no tiene perfil")

@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8; Épica 6 en curso — 5/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8; Épica 6 completada — 6/6)
 
 ---
 
@@ -41,7 +41,7 @@
 | 3 — Ingesta | 8 | 12d | ✅ Completada (8/8) |
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ✅ Completada (8/8) |
-| 6 — Perfil y listas | 6 | 11d | 🟡 En curso (5/6) |
+| 6 — Perfil y listas | 6 | 11d | ✅ Completada (6/6) |
 | 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
 | **Total MVP** | **53** | **~72d** | |
@@ -779,20 +779,21 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T6.6 — Vista de lista en frontend 🟡
+### [x] T6.6 — Vista de lista en frontend 🟡
 
 - **Depende de**: T6.2, T6.3, T6.5
 - **Estimación**: 2d
 - **Descripción**: Página `/listas/[id]` con items, coste total, % A y % C.
 - **Aceptación**:
-  - [ ] Lista de items con imagen, nombre, cadena, cantidad, precio.
-  - [ ] Coste total destacado.
-  - [ ] Tabla de % A por cadena.
-  - [ ] % C con tooltip explicativo.
-  - [ ] Botón "Añadir producto" (abre buscador en modal).
-  - [ ] Edición de cantidad inline.
-  - [ ] Eliminar item con confirmación.
-  - [ ] Avisos visibles si hay productos no disponibles.
+  - [x] Lista de items con imagen, nombre, cadena, cantidad, precio.
+  - [x] Coste total destacado.
+  - [x] Tabla de % A por cadena.
+  - [x] % C con tooltip explicativo.
+  - [x] Botón "Añadir producto" (abre buscador en modal).
+  - [x] Edición de cantidad inline.
+  - [x] Eliminar item con confirmación.
+  - [x] Avisos visibles si hay productos no disponibles.
+- **Nota**: `web/src/app/(app)/listas/[id]/page.tsx` renderiza en el servidor la lista y su resumen y `web/src/components/listas/VistaLista.tsx` lleva la interacción: cantidad editable en línea (PATCH), eliminación con confirmación, botón «Añadir producto» que abre un modal con el buscador (la comparativa), coste total destacado, tabla de % A por cadena, % C con tooltip y los avisos de productos no disponibles. Los proxies de Next son `/api/listas` (colección) y `/api/listas/[id]/[...ruta]` (detalle, items y resumen). La imagen de cada item es el logo de la cadena donde se compra (aún no hay fotos de producto).
 
 ---
 
@@ -1012,8 +1013,8 @@ Actualizar al cerrar cada tarea:
 | 3 — Ingesta | 8 | 8 | 100% |
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
 | 5 — Frontend flujo principal | 8 | 8 | 100% |
-| 6 — Perfil y listas | 5 | 6 | 83% |
+| 6 — Perfil y listas | 6 | 6 | 100% |
 | 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **44** | **53** | **83%** |
+| **Total MVP** | **45** | **53** | **85%** |
 
 ---

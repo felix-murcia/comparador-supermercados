@@ -50,3 +50,4 @@ class ItemListaDetalle:
     producto_nombre: str
     producto_marca: str | None = None
     producto_ean: str | None = None
+    cadena_compra: str | None = None

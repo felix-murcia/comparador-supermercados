@@ -91,7 +91,26 @@
   },
   "lista": {
     "anadir": "Añadir a lista",
-    "proximamente": "Las listas llegan en la próxima versión."
+    "proximamente": "Las listas llegan en la próxima versión.",
+    "no_encontrada": "No hemos encontrado esa lista",
+    "coste_total": "Coste total de tu lista",
+    "porcentaje_a": "Ahorro frente a la cadena más cara",
+    "porcentaje_a_titulo": "Ahorro por cadena",
+    "porcentaje_c": "Pérdida por no comprar en el más barato",
+    "sin_dato": "—",
+    "sin_precio": "Sin precio",
+    "sin_cadena": "Sin cadena",
+    "cadena": "Cadena",
+    "coste": "Coste",
+    "cantidad": "Cantidad",
+    "eliminar": "Eliminar",
+    "confirmar": "Sí, eliminar",
+    "cancelar": "Cancelar",
+    "anadir_producto": "Añadir producto",
+    "buscando": "Buscando…",
+    "cerrar": "Cerrar",
+    "error": "No se pudo guardar el cambio. Inténtalo de nuevo.",
+    "tooltip_porcentaje_c": "Cuánto pagarías de más respecto a comprar cada producto en el supermercado más barato."
   },
   "proximamente": "Disponible en la próxima versión."
 }
