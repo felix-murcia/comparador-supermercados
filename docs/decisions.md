@@ -356,6 +356,102 @@ Responde: "¿cuánto pierdo por no ir a 3 supermercados?" (coste de la comodidad
 
 ---
 
+## ADR-013: Gráfica del histórico con Recharts
+
+**Fecha**: 2026-10-20
+**Estado**: aceptado
+**Contexto**: La ficha de producto (T5.6) necesita una gráfica de la evolución del precio por cadena. La web no tiene graphing library y el bundle manda: Next.js ya incluye React 18.
+
+**Decisión**: Usar **Recharts** como librería de gráficas, con una serie por cadena y el rango temporal (1M/3M/6M/1A) como parámetro de la consulta. Se descarta Chart.js (no mantiene el estilo declarativo de React) y las gráficas SVG a mano (mantenimiento y ejes a coste de la vista).
+
+**Consecuencias**:
+- ✅ La gráfica encaja con el modelo de datos de React y no necesita canvas.
+- ✅ Sin dependencias de pago ni de licence server-side.
+- ⚠️ ~100 kB extra en el bundle de la ficha. Se aceptable: la ficha es una ruta secundaria y Recharts se carga solo allí (import dinámico cuando se implemente el refinamiento).
+
+**Alternativas consideradas**:
+- **Chart.js**: más ligero, pero obliga a imperar el DOM con refs y complica el SSR.
+- **SVG propio**: sin dependencias, pero axes, tooltips y responsive son trabajo a medida.
+
+---
+
+## ADR-014: Progreso de la búsqueda con polling
+
+**Fecha**: 2026-10-20
+**Estado**: aceptado
+**Contexto**: Al lanzar una búsqueda, la web necesita saber cuándo termina el job (T5.3) para pasar de la barra de progreso a los resultados.
+
+**Decisión**: La web **hace polling** a `GET /v1/busquedas/{id}` cada 1,5 s desde el navegador (vía el proxy de Next). El estado del job vive en la tabla `busquedas` y lo escribe el worker; no hay canales push.
+
+**Consecuencias**:
+- ✅ Sin WebSockets ni SSE: el estado ya está en la base de datos y el worker es un proceso aparte.
+- ✅ Funciona igual detrás de proxies y balanceadores (no hay conexiones largas).
+- ⚠️ Hasta 1,5 s de retraso entre el fin real del job y el cambio de vista. Se asume: el trabajo de ingesta tarda segundos o minutos.
+- ⚠️ Una petición por usuario y cada 1,5 s mientras espera. El endpoint es de solo lectura y está cacheado por el borde.
+
+**Alternativas consideradas**:
+- **SSE**: menor latencia, pero obliga a mantener conexiones abiertas en el servidor de Next y en el proxy.
+- **WebSocket**: más complejo y sin ventaja para un flujo de un solo sentido.
+
+---
+
+## ADR-015: Límite de peticiones en la aplicación y en el borde
+
+**Fecha**: 2026-10-20
+**Estado**: aceptado
+**Contexto**: `POST /v1/busquedas` es el endpoint caro: lanza jobs de ingesta con LLM. El borde (Caddy) ya limita por IP (`ADR-011`).
+
+**Decisión**: Mantener **los dos límites**: el del borde por IP (Caddy, 10 req/min) y uno **en la aplicación por usuario** (`RedisLimitador`, contador por minuto, `RATE_LIMIT_BUSQUEDAS_POR_MINUTO`). Si se supera, la API responde 429 `RATE_LIMIT`.
+
+**Consecuencias**:
+- ✅ El borde protege la infraestructura; la aplicación protege el presupuesto de LLM por cuenta (varias personas detrás de la misma IP siguen teniendo su propio límite).
+- ✅ El límite por usuario es el que se puede facturar o afinar por plan.
+- ⚠️ Redis pasa a ser dependencia del camino de escritura: si cae, el limitador deja pasar (fail-open) para no tumbar la app.
+
+**Alternativas consideradas**:
+- **Solo el borde**: un móvil detrás de CGNAT comparte cuota con toda la compañía.
+- **Solo la aplicación**: el LLM se gastaría antes de que el borde filtre el ruido.
+
+---
+
+## ADR-016: El navegador nunca ve el token de la API
+
+**Fecha**: 2026-10-20
+**Estado**: aceptado
+**Contexto**: La API valida el JWT de sesión que emite Auth.js (`ADR-012`). La web necesita llamar a la API (búsquedas, comparativa, listas) desde el navegador.
+
+**Decisión**: Toda llamada a la API pasa por **un proxy en el servidor de Next.js** (`web/src/app/api/**`), que lee la cookie de sesión, extrae el token y reenvía la petición a FastAPI con la cabecera `Authorization`. El token **no viaja al navegador**.
+
+**Consecuencias**:
+- ✅ El JWT no está expuesto a JavaScript: un XSS no lo puede leer.
+- ✅ No hace falta CORS: el navegador solo habla con su propio origen.
+- ✅ Un único punto donde se auditan y registran las llamadas.
+- ⚠️ Un salto extra (web → API) en cada llamada. Se compensa con la caché de Redis en la propia API (comparativa y resumen).
+
+**Alternativas consideradas**:
+- **Llamar a la API desde el navegador con el token**: requiere exponer el token en `useSession` y configurar CORS con credenciales.
+
+---
+
+## ADR-017: Sticky reads para los datos propios del usuario
+
+**Fecha**: 2026-10-20
+**Estado**: aceptado
+**Contexto**: La API escribe en el primario y lee en la réplica. Tras escribir, el usuario quiere ver su cambio (su lista, su job), pero la réplica va retrasada.
+
+**Decisión**: Cuando una petición escribe, se marca al usuario en Redis con el TTL `STICKY_READS_SEGUNDOS` (5 s). Durante ese tiempo sus lecturas van al primario en lugar de a la réplica. Las lecturas de datos **privados y recién escritos** (listas, items, resumen) usan además directamente el primario.
+
+**Consecuencias**:
+- ✅ El usuario ve de inmediato lo que acaba de hacer, sin esperas ni mensajes de error.
+- ✅ La réplica sigue absorbiendo el tráfico de lectura pública (comparativa, catálogo).
+- ⚠️ Un pico de lecturas al primario tras cada escritura de un usuario. Acotado por el TTL de 5 s.
+
+**Alternativas consideradas**:
+- **Esperar a la réplica**: deja al usuario viendo datos obsoletos.
+- **Leer siempre del primario**: waste el motivo de tener una réplica.
+
+---
+
 ## Plantilla para nuevas decisiones
 
 ```markdown

@@ -8,7 +8,7 @@
 **Decisiones**: `docs/decisions.md`
 
 **Última actualización**: 2026-10-19
-**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8; Épica 6 completada — 6/6)
+**Estado global**: 🟡 En desarrollo (Épica 0 parcial — 6/8; Épica 1 completada — 5/5; Épica 2 completada — 6/6; Épica 3 completada — 8/8; Épica 4 completada — 6/6; Épica 5 completada — 8/8; Épica 6 completada — 6/6; Épica 7 en curso — 3/6)
 
 ---
 
@@ -42,7 +42,7 @@
 | 4 — API búsqueda/comparativa | 6 | 8d | ✅ Completada (6/6) |
 | 5 — Frontend flujo principal | 8 | 13d | ✅ Completada (8/8) |
 | 6 — Perfil y listas | 6 | 11d | ✅ Completada (6/6) |
-| 7 — Calidad y operación | 6 | 7d | ⚪ Pendiente |
+| 7 — Calidad y operación | 6 | 7d | 🟡 En curso (3/6) |
 | 8 — Escala (post-MVP) | 4 | — | ⚪ Futuro |
 | **Total MVP** | **53** | **~72d** | |
 
@@ -877,16 +877,17 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
 
 ---
 
-### [ ] T7.6 — ADRs pendientes y revisión de documentación 🟢
+### [x] T7.6 — ADRs pendientes y revisión de documentación 🟢
 
 - **Depende de**: —
 - **Estimación**: 0.5d
 - **Descripción**: Revisar y actualizar `docs/decisions.md` con decisiones tomadas durante el desarrollo. Actualizar `docs/PLAN.md` si cambió algo.
 - **Aceptación**:
-  - [ ] ADRs nuevos registrados (ej: elección de Recharts, estrategia de polling vs. SSE si cambió).
-  - [ ] ADRs obsoletos marcados como `obsoleto` con referencia al nuevo.
-  - [ ] `docs/PLAN.md` coherente con el estado real.
-  - [ ] `README.md` actualizado con estado del proyecto.
+  - [x] ADRs nuevos registrados (ej: elección de Recharts, estrategia de polling vs. SSE si cambió).
+  - [x] ADRs obsoletos marcados como `obsoleto` con referencia al nuevo.
+  - [x] `docs/PLAN.md` coherente con el estado real.
+  - [x] `README.md` actualizado con estado del proyecto.
+- **Nota**: cinco ADRs nuevos: `ADR-013` Recharts para la gráfica del histórico, `ADR-014` polling (y no SSE) para el progreso de la búsqueda, `ADR-015` límite de peticiones en la aplicación y en el borde, `ADR-016` el token de la API nunca viaja al navegador (todo pasa por el proxy de Next) y `ADR-017` sticky reads para los datos propios del usuario. Ninguno de los ADRs anteriores queda obsoleto: `ADR-007` (cola en Postgres) y `ADR-012` (token HS256) se han cumplido tal cual. `docs/PLAN.md` sigue siendo coherente con lo construido y `README.md` refleja el estado real.
 
 ---
 
@@ -1016,7 +1017,7 @@ Actualizar al cerrar cada tarea:
 | 4 — API búsqueda/comparativa | 6 | 6 | 100% |
 | 5 — Frontend flujo principal | 8 | 8 | 100% |
 | 6 — Perfil y listas | 6 | 6 | 100% |
-| 7 — Calidad y operación | 0 | 6 | 0% |
-| **Total MVP** | **45** | **53** | **85%** |
+| 7 — Calidad y operación | 3 | 6 | 50% |
+| **Total MVP** | **48** | **53** | **91%** |
 
 ---
