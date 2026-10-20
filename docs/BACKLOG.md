@@ -363,7 +363,7 @@
   - [x] `url_fuente` obligatoria cuando `encontrado=true`.
   - [x] Tests con respuestas mockeadas (válida, inválida, no encontrado).
   - [x] Retry con backoff exponencial ante errores 5xx.
-- **Nota**: `api/src/adaptadores/ingesta/llm_productor.py` (productor) + `prompts.py` (prompt en constante) + `cliente_llm.py` (clientes HTTP de `openai`/`xai` y `anthropic` tras el puerto `ClienteLLM`). El parseo es JSON estricto: si no es un objeto o faltan campos obligatorios (`nombre`, `formato`, `precio_eur`, `url_fuente`) se lanza `ErrorProductor` (error de dominio, sin crash). Los 5xx y fallos de red se reintentan con backoff 0.5 s, 1 s, 2 s; los 4xx no se reintentan.
+- **Nota**: `api/src/adaptadores/ingesta/cliente_llm.py` (clientes HTTP de `openai`/`xai`/`anthropic`/`openrouter`) y `api/src/adaptadores/ingesta/llm_productor.py` (productor) + `prompts.py` (prompt en constante) + `cliente_llm.py` (clientes HTTP de `openai`/`xai`/`anthropic`/`openrouter`). El parseo es JSON estricto: si no es un objeto o faltan campos obligatorios (`nombre`, `formato`, `precio_eur`, `url_fuente`) se lanza `ErrorProductor` (error de dominio, sin crash). Los 5xx y fallos de red se reintentan con backoff 0,5 s, 1 s, 2 s; los 4xx no se reintentan. Verificado en producción contra OpenRouter: el productor genera un candidato válido y el verificador lo comprueba.
 
 ---
 
@@ -379,7 +379,7 @@
   - [x] Comprueba desviación vs. último precio conocido (>30% → `sospechoso`).
   - [x] Devuelve `(estado, motivos)` con estados `verificado | sospechoso | rechazado`.
   - [x] Tests con HTML real cacheado en `tests/fixtures/`.
-- **Nota**: `api/src/adaptadores/ingesta/verificador_fetch.py` (`FetchVerificador`). Motivos estables: `agente_no_encontro`, `url_invalida`, `fetch_error`, `precio_invalido`, `precio_no_encontrado_en_html`, `precio_por_unidad_incoherente`, `desviacion_precio`. El último precio conocido llega en el candidato como `precio_eur_anterior` (lo añade el caso de uso). Reglas puras en `dominio/precios/reglas.py` y `dominio/productos/reglas.py`.
+- **Nota**: `api/src/adaptadores/ingesta/verificador_fetch.py` (`FetchVerificador`), que descarga la ficha con cabeceras de navegador real (los sitios con protección anti-bot responden 403 a peticiones simples). Motivos estables: `agente_no_encontro`, `url_invalida`, `fetch_error`, `precio_invalido`, `precio_no_encontrado_en_html`, `precio_por_unidad_incoherente`, `desviacion_precio`. El último precio conocido llega en el candidato como `precio_eur_anterior` (lo añade el caso de uso). Reglas puras en `dominio/precios/reglas.py` y `dominio/productos/reglas.py`.
 
 ---
 

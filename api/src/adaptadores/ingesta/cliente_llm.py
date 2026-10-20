@@ -25,6 +25,7 @@ BASE_URLS_POR_DEFECTO = {
     "openai": "https://api.openai.com/v1",
     "xai": "https://api.x.ai/v1",
     "anthropic": "https://api.anthropic.com/v1",
+    "openrouter": "https://openrouter.ai/api/v1",
 }
 
 
@@ -83,7 +84,7 @@ def _texto_de_bloques(datos: dict[str, Any]) -> str:
 
 
 class ClienteOpenAICompatible:
-    """Chat completions con la API de OpenAI y compatibles (xAI)."""
+    """Chat completions con la API de OpenAI y compatibles (xAI, OpenRouter)."""
 
     def __init__(
         self,
@@ -97,6 +98,14 @@ class ClienteOpenAICompatible:
         self._base_url = base_url.rstrip("/")
         self._api_key = api_key
         self._modelo = modelo
+
+    def _cabeceras(self) -> dict[str, str]:
+        cabeceras = {"Authorization": f"Bearer {self._api_key}"}
+        if "openrouter.ai" in self._base_url:
+            # OpenRouter recomienda identificar la aplicación.
+            cabeceras["HTTP-Referer"] = "https://demo.sagarebel.com"
+            cabeceras["X-Title"] = "Comparador de Precios"
+        return cabeceras
 
     async def completar(self, prompt: str) -> str:
         cuerpo: dict[str, Any] = {
@@ -112,7 +121,7 @@ class ClienteOpenAICompatible:
             self._cliente_http,
             f"{self._base_url}/chat/completions",
             cuerpo,
-            {"Authorization": f"Bearer {self._api_key}"},
+            self._cabeceras(),
         )
         try:
             contenido = datos["choices"][0]["message"]["content"]

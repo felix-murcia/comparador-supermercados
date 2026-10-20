@@ -322,6 +322,26 @@ kubectl apply -f infra/k8s/namespace.yaml
 kubectl -n comparador-precios create secret generic comparador-precios-secret --from-literal=...
 ```
 
+### Ingesta de precios (LLM + verificación)
+
+El pipeline es `productor (LLM) → verificador (fetch determinista) → BD`:
+
+1. El **productor** (LLM) propone precio, formato y la URL de la ficha del producto.
+2. El **verificador** descarga esa URL (con cabeceras de navegador real: los sitios con protección anti-bot responden 403 a peticiones simples) y comprueba que el precio aparece en el HTML, que el €/L es coherente con el formato (±5 %) y que la desviación frente al último precio conocido es razonable (>30 % → `sospechoso`).
+3. Lo verificado se guarda en `precios` y se registra la métrica de ingesta.
+
+**El modelo del LLM importa**: un modelo sin búsqueda web se inventa las URLs de las fichas y el verificador las rechaza con 404. Usa un modelo con búsqueda (en OpenRouter, por ejemplo `openai/gpt-4o-mini:online` o `perplexity/sonar`) y configura `LLM_PROVIDER`, `LLM_API_KEY` y `LLM_MODEL` en el `.env`.
+
+```bash
+# Lanzar una búsqueda y ver el resultado
+curl -X POST https://TU_DOMINIO/api/v1/busquedas \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"query":"leche entera 1L","cadenas":["dia"]}'
+
+# Métricas de la última ingesta
+curl -H "Authorization: Bearer $TOKEN" https://TU_DOMINIO/api/v1/_metrics/ingesta
+```
+
 ### Tests y linters
 
 ```bash

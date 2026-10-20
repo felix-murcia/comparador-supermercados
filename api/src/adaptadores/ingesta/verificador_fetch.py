@@ -29,6 +29,24 @@ USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 )
+# Cabeceras de una navegación real: los sitios con protección anti-bot
+# responden 403 si la petición no parece un navegador.
+CABECERAS_NAVEGADOR = {
+    "User-Agent": USER_AGENT,
+    "Accept": (
+        "text/html,application/xhtml+xml,application/xml;q=0.9,"
+        "image/avif,image/webp,*/*;q=0.8"
+    ),
+    "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+    "sec-ch-ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Windows"',
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+}
 TOLERANCIA_UNIDAD = Decimal("0.05")
 UMBRAL_DESVIACION = Decimal("0.30")
 TOLERANCIA_PRECIO = Decimal("0.005")
@@ -112,7 +130,7 @@ class FetchVerificador:
         try:
             respuesta = await self._cliente_http.get(
                 url,
-                headers={"User-Agent": USER_AGENT},
+                headers=CABECERAS_NAVEGADOR,
                 timeout=TIMEOUT_SEGUNDOS,
                 follow_redirects=True,
             )
