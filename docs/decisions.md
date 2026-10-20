@@ -452,6 +452,30 @@ Responde: "¿cuánto pierdo por no ir a 3 supermercados?" (coste de la comodidad
 
 ---
 
+## ADR-019: Reparto de rutas `/api/*` entre Next.js y FastAPI en Caddy
+
+**Fecha**: 2026-10-20
+**Estado**: aceptado
+**Contexto**: El navegador nunca ve el token de sesión (ADR-012 y ADR-016), así que todo lo autenticado pasa por proxies de Next.js (`/api/comparar`, `/api/busquedas`, `/api/me`, `/api/listas`). Pero Caddy enviaba **todo** `/api/*` a FastAPI quitando el prefijo, así que esos proxies nunca se ejecutaban en el despliegue y la UI devolvía `404` (comparativa, búsqueda, perfil y listas). Además, la web resolvía la API con `NEXT_PUBLIC_API_URL`, que en producción valía el dominio público: el proxy pedía `https://<dominio>/v1/comparar` (sin `/api`) y recibía `{}`.
+
+**Decisión**:
+- Caddy enruta a `web:3000` las rutas que Next.js proxya (`/api/auth/*`, `/api/comparar*`, `/api/busquedas*`, `/api/me*`, `/api/listas*`) y reserva el comodín `handle_path /api/*` → `api:8000` para la API pública (`/api/v1/*`, `/api/health/*`).
+- La web llama a FastAPI por la red interna con la variable `API_INTERNAL_URL` (por defecto `http://api:8000`), no con el dominio público.
+- El middleware de Next.js deja de proteger `/api/*`: los proxies devuelven el `401` JSON de la API en lugar de una redirección HTML al login.
+
+**Consecuencias**:
+- ✅ La UI funciona en el despliegue real: comparativa, búsqueda con progreso, perfil y listas.
+- ✅ El token JWS sigue sin salir del servidor.
+- ⚠️ Cada ruta nueva que proxya Next.js debe añadirse al Caddyfile; si se olvida, Caddy la manda a FastAPI y devuelve 404. Conviene recordarlo en el `README`.
+- ⚠️ El límite de peticiones de Caddy tiene que cubrir las dos rutas (`/api/v1/busquedas*` y `/api/busquedas*`).
+
+**Alternativas consideradas**:
+- **Que el navegador llame a la API con la cookie de sesión**: FastAPI no valida esa cookie, obligaría a duplicar la validación de sesión en la API y expondría el dominio de la API al cliente.
+- **Mover los proxies a FastAPI**: FastAPI no conoce la cookie de Auth.js; obligaría a reimplementar la sesión en la API.
+- **Publicar la API en otra ruta (`/api-public/*`)**: cambia la convención de URLs documentada y rompe los enlaces existentes.
+
+---
+
 ## Plantilla para nuevas decisiones
 
 ```markdown

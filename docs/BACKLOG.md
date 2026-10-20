@@ -831,7 +831,7 @@ Aquí tienes la continuación exacta desde T5.7 hasta el final.
   - [x] Sentry captura errores 500 en api y errores de cliente en web.
   - [x] UptimeRobot alerta si `/health/ready` falla 2 veces seguidas.
   - [x] `SENTRY_DSN` en `.env.example`.
-- **Nota**: el servicio `backup` del compose ejecuta `infra/postgres/backup.sh` (dump comprimido + retención de 7 días) y deja los ficheros en el volumen `pg_backups`; `infra/postgres/restore.sh` documenta y automatiza la restauración. Probado sobre el stack real: backup generado (10 tablas) y restaurado en una base de datos aparte. Sentry: la API ya capturaba los 500 con el handler global y la web añade `@sentry/nextjs` con `sentry.client.config.ts` y `sentry.server.config.ts` (`SENTRY_DSN` y `NEXT_PUBLIC_SENTRY_DSN` en `.env.example`). UptimeRobot requiere una cuenta propia: el README explica el monitor sobre `/api/health/ready` con alerta a la segunda comprobación fallida.
+- **Nota**: el servicio `backup` del compose ejecuta `infra/postgres/backup.sh` (dump comprimido + retención de 7 días) y deja los ficheros en el volumen `pg_backups`; `infra/postgres/restore.sh` documenta y automatiza la restauración. Probado sobre el stack real: backup generado (10 tablas) y restaurado en una base de datos aparte. El script se llama con `bash` y se conecta por TCP a `postgres-primary` con `PGPASSWORD`: sin eso fallaba con «Permission denied» y con el socket local, que no existe porque la base vive en otro contenedor. Sentry: la API ya capturaba los 500 con el handler global y la web añade `@sentry/nextjs` con `sentry.client.config.ts` y `sentry.server.config.ts` (`SENTRY_DSN` y `NEXT_PUBLIC_SENTRY_DSN` en `.env.example`); falta rellenar el DSN para activarlo. UptimeRobot requiere una cuenta propia: el README explica el monitor sobre `/api/health/ready` con alerta a la segunda comprobación fallida.
 
 ---
 
@@ -991,20 +991,27 @@ T7.1 → T7.2 → T7.5 → T7.3 → T7.4 → T7.6
 
 El MVP se considera completado cuando **todos** estos puntos se cumplen:
 
-- [ ] Un usuario puede autenticarse con Google o Microsoft.
-- [ ] Puede buscar un producto, seleccionar cadenas y ver resultados en cards con logo, ranking, imagen clicable, nombre, € y €/kg-L.
-- [ ] La barra de progreso aparece solo en cache miss.
-- [ ] Puede cambiar orden y filtros sin relanzar búsqueda.
-- [ ] Puede ver el histórico de precios de un producto.
-- [ ] Puede crear una lista, añadir productos y ver coste total + % A + % C.
-- [ ] Puede editar su perfil y provincia; los precios se ajustan a su ubicación.
-- [ ] Todo funciona en dev con datos de prueba y en prod con datos reales.
-- [ ] No hay secretos en el repo (`gitleaks` pasa en CI).
-- [ ] La API responde en `/health/ready` con RW, RO y Redis OK.
-- [ ] Sentry y UptimeRobot activos en prod.
-- [ ] Backups diarios verificados.
-- [ ] Cobertura global ≥ 70% (dominio ≥ 80%).
-- [ ] CI verde en `main`.
+- [x] Un usuario puede autenticarse con Google (Microsoft pendiente de credenciales).
+- [x] Puede buscar un producto, seleccionar cadenas y ver resultados en cards con logo, ranking, imagen clicable, nombre, € y €/kg-L.
+- [x] La barra de progreso aparece solo en cache miss.
+- [x] Puede cambiar orden y filtros sin relanzar búsqueda.
+- [x] Puede ver el histórico de precios de un producto.
+- [x] Puede crear una lista, añadir productos y ver coste total + % A + % C.
+- [x] Puede editar su perfil y provincia; los precios se ajustan a su ubicación.
+- [x] Todo funciona en dev con datos de prueba y en prod con datos reales.
+- [x] No hay secretos en el repo (`gitleaks` pasa en CI).
+- [x] La API responde en `/health/ready` con RW, RO y Redis OK.
+- [ ] Sentry y UptimeRobot activos en prod (falta el DSN de Sentry y la cuenta de UptimeRobot).
+- [x] Backups diarios verificados (dump comprimido y restauración probada en una BD de prueba).
+- [x] Cobertura global ≥ 70% (dominio ≥ 80%).
+- [ ] CI verde en `main` (el flujo existe pero nunca se ha ejecutado: el repositorio no tiene remoto).
+
+### Pendientes que bloquean el cierre
+
+- **Login de Microsoft**: falta `MICROSOFT_CLIENT_ID` y `MICROSOFT_CLIENT_SECRET` en el `.env`. El proveedor ya está configurado en `web/src/lib/auth.ts` y el callback sería `https://demo.sagarebel.com/api/auth/callback/microsoft`.
+- **Sentry**: falta `SENTRY_DSN` y `NEXT_PUBLIC_SENTRY_DSN` en el `.env` (el código ya está instrumentado).
+- **UptimeRobot**: requiere una cuenta externa para vigilar `/api/health/ready`.
+- **CI**: el repositorio aún no tiene remoto, así que el workflow de GitHub Actions nunca ha corrido.
 
 ---
 

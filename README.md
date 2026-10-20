@@ -134,6 +134,20 @@ docker compose --env-file .env -f infra/docker-compose.base.yml -f infra/docker-
 - **API directa**: http://localhost:8000
 - **Docs API (dev)**: http://localhost:8000/docs
 
+### Qué ruta va a dónde
+
+Caddy reparte las URLs `/api/*` entre la web y FastAPI (**ADR-019**):
+
+| Ruta | Va a | Notas |
+|---|---|---|
+| `/api/auth/*` | Next.js | Callbacks de Google y Microsoft (Auth.js). |
+| `/api/comparar*`, `/api/busquedas*`, `/api/me*`, `/api/listas*` | Next.js | Proxies que inyectan el token de sesión: el navegador nunca lo ve. |
+| `/api/v1/*`, `/api/health/*` | FastAPI | API pública; Caddy quita el prefijo `/api`. |
+
+> **Si añades una ruta nueva en `web/src/app/api/`, añádela también al `Caddyfile`** (bloques `handle /api/<ruta>*`). Si se olvida, Caddy la envía a FastAPI y responde 404.
+>
+> La web llama a FastAPI por la red interna con `API_INTERNAL_URL` (por defecto `http://api:8000`). No la apuntes al dominio público: el proxy pediría `/v1/...` sin el prefijo `/api` y recibiría un `{}`.
+
 ---
 
 ## Autenticación (OAuth en dev)
