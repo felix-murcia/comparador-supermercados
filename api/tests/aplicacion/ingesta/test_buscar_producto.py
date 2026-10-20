@@ -75,6 +75,12 @@ class CadenasFake:
     async def obtener_por_slug(self, slug: str) -> Cadena | None:
         return self.cadenas.get(slug)
 
+    async def obtener_por_id(self, cadena_id: UUID) -> Cadena | None:
+        return next(
+            (cadena for cadena in self.cadenas.values() if cadena.id == cadena_id),
+            None,
+        )
+
 
 class ProductosFake:
     def __init__(self) -> None:

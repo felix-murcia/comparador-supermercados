@@ -155,6 +155,8 @@ class RepositorioCadenas(Protocol):
 
     async def obtener_por_slug(self, slug: str) -> Cadena | None: ...
 
+    async def obtener_por_id(self, cadena_id: UUID) -> Cadena | None: ...
+
 
 @runtime_checkable
 class RepositorioProductosCadenas(Protocol):

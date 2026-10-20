@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,6 +22,12 @@ class SQLAlchemyRepositorioCadenas:
         modelo = await self._session.scalar(
             select(CadenaModelo).where(CadenaModelo.slug == slug).limit(1)
         )
+        if modelo is None:
+            return None
+        return cadena_desde_modelo(modelo)
+
+    async def obtener_por_id(self, cadena_id: UUID) -> Cadena | None:
+        modelo = await self._session.get(CadenaModelo, cadena_id)
         if modelo is None:
             return None
         return cadena_desde_modelo(modelo)
