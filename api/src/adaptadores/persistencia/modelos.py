@@ -13,6 +13,7 @@ from decimal import Decimal
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
+    Computed,
     DateTime,
     ForeignKey,
     Integer,
@@ -21,7 +22,7 @@ from sqlalchemy import (
     UniqueConstraint,
     text,
 )
-from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -47,6 +48,15 @@ class ProductoModelo(Base):
         UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
     nombre: Mapped[str] = mapped_column(Text)
+    # tsvector del nombre normalizado, para la búsqueda por términos
+    # (columna generada, ver la migración 0004).
+    nombre_buscable: Mapped[TSVECTOR] = mapped_column(
+        TSVECTOR,
+        Computed(
+            "to_tsvector('spanish', nombre_buscable_normalizado(nombre))",
+            persisted=True,
+        ),
+    )
     marca: Mapped[str | None] = mapped_column(Text)
     categoria: Mapped[str | None] = mapped_column(Text)
     formato: Mapped[str | None] = mapped_column(Text)

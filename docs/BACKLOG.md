@@ -518,7 +518,7 @@
   - [x] Resolución de precio por provincia (ADR-009).
   - [x] Paginación `limit`/`offset`.
   - [x] Tests: cada filtro, cada orden, fallback provincia→nacional.
-- **Nota**: `api/src/api_http/v1/comparar.py`. La consulta elige un precio por producto y cadena con `DISTINCT ON`, prefiriendo el provincial sobre el nacional y cayendo al nacional si no hay precio de la provincia (ADR-009). Los filtros de precio y stock se aplican sobre el precio ya elegido; la paginación va en la misma consulta. El repositorio (`buscar_comparativa`) devuelve entidades de dominio y la posición en el ranking la calcula el dominio.
+- **Nota**: `api/src/api_http/v1/comparar.py`. La consulta elige un precio por producto y cadena con `DISTINCT ON`, prefiriendo el provincial sobre el nacional y cayendo al nacional si no hay precio de la provincia (ADR-009). Los filtros de precio y stock se aplican sobre el precio ya elegido; la paginación va en la misma consulta. El repositorio (`buscar_comparativa`) devuelve entidades de dominio y la posición en el ranking la calcula el dominio. **La búsqueda por nombre va por términos** (`plainto_tsquery` sobre la columna generada `productos.nombre_buscable`, con índice GIN, migración 0004): el `icontains` exigía que la consulta apareciera como subcadena continua, así que "aceite oliva" no encontraba "Aceite de oliva virgen extra" (hay una "de" en medio) y la similitud de trigramas tampoco llegaba (0,448). La normalización del nombre vive en la base de datos (`nombre_buscable_normalizado`) para que la consulta aplique exactamente la misma regla que el nombre almacenado; un test comprueba que coincide con `normalizar_nombre` del dominio.
 
 ---
 

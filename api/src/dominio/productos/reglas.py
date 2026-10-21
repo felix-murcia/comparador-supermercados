@@ -51,6 +51,11 @@ def normalizar_nombre(texto: str) -> str:
     mismo producto): los retailers escriben la unidad de las dos formas y, sin
     esta normalización, la ingesta crearía dos productos distintos para el
     mismo artículo y el precio se quedaría solo en uno de ellos.
+
+    La base de datos aplica la misma normalización en la función
+    `nombre_buscable_normalizado` (migración 0004), que es la que usa la
+    búsqueda por texto completo. `test_normalizar_nombre_coincide_con_sql`
+    comprueba que las dos coinciden.
     """
     normalizado = normalizar_texto(texto)
     normalizado = _MULTIPLICADOR.sub(r"\1x\2", normalizado)

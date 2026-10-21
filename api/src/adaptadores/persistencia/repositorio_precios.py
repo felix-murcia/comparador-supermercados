@@ -113,11 +113,15 @@ class SQLAlchemyRepositorioPrecios:
     def _coincide_con_el_nombre(consulta: str) -> Any:
         """Condición SQL que encuentra el producto pedido.
 
-        El `icontains` solo encuentra el nombre si la consulta aparece tal
-        cual, así que "leche entera Pascual 1L" no encontraba "Leche entera
-        Pascual 1 L". Se añade la similitud de trigramas (con el índice GIN
-        que hay sobre `productos.nombre`), que ya usa el repositorio de
-        productos para resolver el producto canónico.
+        Se busca por términos (`plainto_tsquery`): "aceite oliva" se
+        convierte en `'aceit' & 'oliv'` y encuentra "Aceite de oliva
+        virgen extra", aunque en el nombre haya palabras de por medio. El
+        `icontains` solo encontraba el nombre si la consulta aparecía tal
+        cual, y la similitud de trigramas no llegaba ("aceite oliva" da
+        0,448 con "Aceite de oliva virgen extra").
+
+        Se mantiene la similitud como alternativa para las consultas con
+        erratas, donde los términos no coinciden.
         """
         literal = ProductoModelo.nombre.icontains(consulta, autoescape=True)
         if len(consulta) < LONGITUD_MINIMA_SIMILITUD:
@@ -125,8 +129,14 @@ class SQLAlchemyRepositorioPrecios:
             # parecería con "leche de avena"): solo se admite la coincidencia
             # literal.
             return literal
+        por_terminos = ProductoModelo.nombre_buscable.op("@@")(
+            func.plainto_tsquery(
+                "spanish",
+                func.nombre_buscable_normalizado(consulta),
+            )
+        )
         similitud = func.similarity(ProductoModelo.nombre, consulta)
-        return or_(literal, similitud >= UMBRAL_SIMILITUD)
+        return or_(literal, por_terminos, similitud >= UMBRAL_SIMILITUD)
 
     def _consulta_elegidos(self, filtros: FiltrosComparacion) -> Any:
         """Un precio por producto y cadena, prefiriendo el de la provincia."""

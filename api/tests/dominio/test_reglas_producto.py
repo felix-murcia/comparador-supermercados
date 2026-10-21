@@ -5,6 +5,8 @@ from __future__ import annotations
 from decimal import Decimal
 
 import pytest
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dominio.productos.reglas import (
     familia_unidad,
@@ -68,3 +70,29 @@ def test_familia_unidad() -> None:
     assert familia_unidad("ml") == "l"
     assert familia_unidad("kg") == "kg"
     assert familia_unidad("g") == "kg"
+
+
+@pytest.mark.asyncio
+async def test_normalizar_nombre_coincide_con_sql(sesion_rw: AsyncSession) -> None:
+    """La normalización de SQL y la del dominio deben dar lo mismo.
+
+    La búsqueda por texto completo normaliza en la base de datos (función
+    `nombre_buscable_normalizado`) y la ingesta normaliza en Python
+    (`normalizar_nombre`). Si divergen, el producto se crea duplicado o la
+    búsqueda no lo encuentra.
+    """
+    casos = [
+        "Leche entera Pascual 1L",
+        "Leche entera Pascual 1 L",
+        "Aceite de oliva virgen extra",
+        "Yogur natural pack de 4 uds",
+        "4x125 g",
+        "4 x 125 g",
+        "Leche Dia Láctea 1 L",
+    ]
+
+    for caso in casos:
+        en_sql = await sesion_rw.scalar(
+            text("SELECT nombre_buscable_normalizado(:nombre)"), {"nombre": caso}
+        )
+        assert en_sql == normalizar_nombre(caso), caso

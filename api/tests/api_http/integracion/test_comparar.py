@@ -64,8 +64,37 @@ async def _preparar_datos(sesion: AsyncSession) -> None:
         litros_o_kg=Decimal("1.5"),
         ean="8412345678903",
     )
-    sesion.add_all([leche, avena, agua])
+    aceite = ProductoModelo(
+        nombre="Aceite de oliva virgen extra",
+        marca="Carbonell",
+        categoria="aceites",
+        formato="1 L",
+        litros_o_kg=Decimal(1),
+        ean="8412345678904",
+    )
+    sesion.add_all([leche, avena, agua, aceite])
     await sesion.flush()
+
+    aceite_dia = ProductoCadenaModelo(
+        producto_id=aceite.id,
+        cadena_id=dia.id,
+        url_producto="https://dia.test/aceite",
+        nombre_en_cadena="Aceite de oliva virgen extra 1 L",
+    )
+    sesion.add(aceite_dia)
+    await sesion.flush()
+    sesion.add(
+        PrecioModelo(
+            producto_cadena_id=aceite_dia.id,
+            precio_eur=Decimal("4.50"),
+            precio_por_litro_kg=Decimal("4.5000"),
+            disponible=True,
+            ambito="nacional",
+            url_fuente="https://dia.test/aceite",
+            fecha_consulta=datetime.now(UTC),
+            estado="verificado",
+        )
+    )
 
     leche_dia = ProductoCadenaModelo(
         producto_id=leche.id,
@@ -307,3 +336,31 @@ async def test_encuentra_el_producto_sea_espacio_o_no_antes_de_la_unidad(
     assert con_espacio.status_code == 200
     assert sin_espacio.json()["resultados"], "no encontró 'leche entera 1L'"
     assert con_espacio.json()["resultados"], "no encontró 'leche entera 1 L'"
+
+
+async def test_busca_por_terminos_y_no_por_subcadena(
+    cliente: AsyncClient, datos: None
+) -> None:
+    """La búsqueda va por términos: "aceite oliva" encuentra el producto.
+
+    En el nombre hay palabras de por medio ("Aceite *de* oliva virgen
+    extra"), así que la consulta no aparece como subcadena continua. Con la
+    similitud de trigramas tampoco sale: da 0,448.
+    """
+    respuesta = await cliente.get("/v1/comparar", params={"q": "aceite oliva"})
+
+    assert respuesta.status_code == 200
+    nombres = [r["nombre"] for r in respuesta.json()["resultados"]]
+    assert "Aceite de oliva virgen extra" in nombres
+
+
+async def test_no_confunde_productos_por_parecidos(
+    cliente: AsyncClient, datos: None
+) -> None:
+    """ "leche entera" no debe traer "Leche de avena" ni "Agua mineral"."""
+    respuesta = await cliente.get("/v1/comparar", params={"q": "leche entera"})
+
+    assert respuesta.status_code == 200
+    nombres = [r["nombre"] for r in respuesta.json()["resultados"]]
+    assert "Leche de avena" not in nombres
+    assert "Agua mineral" not in nombres

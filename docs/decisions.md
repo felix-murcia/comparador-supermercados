@@ -536,6 +536,34 @@ Responde: "¿cuánto pierdo por no ir a 3 supermercados?" (coste de la comodidad
 
 ---
 
+## ADR-022: La búsqueda de productos va por términos con índice de texto completo
+
+**Fecha**: 2026-10-21
+**Estado**: aceptado
+**Contexto**: Buscar "aceite oliva" no encontraba "Aceite de oliva virgen extra" (ni ningún otro aceite de oliva), aunque el producto estaba en la base de datos con su precio. La búsqueda usaba dos mecanismos, y los dos fallaban:
+
+- `icontains` exige que la consulta aparezca como **subcadena continua**, así que en "Aceite **de** oliva virgen extra" no está: hay palabras de por medio.
+- La similitud de trigramas daba 0,448, por debajo del umbral de 0,5 (medido sobre los nombres reales de la base de datos).
+
+**Decisión**: La búsqueda pasa a ser **por términos**: se usa `plainto_tsquery` sobre una columna generada con el `tsvector` del nombre normalizado, con índice GIN. "aceite oliva" se convierte en `'aceit' & 'oliv'` y encuentra el producto aunque el nombre tenga palabras intermedias. Además:
+
+- La normalización del nombre vive en la **base de datos** (función `nombre_buscable_normalizado`, migración 0004) y no solo en la expresión de la columna, para que la consulta aplique exactamente la misma regla que el nombre almacenado. Un test verifica que coincide con `normalizar_nombre` del dominio.
+- Se mantiene la similitud de trigramas como alternativa, para las consultas con erratas ("tomte triturado"), donde los términos no coinciden.
+
+**Consecuencias**:
+- ✅ "aceite oliva" encuentra los 5 productos de aceite de oliva; "leche entera" no trae "Leche de avena" ni "Agua mineral".
+- ✅ El stemming del diccionario `spanish` hace que "tomates" encuentre "Tomate" y "lactea" encuentre "Láctea".
+- ✅ Con índice GIN, la búsqueda no se degrada al crecer el catálogo.
+- ⚠️ La columna `nombre_buscable` es generada: si cambia la regla de normalización, hace falta una migración que la recalcule.
+- ⚠️ La búsqueda por términos es más permisiva que la subcadena: "aceite oliva" trae también "Atún claro en aceite de oliva", que es correcto (contiene ambos términos).
+
+**Alternativas consideradas**:
+- **Bajar el umbral de similitud a 0,4**: "aceite oliva" con "Aceite de girasol" da 0,292, pero otros pares no relacionados se closerían; y no arreglaba el caso de las palabras intermedias.
+- **Tokenizar la consulta en Python y hacer un `LIKE` por término**: obliga a N condicionales `ILIKE` sobre la tabla y no aprovecha ningún índice.
+- **PostgreSQL full-text con `to_tsvector` sobre el nombre sin normalizar**: "1L" y "1 L" seguirían siendo tokens distintos.
+
+---
+
 ## Plantilla para nuevas decisiones
 
 ```markdown
