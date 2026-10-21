@@ -68,7 +68,7 @@ export function ListarListas({ listas }: { listas: Lista[] }) {
         <button
           type="submit"
           disabled={nombre.trim().length === 0 || creando}
-          className="rounded-pill bg-primario px-4 py-2 text-sm font-medium text-white hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-borde disabled:text-gris"
+          className="rounded-pill bg-primario px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-borde disabled:text-gris"
         >
           {t("listas.crear")}
         </button>
@@ -88,7 +88,7 @@ export function ListarListas({ listas }: { listas: Lista[] }) {
             <li key={lista.id}>
               <Link
                 href={`/listas/${lista.id}`}
-                className="block rounded-tarjeta border border-borde px-4 py-3 text-sm text-texto hover:bg-primario-suave"
+                className="block rounded-tarjeta border border-borde px-4 py-3 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
               >
                 {lista.nombre}
               </Link>

@@ -229,7 +229,7 @@ export function VistaBusqueda({
         <button
           type="button"
           onClick={() => router.push("/")}
-          className="mt-6 rounded-pill border border-borde px-5 py-2.5 text-sm hover:bg-primario-suave"
+          className="mt-6 rounded-pill border border-borde px-5 py-2.5 text-sm transition-colors duration-200 hover:bg-primario-suave"
         >
           {t("buscar.volver")}
         </button>
@@ -258,7 +258,7 @@ export function VistaBusqueda({
           type="button"
           onClick={() => router.push("/")}
           aria-label={t("buscar.volver")}
-          className="rounded-pill p-2 text-gris hover:bg-primario-suave hover:text-texto"
+          className="rounded-pill p-2 text-gris transition-colors duration-200 hover:bg-primario-suave hover:text-texto"
         >
           <svg
             width="20"
@@ -298,7 +298,7 @@ export function VistaBusqueda({
           <button
             type="submit"
             disabled={!puedeBuscar}
-            className="rounded-pill bg-primario px-5 py-2.5 text-sm font-medium text-white hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-borde disabled:text-gris"
+            className="rounded-pill bg-primario px-5 py-2.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-borde disabled:text-gris"
           >
             {t("buscar.comparar")}
           </button>
@@ -315,7 +315,9 @@ export function VistaBusqueda({
         onLimpiar={() => cambiarFiltros(FILTROS_INICIALES)}
       />
 
-      <p className="mt-3 text-sm text-gris">
+      {/* El contador cambia al filtrar: se anuncia para que un lector de
+          pantalla sepa cuántos resultados hay ahora. */}
+      <p aria-live="polite" className="mt-3 text-sm text-gris">
         {t("filtros.contador", {
           visibles: visibles.length,
           total: resultados.length,

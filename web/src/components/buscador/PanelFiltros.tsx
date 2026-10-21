@@ -142,7 +142,7 @@ export function PanelFiltros({
         <button
           type="button"
           onClick={onLimpiar}
-          className="mb-1 rounded-pill border border-borde px-4 py-1.5 text-sm text-texto hover:bg-primario-suave"
+          className="mb-1 rounded-pill border border-borde px-4 py-1.5 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
         >
           {t("filtros.limpiar")}
         </button>

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { t } from "@/lib/i18n";
 
@@ -61,6 +61,30 @@ export function CardProducto({
   const [estado, setEstado] = useState<"inactivo" | "cargando" | "anadido" | "error">(
     "inactivo",
   );
+  const botonAbrir = useRef<HTMLButtonElement | null>(null);
+  const dialogo = useRef<HTMLDivElement | null>(null);
+
+  // El modal se cierra con Escape y devuelve el foco al botón que lo abrió
+  // (si no, el foco se pierde en el fondo y la navegación con teclado se
+  // corta).
+  useEffect(() => {
+    if (!modal) {
+      return;
+    }
+    function alPulsarTecla(evento: KeyboardEvent) {
+      if (evento.key === "Escape") {
+        setModal(false);
+      }
+    }
+    document.addEventListener("keydown", alPulsarTecla);
+    dialogo.current?.focus();
+    return () => document.removeEventListener("keydown", alPulsarTecla);
+  }, [modal]);
+
+  function cerrarModal() {
+    setModal(false);
+    botonAbrir.current?.focus();
+  }
 
   async function abrirModal() {
     setModal(true);
@@ -93,6 +117,7 @@ export function CardProducto({
       }
       setEstado("anadido");
       setModal(false);
+      botonAbrir.current?.focus();
     } catch {
       setEstado("error");
     }
@@ -119,7 +144,7 @@ export function CardProducto({
             href={url_producto}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 rounded-pill hover:opacity-80"
+            className="shrink-0 rounded-pill transition-colors duration-200 hover:opacity-80"
           >
             {logo}
           </a>
@@ -159,8 +184,9 @@ export function CardProducto({
         ) : null}
         <button
           type="button"
+          ref={botonAbrir}
           onClick={() => void abrirModal()}
-          className="rounded-pill border border-borde px-4 py-1.5 text-sm text-texto hover:bg-primario-suave"
+          className="rounded-pill border border-borde px-4 py-1.5 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
         >
           {t("lista.anadir")}
         </button>
@@ -172,8 +198,14 @@ export function CardProducto({
           role="dialog"
           aria-modal="true"
           aria-label={t("lista.elegir")}
+          onClick={(evento) => {
+            // Clic en el fondo cierra el modal; clic dentro no.
+            if (evento.target === evento.currentTarget) {
+              cerrarModal();
+            }
+          }}
         >
-          <div className="w-full max-w-md rounded-tarjeta bg-white p-5">
+          <div ref={dialogo} tabIndex={-1} className="w-full max-w-md rounded-tarjeta bg-white p-5">
             <h2 className="text-lg font-medium text-texto">{t("lista.elegir")}</h2>
 
             {listas.length === 0 ? (
@@ -185,7 +217,7 @@ export function CardProducto({
                     <button
                       type="button"
                       onClick={() => void anadir(lista)}
-                      className="w-full rounded-pill border border-borde px-4 py-2 text-left text-sm text-texto hover:bg-primario-suave"
+                      className="w-full rounded-pill border border-borde px-4 py-2 text-left text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
                     >
                       {lista.nombre}
                     </button>
@@ -197,8 +229,8 @@ export function CardProducto({
             <div className="mt-4 flex justify-end">
               <button
                 type="button"
-                onClick={() => setModal(false)}
-                className="rounded-pill border border-borde px-4 py-2 text-sm text-texto hover:bg-primario-suave"
+                onClick={cerrarModal}
+                className="rounded-pill border border-borde px-4 py-2 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
               >
                 {t("lista.cerrar")}
               </button>

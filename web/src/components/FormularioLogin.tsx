@@ -15,7 +15,7 @@ export function FormularioLogin({ destino, microsoftDisponible }: Props) {
     <div className="mt-6 flex w-full flex-col gap-3">
       <button
         type="button"
-        className="flex w-full items-center justify-center gap-2.5 rounded-pill border border-borde bg-white px-4 py-2.5 text-sm text-texto hover:bg-primario-suave"
+        className="flex w-full items-center justify-center gap-2.5 rounded-pill border border-borde bg-white px-4 py-2.5 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
         onClick={() => signIn("google", { callbackUrl: destino })}
       >
         <LogoGoogle />
@@ -23,7 +23,7 @@ export function FormularioLogin({ destino, microsoftDisponible }: Props) {
       </button>
       <button
         type="button"
-        className="flex w-full items-center justify-center gap-2.5 rounded-pill border border-borde bg-white px-4 py-2.5 text-sm text-texto hover:bg-primario-suave disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
+        className="flex w-full items-center justify-center gap-2.5 rounded-pill border border-borde bg-white px-4 py-2.5 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
         onClick={() => signIn("microsoft", { callbackUrl: destino })}
         disabled={!microsoftDisponible}
         title={microsoftDisponible ? undefined : t("login.microsoft_no_disponible")}

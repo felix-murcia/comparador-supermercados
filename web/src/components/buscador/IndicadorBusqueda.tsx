@@ -24,6 +24,9 @@ export function IndicadorBusqueda({ cadenas }: { cadenas: string[] }) {
       aria-live="polite"
       className="flex flex-col items-center gap-4 text-center"
     >
+      {/* El anillo gira salvo que la persona prefiera menos movimiento: la
+          regla global de `globals.css` lo neutraliza en ese caso y sigue
+          leyéndose como indicador de carga gracias al borde y al texto. */}
       <span
         aria-hidden="true"
         className="h-8 w-8 animate-spin rounded-pill border-[3px] border-primario-suave border-t-primario"

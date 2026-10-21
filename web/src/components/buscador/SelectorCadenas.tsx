@@ -32,7 +32,7 @@ export function SelectorCadenas({
               className={`flex cursor-pointer items-center gap-2 rounded-pill border px-3 py-2 text-sm ${
                 activa
                   ? "border-primario bg-primario-suave text-primario-oscuro"
-                  : "border-borde bg-white text-texto hover:bg-primario-suave"
+                  : "border-borde bg-white text-texto transition-colors duration-200 hover:bg-primario-suave"
               }`}
             >
               <input

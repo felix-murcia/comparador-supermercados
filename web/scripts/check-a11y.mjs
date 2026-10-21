@@ -137,6 +137,36 @@ for (const archivo of archivos(SRC, ".tsx")) {
   });
 }
 
+// 5: los elementos con estado hover deben tener transición (cambio suave).
+for (const archivo of archivos(SRC, ".tsx")) {
+  const contenido = readFileSync(archivo, "utf8");
+  contenido.split("\n").forEach((linea, indice) => {
+    if (/\bhover:/.test(linea) && !/\btransition/.test(linea)) {
+      problemas.push(
+        `${relative(RAIZ, archivo)}:${indice + 1} estado hover sin transición`,
+      );
+    }
+  });
+}
+
+// 6: los diálogos se cierran con Escape y devuelven el foco al abrirse.
+for (const archivo of archivos(SRC, ".tsx")) {
+  const contenido = readFileSync(archivo, "utf8");
+  if (!/role="dialog"/.test(contenido)) {
+    continue;
+  }
+  if (!/Escape/.test(contenido)) {
+    problemas.push(
+      `${relative(RAIZ, archivo)} diálogo sin cierre con la tecla Escape`,
+    );
+  }
+  if (!/\.focus\(\)/.test(contenido)) {
+    problemas.push(
+      `${relative(RAIZ, archivo)} diálogo sin gestión del foco`,
+    );
+  }
+}
+
 if (problemas.length === 0) {
   console.log("a11y: todas las comprobaciones pasan");
   process.exit(0);

@@ -125,7 +125,7 @@ export default async function PaginaProducto({ params, searchParams }: Props) {
         </div>
         <button
           type="button"
-          className="rounded-pill border border-borde px-4 py-2 text-sm text-texto hover:bg-primario-suave"
+          className="rounded-pill border border-borde px-4 py-2 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
         >
           {t("lista.anadir")}
         </button>
@@ -173,7 +173,7 @@ export default async function PaginaProducto({ params, searchParams }: Props) {
                         href={precio.url_producto}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primario hover:underline"
+                        className="text-primario transition-colors duration-200 hover:underline"
                       >
                         {t("producto.ver_producto")}
                       </a>
@@ -204,7 +204,7 @@ export default async function PaginaProducto({ params, searchParams }: Props) {
                   className={`rounded-pill px-3 py-1 text-sm ${
                     activo
                       ? "bg-primario-suave text-primario-oscuro"
-                      : "text-gris hover:bg-primario-suave"
+                      : "text-gris transition-colors duration-200 hover:bg-primario-suave"
                   }`}
                 >
                   {t(rango.clave)}

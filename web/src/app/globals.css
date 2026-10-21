@@ -15,4 +15,29 @@
   :focus-visible {
     @apply outline-none ring-2 ring-primario ring-offset-2;
   }
+
+  /* Cursor de mano en todo lo que se puede pulsar. Tailwind no lo aplica
+     por defecto a <button> ni a <a>, y sin esto los controles parecen
+     texto plano. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

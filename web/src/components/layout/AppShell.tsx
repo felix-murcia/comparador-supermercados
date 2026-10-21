@@ -41,7 +41,7 @@ export function AppShell({
           aria-expanded={abierto}
           aria-controls="menu-lateral"
           aria-label={abierto ? t("menu.cerrar") : t("menu.abrir")}
-          className="rounded-pill p-2 text-gris hover:bg-primario-suave hover:text-texto md:hidden"
+          className="rounded-pill p-2 text-gris transition-colors duration-200 hover:bg-primario-suave hover:text-texto md:hidden"
         >
           <svg
             width="20"
@@ -86,7 +86,7 @@ export function AppShell({
                     className={`block rounded-pill px-3 py-2 text-sm ${
                       activo
                         ? "bg-primario-suave text-primario-oscuro"
-                        : "text-gris hover:bg-primario-suave hover:text-texto"
+                        : "text-gris transition-colors duration-200 hover:bg-primario-suave hover:text-texto"
                     }`}
                   >
                     {t(enlace.clave)}

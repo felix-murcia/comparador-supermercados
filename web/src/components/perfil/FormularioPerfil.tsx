@@ -88,7 +88,7 @@ export function FormularioPerfil({
       <button
         type="submit"
         disabled={estado === "guardando"}
-        className="mt-6 rounded-pill bg-primario px-5 py-2.5 text-sm font-medium text-white hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-borde disabled:text-gris"
+        className="mt-6 rounded-pill bg-primario px-5 py-2.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-borde disabled:text-gris"
       >
         {estado === "guardando" ? t("perfil.guardando") : t("perfil.guardar")}
       </button>

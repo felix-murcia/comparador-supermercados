@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { nombreCadena } from "@/lib/cadenas";
 import { t } from "@/lib/i18n";
@@ -59,6 +59,25 @@ export function VistaLista({ lista, resumen }: Props) {
   const [items, setItems] = useState<Item[]>(lista.items);
   const [borrando, setBorrando] = useState<string | null>(null);
   const [modal, setModal] = useState(false);
+  const botonAbrir = useRef<HTMLButtonElement | null>(null);
+  const dialogo = useRef<HTMLDivElement | null>(null);
+
+  // El diálogo se cierra con Escape y devuelve el foco al botón que lo
+  // abrió, para no perder el hilo con el teclado.
+  useEffect(() => {
+    if (!modal) {
+      return;
+    }
+    function alPulsarTecla(evento: KeyboardEvent) {
+      if (evento.key === "Escape") {
+        setModal(false);
+        botonAbrir.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", alPulsarTecla);
+    dialogo.current?.focus();
+    return () => document.removeEventListener("keydown", alPulsarTecla);
+  }, [modal]);
   const [consulta, setConsulta] = useState("");
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [buscando, setBuscando] = useState(false);
@@ -269,7 +288,7 @@ export function VistaLista({ lista, resumen }: Props) {
               <button
                 type="button"
                 onClick={() => setBorrando(item.id)}
-                className="rounded-pill border border-borde px-3 py-1 text-sm text-texto hover:bg-primario-suave"
+                className="rounded-pill border border-borde px-3 py-1 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
               >
                 {t("lista.eliminar")}
               </button>
@@ -281,8 +300,9 @@ export function VistaLista({ lista, resumen }: Props) {
       <div className="mt-6">
         <button
           type="button"
+          ref={botonAbrir}
           onClick={() => setModal(true)}
-          className="rounded-pill bg-primario px-5 py-2.5 text-sm font-medium text-white hover:bg-primario-oscuro"
+          className="rounded-pill bg-primario px-5 py-2.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-primario-oscuro"
         >
           {t("lista.anadir_producto")}
         </button>
@@ -294,8 +314,19 @@ export function VistaLista({ lista, resumen }: Props) {
           role="dialog"
           aria-modal="true"
           aria-label={t("lista.anadir_producto")}
+          onClick={(evento) => {
+            // Clic en el fondo cierra el diálogo; clic dentro no.
+            if (evento.target === evento.currentTarget) {
+              setModal(false);
+              botonAbrir.current?.focus();
+            }
+          }}
         >
-          <div className="w-full max-w-lg rounded-tarjeta bg-white p-5">
+          <div
+            ref={dialogo}
+            tabIndex={-1}
+            className="w-full max-w-lg rounded-tarjeta bg-white p-5"
+          >
             <h2 className="text-lg font-medium text-texto">
               {t("lista.anadir_producto")}
             </h2>
@@ -331,7 +362,7 @@ export function VistaLista({ lista, resumen }: Props) {
                   <button
                     type="button"
                     onClick={() => void anadir(candidato)}
-                    className="flex w-full items-center gap-3 rounded-pill border border-borde px-3 py-2 text-left text-sm hover:bg-primario-suave"
+                    className="flex w-full items-center gap-3 rounded-pill border border-borde px-3 py-2 text-left text-sm transition-colors duration-200 hover:bg-primario-suave"
                   >
                     <span className="min-w-0 flex-1 truncate text-texto">
                       {candidato.nombre}
@@ -352,8 +383,11 @@ export function VistaLista({ lista, resumen }: Props) {
             <div className="mt-4 flex justify-end">
               <button
                 type="button"
-                onClick={() => setModal(false)}
-                className="rounded-pill border border-borde px-4 py-2 text-sm text-texto hover:bg-primario-suave"
+                onClick={() => {
+                  setModal(false);
+                  botonAbrir.current?.focus();
+                }}
+                className="rounded-pill border border-borde px-4 py-2 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
               >
                 {t("lista.cerrar")}
               </button>
