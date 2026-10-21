@@ -64,7 +64,7 @@ class VerificadorFake:
     async def verificar(self, candidato: Candidato) -> ResultadoVerificacion:
         self.candidatos.append(candidato)
         if not self.resultados:
-            return "rechazado", ["sin_resultados"]
+            return ResultadoVerificacion("rechazado", ["sin_resultados"])
         return self.resultados.pop(0)
 
 
@@ -213,7 +213,7 @@ def _caso(
 @pytest.mark.asyncio
 async def test_guarda_el_precio_verificado_y_devuelve_exito() -> None:
     productor = ProductorFake([CANDIDATO])
-    verificador = VerificadorFake([("verificado", [])])
+    verificador = VerificadorFake([ResultadoVerificacion("verificado", [], None)])
     precios = PreciosFake()
     caso = _caso(
         productor,
@@ -264,7 +264,9 @@ async def test_no_reintenta_si_el_agente_no_encontro_el_producto() -> None:
 @pytest.mark.asyncio
 async def test_hasta_tres_pasadas_y_guarda_el_precio_sospechoso() -> None:
     productor = ProductorFake([CANDIDATO, CANDIDATO, CANDIDATO])
-    verificador = VerificadorFake([("sospechoso", ["desviacion_precio"])] * 3)
+    verificador = VerificadorFake(
+        [ResultadoVerificacion("sospechoso", ["desviacion_precio"], None)] * 3
+    )
     precios = PreciosFake()
     caso = _caso(
         productor,
@@ -287,7 +289,9 @@ async def test_hasta_tres_pasadas_y_guarda_el_precio_sospechoso() -> None:
 @pytest.mark.asyncio
 async def test_no_guarda_nada_si_el_verificador_rechaza() -> None:
     productor = ProductorFake([CANDIDATO, CANDIDATO, CANDIDATO])
-    verificador = VerificadorFake([("rechazado", ["precio_no_encontrado_en_html"])] * 3)
+    verificador = VerificadorFake(
+        [ResultadoVerificacion("rechazado", ["precio_no_encontrado_en_html"])] * 3
+    )
     precios = PreciosFake()
     caso = _caso(
         productor,
@@ -309,7 +313,7 @@ async def test_no_guarda_nada_si_el_verificador_rechaza() -> None:
 @pytest.mark.asyncio
 async def test_pasa_el_ultimo_precio_conocido_al_verificador() -> None:
     productor = ProductorFake([CANDIDATO])
-    verificador = VerificadorFake([("verificado", [])])
+    verificador = VerificadorFake([ResultadoVerificacion("verificado", [], None)])
     precios = PreciosFake()
     precios.anterior = PrecioRegistrado(
         id=uuid4(),
@@ -342,7 +346,7 @@ async def test_pasa_el_ultimo_precio_conocido_al_verificador() -> None:
 @pytest.mark.asyncio
 async def test_crea_el_producto_cuando_no_existe() -> None:
     productor = ProductorFake([CANDIDATO])
-    verificador = VerificadorFake([("verificado", [])])
+    verificador = VerificadorFake([ResultadoVerificacion("verificado", [], None)])
     productos = ProductosFake()
     productos_cadenas = ProductosCadenasFake()
     caso = _caso(
@@ -366,7 +370,7 @@ async def test_crea_el_producto_cuando_no_existe() -> None:
 @pytest.mark.asyncio
 async def test_reutiliza_el_producto_que_ya_existe_por_ean() -> None:
     productor = ProductorFake([CANDIDATO])
-    verificador = VerificadorFake([("verificado", [])])
+    verificador = VerificadorFake([ResultadoVerificacion("verificado", [], None)])
     productos = ProductosFake()
     producto = Producto(
         id=uuid4(),
@@ -441,7 +445,7 @@ async def test_reintenta_un_error_reintentable_del_productor() -> None:
             CANDIDATO,
         ]
     )
-    verificador = VerificadorFake([("verificado", [])])
+    verificador = VerificadorFake([ResultadoVerificacion("verificado", [], None)])
     precios = PreciosFake()
     caso = _caso(
         productor,
@@ -457,3 +461,31 @@ async def test_reintenta_un_error_reintentable_del_productor() -> None:
     assert resultado.estado == "verificado"
     assert len(productor.llamadas) == 2
     assert len(precios.insertados) == 1
+
+
+@pytest.mark.asyncio
+async def test_guarda_el_precio_confirmado_por_el_verificador() -> None:
+    """Si el verificador corrige el precio, se guarda el de la página.
+
+    El LLM puede proponer el importe de otro artículo que aparecía en los
+    resultados de la búsqueda; la ficha es la fuente de verdad.
+    """
+    productor = ProductorFake([{**CANDIDATO, "precio_eur": 1.39}])
+    verificador = VerificadorFake(
+        [ResultadoVerificacion("verificado", [], Decimal("1.29"))]
+    )
+    precios = PreciosFake()
+    caso = _caso(
+        productor,
+        verificador,
+        CadenasFake({"dia": _cadena()}),
+        ProductosFake(),
+        ProductosCadenasFake(),
+        precios,
+    )
+
+    resultado = await caso.ejecutar("leche entera", "dia")
+
+    assert resultado.estado == "verificado"
+    assert len(precios.insertados) == 1
+    assert precios.insertados[0].importe_eur == Decimal("1.29")

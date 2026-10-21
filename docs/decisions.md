@@ -593,6 +593,36 @@ Responde: "¿cuánto pierdo por no ir a 3 supermercados?" (coste de la comodidad
 
 ---
 
+## ADR-024: La ficha del retailer es la fuente de verdad del precio y del nombre
+
+**Fecha**: 2026-10-21
+**Estado**: aceptado
+**Contexto**: Con el LLM gratuito, muchas búsquedas se rechazaban con `precio_no_encontrado_en_html` o `agente_no_encontro`, y una búsqueda tardaba más de un minuto. Las causas, medidas sobre las peticiones reales:
+
+1. **El LLM se equivoca en el precio.** Solo ve el *resumen* de la búsqueda, donde conviven los importes de otros artículos. Para "Leche entera Pascual 1 L" proponía 1,39 € cuando la ficha decía 1,29 €.
+2. **El LLM se abstiene ante la ambigüedad.** Ante "pizza" o "galletas digestive marianilla" (marca que no aparece en los resultados) respondía `encontrado: false` y el producto se descartaba.
+3. **El parser exigía JSON exacto.** Los modelos que razonan antes de responder envuelven el JSON en texto (`razonamiento`, cabecera del proveedor, ```json), y `json.loads` fallaba.
+4. **La latencia es del proveedor, no de la app.** La búsqueda web del modelo gratuito tarda 20–35 s por llamada (el mismo modelo sin búsqueda responde en 0,6 s), y falla con 502 uno de cada tres veces.
+
+**Decisión**:
+- **El verificador corrige precio y nombre** con los datos estructurados de la ficha (JSON-LD, `offers.price` y `name`): la página del retailer es la fuente de verdad. El puerto `Verificador` devuelve el precio y el nombre confirmados, y el caso de uso los aplica al candidato antes de guardarlo.
+- **El parser tolera el ruido**: extrae el primer objeto JSON balanceado de la respuesta, en vez de exigir que la respuesta *sea* un JSON.
+- **El prompt pide un producto concreto** y anima a devolver el equivalente más cercano en vez de abstenererse.
+- **Las cadenas se procesan en paralelo**: cada una tarda lo que tarda la búsqueda web, así que en serie la espera se multiplicaba.
+
+**Consecuencias**:
+- ✅ "Leche entera Pascual 1 L" se verifica a 1,29 € (el de la ficha) en vez de rechazarse por el 1,39 € que propuso el LLM.
+- ✅ El verificador registra qué precio buscaba y qué encontró la página, para poder diagnosticar rechazos.
+- ✅ La espera de una búsqueda de 3 cadenas pasa de la suma (~75 s) al máximo (~30 s), más los reintentos.
+- ⚠️ Con el modelo gratuito, una búsqueda sigue tardando entre 1 y 3 minutos: la búsqueda web del proveedor es lenta y falla a veces (502). Con un modelo de pago la latencia baja, pero el coste por búsqueda sube. Es el compromiso que se acepta con `LLM_MAX_PASADAS` / `LLM_MAX_INTENTOS`.
+
+**Alternativas consideradas**:
+- **Exigir que el LLM acierte el precio**: frágil, depende de la calidad del modelo y del snippet de búsqueda.
+- **Rascar el precio del HTML**: la página tiene los precios de otros artículos relacionados; el JSON-LD es el dato estructurado del producto.
+- **Un modelo de pago**: más rápido y fiable, pero a 0,007 $ por búsqueda de búsqueda web más los tokens, que es lo que agotó el saldo.
+
+---
+
 ## Plantilla para nuevas decisiones
 
 ```markdown

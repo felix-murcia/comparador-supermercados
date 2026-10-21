@@ -7,6 +7,7 @@ actualizando el progreso (0-100) hasta cerrar el job como `completada` o
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
@@ -41,16 +42,31 @@ class ProcesarBusqueda:
         self._repositorio_metricas = repositorio_metricas
 
     async def ejecutar(self, busqueda: Busqueda) -> EstadoBusqueda:
-        """Procesa el job y devuelve su estado final."""
+        """Procesa el job y devuelve su estado final.
+
+        Las cadenas se procesan en paralelo: cada una tarda lo que tarda la
+        búsqueda web del LLM (decenas de segundos), así que hacerlas en serie
+        multiplica la espera de la persona que busca. El progreso se
+        actualiza conforme termina cada cadena.
+        """
         cadenas = busqueda.cadenas
         total = max(len(cadenas), 1)
         guardados = 0
 
-        for indice, cadena in enumerate(cadenas, start=1):
-            if await self._procesar_cadena(busqueda.query, cadena):
-                guardados += 1
+        async def _procesar(cadena: str) -> bool:
+            return await self._procesar_cadena(busqueda.query, cadena)
+
+        pendientes = {asyncio.create_task(_procesar(cadena)) for cadena in cadenas}
+        for terminadas, tarea in enumerate(asyncio.as_completed(pendientes), start=1):
+            try:
+                if await tarea:
+                    guardados += 1
+            except Exception as error:  # noqa: BLE001 - una cadena no tumba el job
+                logger.warning(
+                    "Fallo inesperado procesando una cadena: %s", type(error).__name__
+                )
             await self._repositorio_busquedas.actualizar_estado(
-                busqueda.id, "en_progreso", int(indice * 100 / total)
+                busqueda.id, "en_progreso", int(terminadas * 100 / total)
             )
 
         estado: EstadoBusqueda = "completada" if guardados else "fallida"

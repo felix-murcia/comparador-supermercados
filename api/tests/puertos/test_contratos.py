@@ -73,12 +73,12 @@ async def assert_contrato_productor(productor: Productor) -> Candidato:
 
 async def assert_contrato_verificador(
     verificador: Verificador, candidato: Candidato
-) -> ResultadoVerificacion:
-    estado, motivos = await verificador.verificar(candidato)
-    assert estado in ESTADOS_PRECIO
-    assert isinstance(motivos, list)
-    assert all(isinstance(motivo, str) for motivo in motivos)
-    return estado, motivos
+) -> tuple[str, list[str]]:
+    resultado = await verificador.verificar(candidato)
+    assert resultado.estado in ESTADOS_PRECIO
+    assert isinstance(resultado.motivos, list)
+    assert all(isinstance(motivo, str) for motivo in resultado.motivos)
+    return resultado.estado, resultado.motivos
 
 
 async def assert_contrato_cache(cache: Cache) -> None:
@@ -97,7 +97,9 @@ async def assert_contrato_cache(cache: Cache) -> None:
 
 def test_los_fakes_cumplen_los_protocolos() -> None:
     assert isinstance(ProductorFake(), Productor)
-    assert isinstance(VerificadorFake(("verificado", [])), Verificador)
+    assert isinstance(
+        VerificadorFake(ResultadoVerificacion("verificado", [])), Verificador
+    )
     assert isinstance(CacheFake(), Cache)
 
 
@@ -128,7 +130,9 @@ async def test_contrato_productor_no_encontrado() -> None:
 
 @pytest.mark.asyncio
 async def test_contrato_verificador() -> None:
-    verificador = VerificadorFake(("sospechoso", ["precio no aparece en el HTML"]))
+    verificador = VerificadorFake(
+        ResultadoVerificacion("sospechoso", ["precio no aparece en el HTML"])
+    )
 
     estado, motivos = await assert_contrato_verificador(verificador, CANDIDATO_VALIDO)
 

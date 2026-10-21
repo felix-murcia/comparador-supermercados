@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
@@ -67,7 +68,7 @@ def test_el_verificador_cumple_el_protocolo() -> None:
 async def test_verifica_si_el_precio_esta_en_el_html() -> None:
     verificador = _verificador(_html("producto_con_precio.html"))
 
-    estado, motivos = await verificador.verificar(CANDIDATO)
+    estado, motivos, _precio, _nombre = await verificador.verificar(CANDIDATO)
 
     assert estado == "verificado"
     assert motivos == []
@@ -77,7 +78,7 @@ async def test_verifica_si_el_precio_esta_en_el_html() -> None:
 async def test_tolera_el_precio_con_punto_decimal() -> None:
     verificador = _verificador(_html("producto_precio_con_punto.html"))
 
-    estado, motivos = await verificador.verificar(CANDIDATO)
+    estado, motivos, _precio, _nombre = await verificador.verificar(CANDIDATO)
 
     assert estado == "verificado"
     assert motivos == []
@@ -87,7 +88,7 @@ async def test_tolera_el_precio_con_punto_decimal() -> None:
 async def test_rechaza_si_el_precio_no_esta_en_el_html() -> None:
     verificador = _verificador(_html("producto_sin_precio.html"))
 
-    estado, motivos = await verificador.verificar(CANDIDATO)
+    estado, motivos, _precio, _nombre = await verificador.verificar(CANDIDATO)
 
     assert estado == "rechazado"
     assert motivos == [MOTIVO_PRECIO_AUSENTE]
@@ -97,7 +98,7 @@ async def test_rechaza_si_el_precio_no_esta_en_el_html() -> None:
 async def test_rechaza_si_la_ficha_responde_error_http() -> None:
     verificador = _verificador(_html("producto_con_precio.html"), estado=500)
 
-    estado, motivos = await verificador.verificar(CANDIDATO)
+    estado, motivos, _precio, _nombre = await verificador.verificar(CANDIDATO)
 
     assert estado == "rechazado"
     assert motivos == [MOTIVO_FETCH_ERROR]
@@ -111,7 +112,7 @@ async def test_rechaza_si_el_fetch_falla() -> None:
     cliente = httpx.AsyncClient(transport=httpx.MockTransport(falla))
     verificador = FetchVerificador(cliente)
 
-    estado, motivos = await verificador.verificar(CANDIDATO)
+    estado, motivos, _precio, _nombre = await verificador.verificar(CANDIDATO)
 
     assert estado == "rechazado"
     assert motivos == [MOTIVO_FETCH_ERROR]
@@ -128,7 +129,7 @@ async def test_rechaza_sin_descargar_si_el_producto_no_se_encontro() -> None:
     cliente = httpx.AsyncClient(transport=httpx.MockTransport(registra))
     verificador = FetchVerificador(cliente)
 
-    estado, motivos = await verificador.verificar(
+    estado, motivos, _precio, _nombre = await verificador.verificar(
         {"encontrado": False, "motivo_si_no_encontrado": "agente_no_encontro"}
     )
 
@@ -141,7 +142,7 @@ async def test_rechaza_sin_descargar_si_el_producto_no_se_encontro() -> None:
 async def test_rechaza_si_la_url_no_es_valida() -> None:
     verificador = _verificador(_html("producto_con_precio.html"))
 
-    estado, motivos = await verificador.verificar(
+    estado, motivos, _precio, _nombre = await verificador.verificar(
         {**CANDIDATO, "url_fuente": "no-es-una-url"}
     )
 
@@ -153,7 +154,7 @@ async def test_rechaza_si_la_url_no_es_valida() -> None:
 async def test_sospecha_si_el_precio_por_unidad_no_es_coherente() -> None:
     verificador = _verificador(_html("producto_precio_incoherente.html"))
 
-    estado, motivos = await verificador.verificar(
+    estado, motivos, _precio, _nombre = await verificador.verificar(
         {**CANDIDATO, "precio_eur": 6.49, "formato": "pack 3L", "litros_o_kg": 3.0}
     )
 
@@ -165,7 +166,7 @@ async def test_sospecha_si_el_precio_por_unidad_no_es_coherente() -> None:
 async def test_sospecha_si_la_desviacion_supera_el_30_por_ciento() -> None:
     verificador = _verificador(_html("producto_con_precio.html"))
 
-    estado, motivos = await verificador.verificar(
+    estado, motivos, _precio, _nombre = await verificador.verificar(
         {**CANDIDATO, "precio_eur_anterior": 0.80}
     )
 
@@ -177,7 +178,7 @@ async def test_sospecha_si_la_desviacion_supera_el_30_por_ciento() -> None:
 async def test_no_sospecha_si_la_desviacion_es_pequena() -> None:
     verificador = _verificador(_html("producto_con_precio.html"))
 
-    estado, motivos = await verificador.verificar(
+    estado, motivos, _precio, _nombre = await verificador.verificar(
         {**CANDIDATO, "precio_eur_anterior": 1.25}
     )
 
@@ -202,3 +203,40 @@ async def test_envia_user_agent_de_navegador_y_timeout_de_10s() -> None:
     assert TIMEOUT_SEGUNDOS == 10.0
     assert peticiones[0].headers["user-agent"] == USER_AGENT
     assert peticiones[0].extensions["timeout"]["read"] == 10.0
+
+
+@pytest.mark.asyncio
+async def test_usa_el_precio_del_json_ld_cuando_el_llm_se_equivoca() -> None:
+    """La página es la fuente de verdad del precio.
+
+    El LLM ve el resumen de la búsqueda, donde conviven los importes de
+    otros artículos, y puede proponer un precio que no es el de la ficha.
+    Los datos estructurados (JSON-LD) traen el precio de ese producto.
+    """
+    verificador = _verificador(_html("producto_con_json_ld.html"))
+
+    estado, motivos, precio, _nombre = await verificador.verificar(CANDIDATO)
+
+    assert estado == "verificado"
+    assert motivos == []
+    assert precio == Decimal("1.29")
+
+
+@pytest.mark.asyncio
+async def test_el_precio_confirmado_solo_se_devuelve_si_se_verifica() -> None:
+    verificador = _verificador(_html("producto_sin_precio.html"))
+
+    estado, _motivos, precio, _nombre = await verificador.verificar(CANDIDATO)
+
+    assert estado == "rechazado"
+    assert precio is None
+
+
+@pytest.mark.asyncio
+async def test_el_nombre_confirmado_viene_de_la_ficha() -> None:
+    """El nombre real del producto es el de la ficha, no el del LLM."""
+    verificador = _verificador(_html("producto_con_json_ld.html"))
+
+    _estado, _motivos, _precio, nombre = await verificador.verificar(CANDIDATO)
+
+    assert nombre == "Leche entera Pascual 1 L"

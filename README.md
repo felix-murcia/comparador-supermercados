@@ -356,6 +356,8 @@ El pipeline es `productor (LLM) → verificador (fetch determinista) → BD`:
 2. El **verificador** descarga esa URL (con cabeceras de navegador real: los sitios con protección anti-bot responden 403 a peticiones simples) y comprueba que el precio aparece en el HTML, que el €/L es coherente con el formato (±5 %) y que la desviación frente al último precio conocido es razonable (>30 % → `sospechoso`).
 3. Lo verificado se guarda en `precios` y se registra la métrica de ingesta.
 
+**La ficha es la fuente de verdad, no el LLM**: este solo ve el resumen de la búsqueda, donde conviven los precios de otros artículos, así que se equivoca con frecuencia. El verificador lee el precio y el nombre reales de la página (datos estructurados JSON-LD) y **corrige** los que propuso el LLM: si la ficha dice 1,29 € y el LLM dijo 1,39 €, se guarda 1,29 €. Ver ADR-024.
+
 **El modelo del LLM importa**: un modelo sin búsqueda web se inventa las URLs de las fichas y el verificador las rechaza con 404 (o 403 por la protección anti-bot del retailer). Usa un modelo **con búsqueda web**: en OpenRouter se activa añadiendo el sufijo `:online` al identificador del modelo.
 
 ```bash
@@ -371,7 +373,9 @@ LLM_MAX_INTENTOS=2
 
 Con la configuración de arriba, una búsqueda de 3 cadenas cuesta como máximo 12 × 0,005 = **0,06 $**. Aun así hace falta un saldo mínimo en la cuenta: con saldo 0 el modelo gratis responde, pero cualquier motor de búsqueda devuelve 402.
 
-Probado en producción: el productor encuentra la ficha real (`https://www.dia.es/huevos-leche-y-mantequilla/leche/p/73676`), el verificador confirma el precio en el HTML y el job pasa a `completada` en ~10 s. De los modelos gratuitos, `nvidia/nemotron-3.5-super-vl` es el que devuelve un objeto JSON con el esquema que espera el productor (`google/gemma-4-*` devuelve un array y el parser lo rechaza). Es el valor por defecto de `.env.example`.
+**Sobre la latencia**: con el modelo gratuito, una búsqueda tarda entre 1 y 3 minutos. La causa está en el proveedor, no en la app: la búsqueda web del modelo gratuito tarda 20–35 s por llamada (el mismo modelo sin búsqueda responde en 0,6 s) y falla con 502 uno de cada tres veces. Las cadenas se procesan **en paralelo** (así la espera es la de la más lenta, no la suma) y los reintentos usan backoff. Con un modelo de pago la latencia baja, pero el coste por búsqueda sube.
+
+Probado en producción: el productor encuentra la ficha real (`https://www.dia.es/huevos-leche-y-mantequilla/leche/p/73676`), el verificador confirma el precio en el HTML (corrigiendo el que propuso el LLM) y el job termina en `completada`. De los modelos gratuitos, `nvidia/nemotron-3.5-super-vl` es el que devuelve un objeto JSON con el esquema que espera el productor (`google/gemma-4-*` devuelve un array y el parser lo rechaza). Es el valor por defecto de `.env.example`.
 
 ```bash
 # Lanzar una búsqueda y ver el resultado

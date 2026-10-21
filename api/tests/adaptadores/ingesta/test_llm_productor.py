@@ -113,6 +113,53 @@ async def test_json_que_no_es_objeto_produce_error_controlado() -> None:
 
 
 @pytest.mark.asyncio
+async def test_acepta_json_envuelto_en_ruido() -> None:
+    """El JSON puede venir rodeado de texto (razonamiento, cabecera del proveedor).
+
+    Los modelos que razonan antes de responder lo envuelven así, y el parser
+    no debe desperdiciar la respuesta por eso.
+    """
+    cliente = ClienteFake(
+        [
+            "He buscado la ficha.\n\n```json\n"
+            + json.dumps(CANDIDATO_VALIDO)
+            + "\n```\nEspero que sirva."
+        ]
+    )
+
+    candidato = await LLMProductor(cliente).producir("leche entera", "dia")
+
+    assert candidato["url_fuente"] == "https://www.dia.es/leche-entera"
+    assert candidato["precio_eur"] == 1.29
+
+
+@pytest.mark.asyncio
+async def test_acepta_json_con_texto_antes() -> None:
+    cliente = ClienteFake(["\n\n" + json.dumps(CANDIDATO_VALIDO)])
+
+    candidato = await LLMProductor(cliente).producir("leche entera", "dia")
+
+    assert candidato["nombre"] == "Leche entera"
+
+
+@pytest.mark.asyncio
+async def test_el_prompt_pide_un_producto_concreto_en_la_cadena() -> None:
+    """El prompt debe pedir la ficha exacta, no una búsqueda vaga.
+
+    Con una consulta ambigua ("pizza") el modelo se abstiene y responde
+    "encontrado": false; pidiendo la ficha concreta responde con la URL.
+    """
+    cliente = ClienteFake([json.dumps(CANDIDATO_VALIDO)])
+
+    await LLMProductor(cliente).producir("Pizza 4 quesos 390 g", "dia")
+
+    prompt = cliente.prompts[0]
+    assert "Pizza 4 quesos 390 g" in prompt
+    assert "dia" in prompt
+    assert "ficha de producto" in prompt
+
+
+@pytest.mark.asyncio
 async def test_faltan_campos_obligatorios_produce_error_controlado() -> None:
     incompleto = {**CANDIDATO_VALIDO}
     del incompleto["nombre"]
@@ -157,7 +204,7 @@ async def test_reintenta_ante_error_transitorio() -> None:
 
     assert candidato == CANDIDATO_VALIDO
     assert len(cliente.prompts) == 2
-    assert dormir.segundos == [0.5]
+    assert dormir.segundos == [1.0]
 
 
 @pytest.mark.asyncio
@@ -172,7 +219,7 @@ async def test_agotados_los_intentos_produce_error_reintentable() -> None:
 
     assert excinfo.value.reintentable is True
     assert len(cliente.prompts) == 3
-    assert dormir.segundos == [0.5, 1.0]
+    assert dormir.segundos == [1.0, 2.0]
 
 
 @pytest.mark.asyncio

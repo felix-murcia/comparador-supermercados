@@ -130,7 +130,24 @@ class BuscarProducto:
             )
             candidato = await self._con_precio_anterior(candidato, producto_cadena_id)
 
-            estado, motivos = await self._verificador.verificar(candidato)
+            (
+                estado,
+                motivos,
+                precio_confirmado,
+                nombre_confirmado,
+            ) = await self._verificador.verificar(candidato)
+
+            if precio_confirmado is not None:
+                # El verificador corrige el precio con el de la ficha: el LLM
+                # ve el resumen de la búsqueda y puede leer el importe de
+                # otro artículo. La página es la fuente de verdad.
+                candidato = {**candidato, "precio_eur": precio_confirmado}
+            if nombre_confirmado:
+                candidato = {
+                    **candidato,
+                    "nombre_en_cadena": nombre_confirmado,
+                    "nombre": nombre_confirmado,
+                }
 
             if estado == "verificado":
                 return await self._guardar(

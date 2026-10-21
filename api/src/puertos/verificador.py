@@ -10,14 +10,26 @@ cuando conoce el último precio persistido) para la regla de desviación.
 
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable
+from decimal import Decimal
+from typing import NamedTuple, Protocol, runtime_checkable
 
 from src.dominio.precios.estados import EstadoPrecio
 from src.puertos.productor import Candidato
 
-# (estado, motivos) donde estado es uno de ESTADOS_PRECIO y motivos explica
-# por qué se marcó como sospechoso o rechazado.
-ResultadoVerificacion = tuple[EstadoPrecio, list[str]]
+
+class ResultadoVerificacion(NamedTuple):
+    """Resultado de verificar un candidato.
+
+    `precio` y `nombre` son los datos confirmados en la página del retailer,
+    que es la fuente de verdad: el LLM puede equivocarse (lee precios de
+    otros artículos en los resultados de búsqueda), así que el verificador
+    puede corregirlos. Son `None` si el candidato no llegó a verificarse.
+    """
+
+    estado: EstadoPrecio
+    motivos: list[str]
+    precio: Decimal | None = None
+    nombre: str | None = None
 
 
 @runtime_checkable

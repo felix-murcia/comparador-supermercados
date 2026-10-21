@@ -7,9 +7,11 @@ precio conocido no es excesiva.
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 from decimal import Decimal, InvalidOperation
+from typing import Any
 
 import httpx
 
@@ -89,6 +91,64 @@ def _precios_con_moneda(html: str) -> list[Decimal]:
     return precios
 
 
+def _es_producto(item: dict[str, Any]) -> bool:
+    tipo = item.get("@type")
+    if isinstance(tipo, list):
+        return "Product" in tipo
+    return tipo == "Product"
+
+
+def _ofertas(item: dict[str, Any]) -> list[dict[str, Any]]:
+    ofertas = item.get("offers")
+    if isinstance(ofertas, dict):
+        return [ofertas]
+    if isinstance(ofertas, list):
+        return [oferta for oferta in ofertas if isinstance(oferta, dict)]
+    return []
+
+
+def _producto_json_ld(html: str) -> dict[str, Any] | None:
+    """El producto principal de la página, según sus datos estructurados."""
+    for bloque in re.finditer(
+        r"<script[^>]*application/ld\+json[^>]*>(.*?)</script>",
+        html,
+        re.DOTALL | re.IGNORECASE,
+    ):
+        try:
+            datos = json.loads(bloque.group(1).strip())
+        except (json.JSONDecodeError, ValueError):
+            continue
+        for item in datos if isinstance(datos, list) else [datos]:
+            if isinstance(item, dict) and _es_producto(item):
+                return item
+    return None
+
+
+def _precio_json_ld(html: str) -> Decimal | None:
+    """Precio del producto principal de la página, según sus datos JSON-LD.
+
+    La página puede traer varios bloques de producto (relacionados, listas
+    de categorías). Se toma el primero, que es el de la propia ficha.
+    """
+    producto = _producto_json_ld(html)
+    if producto is None:
+        return None
+    for oferta in _ofertas(producto):
+        valor = _a_decimal(oferta.get("price"))
+        if valor is not None and valor > 0:
+            return valor
+    return None
+
+
+def _nombre_json_ld(html: str) -> str | None:
+    """Nombre real del producto según la ficha."""
+    producto = _producto_json_ld(html)
+    if producto is None:
+        return None
+    nombre = producto.get("name")
+    return nombre if isinstance(nombre, str) and nombre.strip() else None
+
+
 def _precio_por_unidad(html: str) -> tuple[Decimal, str] | None:
     for coincidencia in _PATRON_PRECIO_UNIDAD.finditer(html):
         valor = _a_decimal(coincidencia.group(1))
@@ -117,15 +177,15 @@ class FetchVerificador:
 
     async def verificar(self, candidato: Candidato) -> ResultadoVerificacion:
         if not candidato.get("encontrado"):
-            return "rechazado", [MOTIVO_NO_ENCONTRADO]
+            return ResultadoVerificacion("rechazado", [MOTIVO_NO_ENCONTRADO])
 
         url = candidato.get("url_fuente")
         if not isinstance(url, str) or not url.startswith(("http://", "https://")):
-            return "rechazado", [MOTIVO_URL_INVALIDA]
+            return ResultadoVerificacion("rechazado", [MOTIVO_URL_INVALIDA])
 
         precio = _a_decimal(candidato.get("precio_eur"))
         if precio is None or precio <= 0:
-            return "rechazado", [MOTIVO_PRECIO_INVALIDO]
+            return ResultadoVerificacion("rechazado", [MOTIVO_PRECIO_INVALIDO])
 
         try:
             respuesta = await self._cliente_http.get(
@@ -136,20 +196,46 @@ class FetchVerificador:
             )
         except httpx.HTTPError as error:
             logger.warning("No se pudo descargar %s: %s", url, type(error).__name__)
-            return "rechazado", [MOTIVO_FETCH_ERROR]
+            return ResultadoVerificacion("rechazado", [MOTIVO_FETCH_ERROR])
 
         if respuesta.status_code >= 400:
             logger.warning("La ficha %s respondió HTTP %s", url, respuesta.status_code)
-            return "rechazado", [MOTIVO_FETCH_ERROR]
+            return ResultadoVerificacion("rechazado", [MOTIVO_FETCH_ERROR])
 
         html = respuesta.text
+
+        # El precio de la ficha es el de los datos estructurados (JSON-LD),
+        # no el que propose el LLM: este ve el resumen de la búsqueda, donde
+        # conviven los precios de otros artículos. Si la página no los
+        # publica, se recurre a rascar importes del HTML.
+        precio_json_ld = _precio_json_ld(html)
+        if (
+            precio_json_ld is not None
+            and abs(precio_json_ld - precio) > TOLERANCIA_PRECIO
+        ):
+            logger.info(
+                "El precio de %s es %s (el LLM propuso %s): se usa el de la página",
+                url,
+                precio_json_ld,
+                precio,
+            )
+            precio = precio_json_ld
+
+        nombre_json_ld = _nombre_json_ld(html)
+
         if not self._precio_presente(html, precio):
-            return "rechazado", [MOTIVO_PRECIO_AUSENTE]
+            logger.warning(
+                "La ficha %s no contiene el precio %s (precios en la página: %s)",
+                url,
+                precio,
+                ", ".join(str(p) for p in _precios_con_moneda(html)[:8]) or "ninguno",
+            )
+            return ResultadoVerificacion("rechazado", [MOTIVO_PRECIO_AUSENTE])
 
         motivos = self._sospechas(html, candidato, precio)
         if motivos:
-            return "sospechoso", motivos
-        return "verificado", []
+            return ResultadoVerificacion("sospechoso", motivos)
+        return ResultadoVerificacion("verificado", [], precio, nombre_json_ld)
 
     def _precio_presente(self, html: str, precio: Decimal) -> bool:
         return any(
