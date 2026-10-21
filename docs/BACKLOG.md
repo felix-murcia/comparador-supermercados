@@ -566,7 +566,7 @@
 
 **Objetivo**: hero → resultados, cards, ficha producto, histórico, i18n.
 
-**Criterio de salida**: usuario busca, ve barra de progreso (solo miss), ve cards con todos los campos, cambia orden/filtros, abre ficha con histórico.
+**Criterio de salida**: usuario busca, ve el indicador de carga (solo miss), ve cards con todos los campos, cambia orden/filtros, abre ficha con histórico.
 
 ---
 
@@ -598,18 +598,18 @@
 
 ---
 
-### [x] T5.3 — Flujo hero → resultados + barra de progreso 🔴
+### [x] T5.3 — Flujo hero → resultados + indicador de carga 🔴
 
 - **Depende de**: T5.2, T4.1, T4.2
 - **Estimación**: 2d
-- **Descripción**: Al comparar, si cache hit → resultados instantáneos. Si miss → barra de progreso con polling cada 1–2 s.
+- **Descripción**: Al comparar, si cache hit → resultados instantáneos. Si miss → indicador de carga con polling cada 1–2 s.
 - **Aceptación**:
   - [x] Cache hit: transición directa, sin barra.
   - [x] Cache miss: barra animada con % real del job.
   - [x] Al completar, transición a vista resultados (buscador arriba, flecha volver).
   - [x] Flecha volver resetea a hero.
   - [x] Re-búsqueda desde resultados mantiene filtros en URL.
-- **Nota**: `web/src/components/buscador/VistaBusqueda.tsx` (cliente) decide el estado inicial a partir de `?cache=1` (resultados directos) o del `job` de la URL (barra de progreso con `role="progressbar"` y el % real del job, consultando cada 1,5 s). Al terminar carga la comparativa por el proxy `/api/comparar` y muestra el buscador arriba con la flecha de volver (que regresa al hero). La re-búsqueda vuelve a llamar a la API y reconstruye la URL con `q`, `cadenas` y `job`, así que los filtros quedan siempre en la URL. Los proxies `/api/busquedas` y `/api/busquedas/{id}` reenvían el token de sesión desde el servidor.
+- **Nota**: `web/src/components/buscador/VistaBusqueda.tsx` (cliente) decide el estado inicial a partir de `?cache=1` (resultados directos) o del `job` de la URL (indicador de carga, consultando cada 1,5 s). El indicador es un **spinner indeterminado** (`IndicadorBusqueda.tsx`, `role="status"` y texto con los nombres de los supermercados donde se busca) y no una barra de progreso: el porcentaje del job solo avanza al terminar cada cadena, así que con una sola cadena saltaba de 0 a 100 de golpe y no medía nada. Al terminar carga la comparativa por el proxy `/api/comparar` y muestra el buscador arriba con la flecha de volver (que regresa al hero). La re-búsqueda vuelve a llamar a la API y reconstruye la URL con `q`, `cadenas` y `job`, así que los filtros quedan siempre en la URL. Los proxies `/api/busquedas` y `/api/busquedas/{id}` reenvían el token de sesión desde el servidor.
 
 ---
 
@@ -993,7 +993,7 @@ El MVP se considera completado cuando **todos** estos puntos se cumplen:
 
 - [x] Un usuario puede autenticarse con Google (Microsoft pendiente de credenciales).
 - [x] Puede buscar un producto, seleccionar cadenas y ver resultados en cards con logo, ranking, imagen clicable, nombre, € y €/kg-L.
-- [x] La barra de progreso aparece solo en cache miss.
+- [x] El indicador de carga aparece solo en cache miss.
 - [x] Puede cambiar orden y filtros sin relanzar búsqueda.
 - [x] Puede ver el histórico de precios de un producto.
 - [x] Puede crear una lista, añadir productos y ver coste total + % A + % C.

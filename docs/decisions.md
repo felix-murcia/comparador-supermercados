@@ -145,7 +145,7 @@
 **Consecuencias**:
 - ✅ Búsquedas repetidas instantáneas y gratis.
 - ✅ Reduce drásticamente el coste de LLM.
-- ✅ La barra de progreso solo aparece en cache miss (requisito de UX).
+- ✅ El indicador de carga solo aparece en cache miss (requisito de UX).
 - ⚠️ Un precio puede estar hasta 24 h desactualizado. Mitigación: invalidación tras ingesta diaria + fecha visible en UI.
 - ⚠️ Redis es un punto único de fallo. Mitigación: si Redis cae, la app sigue funcionando (cache miss → ingesta). Redis es optimización, no dependencia crítica.
 
@@ -379,7 +379,7 @@ Responde: "¿cuánto pierdo por no ir a 3 supermercados?" (coste de la comodidad
 
 **Fecha**: 2026-10-20
 **Estado**: aceptado
-**Contexto**: Al lanzar una búsqueda, la web necesita saber cuándo termina el job (T5.3) para pasar de la barra de progreso a los resultados.
+**Contexto**: Al lanzar una búsqueda, la web necesita saber cuándo termina el job (T5.3) para pasar del indicador de carga a los resultados.
 
 **Decisión**: La web **hace polling** a `GET /v1/busquedas/{id}` cada 1,5 s desde el navegador (vía el proxy de Next). El estado del job vive en la tabla `busquedas` y lo escribe el worker; no hay canales push.
 
@@ -387,6 +387,7 @@ Responde: "¿cuánto pierdo por no ir a 3 supermercados?" (coste de la comodidad
 - ✅ Sin WebSockets ni SSE: el estado ya está en la base de datos y el worker es un proceso aparte.
 - ✅ Funciona igual detrás de proxies y balanceadores (no hay conexiones largas).
 - ⚠️ Hasta 1,5 s de retraso entre el fin real del job y el cambio de vista. Se asume: el trabajo de ingesta tarda segundos o minutos.
+- ⚠️ El indicador de carga es indeterminado (spinner): el job solo expone un progreso por cadenas completadas, que con una sola cadena salta de 0 a 100 y no aporta información.
 - ⚠️ Una petición por usuario y cada 1,5 s mientras espera. El endpoint es de solo lectura y está cacheado por el borde.
 
 **Alternativas consideradas**:

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { BarraProgreso } from "@/components/buscador/BarraProgreso";
+import { IndicadorBusqueda } from "@/components/buscador/IndicadorBusqueda";
 import { PanelFiltros } from "@/components/buscador/PanelFiltros";
 import { SelectorCadenas } from "@/components/buscador/SelectorCadenas";
 import { CardProducto } from "@/components/producto/CardProducto";
@@ -46,7 +46,6 @@ export function VistaBusqueda({
   const [estado, setEstado] = useState<Estado>(
     cacheHit ? "resultados" : "progreso",
   );
-  const [progreso, setProgreso] = useState(0);
   const [resultados, setResultados] =
     useState<ResultadoComparacion[]>(resultadosIniciales);
   const [filtros, setFiltros] = useState<Filtros>(filtrosIniciales);
@@ -116,9 +115,6 @@ export function VistaBusqueda({
         const datos = await respuesta.json();
         if (cancelado) {
           return;
-        }
-        if (typeof datos.progreso === "number") {
-          setProgreso(datos.progreso);
         }
         if (datos.estado === "completada") {
           setEstado("resultados");
@@ -219,7 +215,6 @@ export function VistaBusqueda({
       }
       router.push(`/buscar?${parametros.toString()}`);
       setEstado(datos.cache_hit ? "resultados" : "progreso");
-      setProgreso(0);
     } catch {
       setError(t("buscar.error"));
     }
@@ -250,7 +245,7 @@ export function VistaBusqueda({
         </h1>
         <p className="mt-2 text-center text-sm text-gris">{consultaInicial}</p>
         <div className="mt-8">
-          <BarraProgreso progreso={progreso} />
+          <IndicadorBusqueda cadenas={cadenasIniciales} />
         </div>
       </section>
     );

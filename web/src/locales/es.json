@@ -36,13 +36,12 @@
     "cadenas": "Supermercados a comparar",
     "buscando": "Buscando…",
     "buscando_titulo": "Buscando precios",
-    "progreso": "Progreso de la búsqueda",
-    "progreso_texto": "Progreso:",
     "volver": "Volver a la búsqueda",
     "sin_resultados": "Todavía no hay precios para esta búsqueda.",
     "error": "No se pudo lanzar la búsqueda. Inténtalo de nuevo.",
     "error_busqueda": "La búsqueda ha fallado. Vuelve a intentarlo.",
-    "error_resultados": "No se pudieron cargar los resultados."
+    "error_resultados": "No se pudieron cargar los resultados.",
+    "buscando_en": "Buscando en {cadenas}…"
   },
   "producto": {
     "no_encontrado": "No hemos encontrado ese producto",
