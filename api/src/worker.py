@@ -75,8 +75,9 @@ def _productor() -> LLMProductor:
         modelo=settings.llm_model,
         cliente_http=_cliente(),
         base_url=settings.llm_base_url or None,
+        motor_busqueda=settings.llm_motor_busqueda,
     )
-    return LLMProductor(cliente_llm)
+    return LLMProductor(cliente_llm, max_intentos=settings.llm_max_intentos)
 
 
 def _verificador() -> FetchVerificador:
@@ -93,6 +94,7 @@ async def _buscar_con_pipeline(query: str, cadena: str) -> ResultadoBusqueda:
             repositorio_productos=SQLAlchemyRepositorioProductos(sesion),
             repositorio_productos_cadenas=SQLAlchemyRepositorioProductosCadenas(sesion),
             repositorio_precios=SQLAlchemyRepositorioPrecios(sesion),
+            max_pasadas=settings.llm_max_pasadas,
         )
         resultado = await caso.ejecutar(query, cadena)
         await sesion.commit()

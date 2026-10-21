@@ -565,6 +565,34 @@ Responde: "¿cuánto pierdo por no ir a 3 supermercados?" (coste de la comodidad
 
 ---
 
+## ADR-023: El LLM de la ingesta es gratuito, pero la búsqueda web se cobra
+
+**Fecha**: 2026-10-21
+**Estado**: aceptado
+**Contexto**: Con `openai/gpt-4o-mini:online`, 20 búsquedas consumieron los 20 $ de saldo de OpenRouter. Dos causas se solapaban:
+
+1. El modelo **de pago** (0,15 $/1M de entrada) se pagaba por cada llamada, y la búsqueda web sumaba 0,007 $ por petición.
+2. La app llama al LLM **hasta 27 veces por búsqueda** (3 cadenas × 3 pasadas × 3 reintentos), cada llamada con su búsqueda web.
+
+**Decisión**:
+- El LLM pasa a ser **gratuito**: `nvidia/nemotron-3.5-super-vl:free:online`. Es el único gratuito que devuelve un **objeto JSON** con el esquema que exige el productor (los `gemma-4-*` devuelven un array y el parser los rechaza), y con contexto de 1 M.
+- Se fija el motor de búsqueda a `parallel` (0,005 $ por petición) en vez del Exa `auto` por defecto (0,007 $), con la nueva variable `LLM_MOTOR_BUSQUEDA`.
+- `LLM_MAX_PASADAS` (2) y `LLM_MAX_INTENTOS` (2) acotan las llamadas por búsqueda: 3 cadenas × 2 × 2 = 12 en el peor caso, frente a 27.
+
+**Consecuencias**:
+- ✅ El LLM no cuesta nada: el gasto es solo la búsqueda web.
+- ✅ Con los topes, una búsqueda de 3 cadenas cuesta como máximo 0,06 $ (12 llamadas × 0,005 $) en vez de ~1 $.
+- ⚠️ **No hay búsqueda web totalmente gratuita**: la documentación de OpenRouter lo dice ("using web search will incur extra costs, even with free models") y se comprobó que con saldo 0 el modelo gratis funciona pero cualquier motor de búsqueda devuelve 402. Hace falta un saldo mínimo en la cuenta para que la ingesta funcione.
+- ⚠️ Los topes bajan la tasa de aciertos: con menos pasadas se aceptan menos productos dudosos. Es el equilibrio chosen entre coste y cobertura.
+
+**Alternativas consideradas**:
+- **`perplexity/sonar`**: la búsqueda nativa va incluida en el precio de los tokens (1 $/1M), pero el modelo es de pago y su precio por token es mucho mayor.
+- **`openrouter/auto` con plugins**: encarece el LLM además de la búsqueda.
+- **Sustituir la búsqueda web por la API del retailer**: no hay API pública; el verificador necesita la URL de la ficha, que es justo lo que aporta el LLM.
+- **Dejar el LLM de pago con topes más agresivos**: sigue habiendo coste por token y por búsqueda, y el saldo se vuelve a agotar.
+
+---
+
 ## Plantilla para nuevas decisiones
 
 ```markdown

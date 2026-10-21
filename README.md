@@ -361,10 +361,17 @@ El pipeline es `productor (LLM) → verificador (fetch determinista) → BD`:
 ```bash
 # .env
 LLM_PROVIDER=openrouter
-LLM_MODEL=openai/gpt-4o-mini:online
+LLM_MODEL=nvidia/nemotron-3.5-super-vl:free:online
+LLM_MOTOR_BUSQUEDA=parallel
+LLM_MAX_PASADAS=2
+LLM_MAX_INTENTOS=2
 ```
 
-Probado en producción con `openai/gpt-4o-mini:online`: el productor encuentra la ficha real (`https://www.dia.es/huevos-leche-y-mantequilla/leche/p/73676`), el verificador confirma el precio en el HTML y el job pasa a `completada` en ~10 s. Los modelos gratuitos de OpenRouter (`:free`) no traen búsqueda y además están limitados por el proveedor (429), así que no sirven para la ingesta. Es el valor por defecto de `.env.example`.
+**Ojo con el coste**: el LLM puede ser gratuito, pero **la búsqueda web se cobra aparte en todos los casos** (la documentación de OpenRouter: *"using web search will incur extra costs, even with free models"*). El motor por defecto (Exa "auto") cuesta 0,007 $ por petición y `parallel` 0,005 $. Los topes `LLM_MAX_PASADAS` y `LLM_MAX_INTENTOS` acotan las llamadas por búsqueda (cadenas × pasadas × intentos), que es por donde se escapa el dinero: sin ellos, una búsqueda de 3 cadenas puede llegar a 27 llamadas.
+
+Con la configuración de arriba, una búsqueda de 3 cadenas cuesta como máximo 12 × 0,005 = **0,06 $**. Aun así hace falta un saldo mínimo en la cuenta: con saldo 0 el modelo gratis responde, pero cualquier motor de búsqueda devuelve 402.
+
+Probado en producción: el productor encuentra la ficha real (`https://www.dia.es/huevos-leche-y-mantequilla/leche/p/73676`), el verificador confirma el precio en el HTML y el job pasa a `completada` en ~10 s. De los modelos gratuitos, `nvidia/nemotron-3.5-super-vl` es el que devuelve un objeto JSON con el esquema que espera el productor (`google/gemma-4-*` devuelve un array y el parser lo rechaza). Es el valor por defecto de `.env.example`.
 
 ```bash
 # Lanzar una búsqueda y ver el resultado

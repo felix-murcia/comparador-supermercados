@@ -93,11 +93,13 @@ class ClienteOpenAICompatible:
         base_url: str,
         api_key: str,
         modelo: str,
+        motor_busqueda: str = "",
     ) -> None:
         self._cliente_http = cliente_http
         self._base_url = base_url.rstrip("/")
         self._api_key = api_key
         self._modelo = modelo
+        self._motor_busqueda = motor_busqueda
 
     def _cabeceras(self) -> dict[str, str]:
         cabeceras = {"Authorization": f"Bearer {self._api_key}"}
@@ -106,6 +108,18 @@ class ClienteOpenAICompatible:
             cabeceras["HTTP-Referer"] = "https://demo.sagarebel.com"
             cabeceras["X-Title"] = "Comparador de Precios"
         return cabeceras
+
+    def _plugins(self) -> list[dict[str, str]]:
+        """Plugin de búsqueda web, si el motor de búsqueda está configurado.
+
+        El sufijo `:online` del modelo ya activa la búsqueda con el motor por
+        defecto (Exa "auto", 0,007 $/petición). Fijar el motor permite
+        abaratarlo: "parallel" cuesta 0,005 $. La búsqueda se cobra aparte
+        aunque el modelo sea gratuito.
+        """
+        if not self._motor_busqueda or "openrouter.ai" not in self._base_url:
+            return []
+        return [{"id": "web", "engine": self._motor_busqueda}]
 
     async def completar(self, prompt: str) -> str:
         cuerpo: dict[str, Any] = {
@@ -117,6 +131,9 @@ class ClienteOpenAICompatible:
             "response_format": {"type": "json_object"},
             "temperature": 0,
         }
+        plugins = self._plugins()
+        if plugins:
+            cuerpo["plugins"] = plugins
         datos = await _enviar(
             self._cliente_http,
             f"{self._base_url}/chat/completions",
@@ -196,10 +213,13 @@ def crear_cliente_llm(
     modelo: str,
     cliente_http: httpx.AsyncClient,
     base_url: str | None = None,
+    motor_busqueda: str = "",
 ) -> ClienteLLM:
     """Construye el cliente del proveedor configurado.
 
     `base_url` permite apuntar a un proxy o a otro servicio compatible.
+    `motor_busqueda` fija el motor de búsqueda web de OpenRouter
+    (`LLM_MOTOR_BUSQUEDA`); vacío usa el que el proveedor pone por defecto.
     """
     if not api_key:
         raise ValueError("Falta la API key del LLM (LLM_API_KEY)")
@@ -217,5 +237,9 @@ def crear_cliente_llm(
             cliente_http=cliente_http, base_url=url, api_key=api_key, modelo=modelo
         )
     return ClienteOpenAICompatible(
-        cliente_http=cliente_http, base_url=url, api_key=api_key, modelo=modelo
+        cliente_http=cliente_http,
+        base_url=url,
+        api_key=api_key,
+        modelo=modelo,
+        motor_busqueda=motor_busqueda,
     )

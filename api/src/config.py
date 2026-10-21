@@ -68,6 +68,15 @@ class Settings(BaseSettings):
     # URL base del proveedor (opcional; por defecto la oficial de cada uno).
     llm_base_url: str = ""
     llm_timeout_segundos: int = 60
+    # Motor de búsqueda web de OpenRouter (opcional). El proveedor usa por
+    # defecto Exa "auto" (0,007 $/petición); "parallel" cuesta 0,005 $.
+    llm_motor_busqueda: str = ""
+    # Pasadas de la ingesta por cadena (productor + verificador) y reintentos
+    # del productor. Multiplican el gasto: pasadas x reintentos x cadenas es
+    # el número de llamadas al LLM por búsqueda, y cada una paga la búsqueda
+    # web. Bajarlos es la forma directa de acotar el coste.
+    llm_max_pasadas: int = 3
+    llm_max_intentos: int = 3
 
     # ===== Observabilidad =====
     admin_emails: str = ""

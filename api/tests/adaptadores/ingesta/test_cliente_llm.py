@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import httpx
 import pytest
 
@@ -11,6 +13,7 @@ from src.adaptadores.ingesta.cliente_llm import (
     crear_cliente_llm,
 )
 from src.adaptadores.ingesta.errores import ErrorClienteLLM
+from src.adaptadores.ingesta.prompts import PROMPT_SISTEMA
 from src.puertos.llm import ClienteLLM
 
 
@@ -189,3 +192,66 @@ def test_no_avisa_si_el_modelo_lleva_busqueda_web(
     assert not [
         registro for registro in caplog.records if "búsqueda web" in registro.message
     ]
+
+
+@pytest.mark.asyncio
+async def test_openrouter_envia_el_motor_de_busqueda_configurado() -> None:
+    """El motor de búsqueda se manda en `plugins` si está configurado.
+
+    La búsqueda web se cobra aparte aunque el modelo sea gratuito (0,005 $
+    con "parallel", 0,007 $ con el motor por defecto), así que conviene
+    poder fijar el motor más barato.
+    """
+    capturado: dict[str, object] = {}
+
+    async def _captura(peticion: httpx.Request) -> httpx.Response:
+        capturado["cuerpo"] = json.loads(peticion.content)
+        return httpx.Response(
+            200, json={"choices": [{"message": {"content": '{"encontrado": false}'}}]}
+        )
+
+    cliente = ClienteOpenAICompatible(
+        cliente_http=httpx.AsyncClient(transport=httpx.MockTransport(_captura)),
+        base_url="https://openrouter.ai/api/v1",
+        api_key="clave",
+        modelo="nvidia/nemotron-3.5-super-vl:free:online",
+        motor_busqueda="parallel",
+    )
+
+    await cliente.completar("prompt")
+
+    assert capturado["cuerpo"] == {
+        "model": "nvidia/nemotron-3.5-super-vl:free:online",
+        "messages": [
+            {"role": "system", "content": PROMPT_SISTEMA},
+            {"role": "user", "content": "prompt"},
+        ],
+        "response_format": {"type": "json_object"},
+        "temperature": 0,
+        "plugins": [{"id": "web", "engine": "parallel"}],
+    }
+
+
+@pytest.mark.asyncio
+async def test_sin_motor_de_busqueda_no_manda_plugins() -> None:
+    """Sin motor configurado, el proveedor usa el suyo por defecto."""
+    capturado: dict[str, object] = {}
+
+    async def _captura(peticion: httpx.Request) -> httpx.Response:
+        capturado["cuerpo"] = json.loads(peticion.content)
+        return httpx.Response(
+            200, json={"choices": [{"message": {"content": '{"encontrado": false}'}}]}
+        )
+
+    cliente = ClienteOpenAICompatible(
+        cliente_http=httpx.AsyncClient(transport=httpx.MockTransport(_captura)),
+        base_url="https://openrouter.ai/api/v1",
+        api_key="clave",
+        modelo="nvidia/nemotron-3.5-super-vl:free:online",
+    )
+
+    await cliente.completar("prompt")
+
+    cuerpo = capturado["cuerpo"]
+    assert isinstance(cuerpo, dict)
+    assert "plugins" not in cuerpo
