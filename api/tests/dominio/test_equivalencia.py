@@ -38,16 +38,14 @@ def test_la_descripcion_base_quita_la_marca_y_las_medidas() -> None:
         == "desnatada leche"
     )
     assert (
-        descripcion_base("Leche desnatada Hacendado", "Hacendado")
-        == "desnatada leche"
+        descripcion_base("Leche desnatada Hacendado", "Hacendado") == "desnatada leche"
     )
 
 
 def test_la_descripcion_base_conserva_los_detalles_que_no_son_marca() -> None:
     """«brik» no es una marca: describe el envase, y se conserva."""
     assert (
-        descripcion_base("Leche desnatada brik 1 l.", "SIMPL")
-        == "brik desnatada leche"
+        descripcion_base("Leche desnatada brik 1 l.", "SIMPL") == "brik desnatada leche"
     )
 
 
@@ -87,12 +85,8 @@ def test_no_son_equivalentes_los_productos_distintos() -> None:
     """Ni otra leche, ni otro tamaño, ni otra categoría."""
     dia = _producto("Leche desnatada Dia Láctea 1 L", "Dia Láctea", formato="1L")
 
-    assert not es_equivalente(
-        dia, _producto("Leche semidesnatada 1 L", "Puleva")
-    )
-    assert not es_equivalente(
-        dia, _producto("Leche entera 1 L", "Paseo")
-    )
+    assert not es_equivalente(dia, _producto("Leche semidesnatada 1 L", "Puleva"))
+    assert not es_equivalente(dia, _producto("Leche entera 1 L", "Paseo"))
     assert not es_equivalente(
         dia, _producto("Leche desnatada 3 L", "Puleva", litros_o_kg=Decimal(3))
     )
