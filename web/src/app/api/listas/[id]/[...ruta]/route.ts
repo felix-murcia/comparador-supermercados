@@ -17,7 +17,10 @@ async function reenviar(request: NextRequest, metodo: string, contexto: Contexto
   const conCuerpo = metodo !== "GET" && metodo !== "DELETE";
   const cuerpo = conCuerpo ? await request.json().catch(() => ({})) : undefined;
 
-  const respuesta = await llamarApi(request, destino, {
+  // El query string se reenvía: el resumen lo necesita para saber qué
+  // cadenas se comparan (`?cadenas=dia,carrefour`).
+  const consulta = request.nextUrl.search;
+  const respuesta = await llamarApi(request, `${destino}${consulta}`, {
     method: metodo,
     ...(cuerpo === undefined ? {} : { body: JSON.stringify(cuerpo) }),
   });

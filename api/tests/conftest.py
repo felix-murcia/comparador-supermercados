@@ -11,7 +11,7 @@ import asyncio
 import os
 from collections.abc import AsyncIterator, Awaitable, Callable
 from decimal import Decimal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 import pytest_asyncio
@@ -149,6 +149,37 @@ async def cadena_dia(sesion_rw: AsyncSession) -> UUID:
     await sesion_rw.refresh(modelo)
     await sesion_rw.commit()
     return modelo.id
+
+
+@pytest_asyncio.fixture
+async def cadena_carrefour(sesion_rw: AsyncSession) -> UUID:
+    modelo = CadenaModelo(slug="carrefour", nombre="Carrefour", logo_svg="<svg></svg>")
+    sesion_rw.add(modelo)
+    await sesion_rw.flush()
+    await sesion_rw.refresh(modelo)
+    await sesion_rw.commit()
+    return modelo.id
+
+
+@pytest_asyncio.fixture
+async def usuario(sesion_rw: AsyncSession) -> UUID:
+    """Usuario real: las listas tienen clave foránea contra `usuarios`."""
+    from src.adaptadores.persistencia.repositorio_usuarios import (
+        SQLAlchemyRepositorioUsuarios,
+    )
+    from src.dominio.usuarios.entidades import IdentidadOAuth
+
+    provider_id = f"test-{uuid4().hex[:8]}"
+    creado = await SQLAlchemyRepositorioUsuarios(sesion_rw).upsert(
+        IdentidadOAuth(
+            provider="google",
+            provider_id=provider_id,
+            email=f"{provider_id}@example.test",
+            nombre="Ana",
+        )
+    )
+    await sesion_rw.commit()
+    return creado.id
 
 
 @pytest_asyncio.fixture

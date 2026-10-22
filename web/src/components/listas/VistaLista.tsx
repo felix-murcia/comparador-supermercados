@@ -208,8 +208,8 @@ export function VistaLista({ lista, resumen }: Props) {
 
       {resumen && resumen.avisos.length > 0 ? (
         <ul className="mt-4 space-y-1">
-          {resumen.avisos.map((texto) => (
-            <li key={texto} className="text-sm text-gris">
+          {resumen.avisos.map((texto, indice) => (
+            <li key={`${indice}-${texto}`} className="text-sm text-gris">
               {texto}
             </li>
           ))}

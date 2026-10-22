@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime
 from typing import Any, cast
 from uuid import UUID
@@ -23,6 +24,7 @@ from src.dominio.precios.entidades import (
     PrecioNuevo,
     PrecioRegistrado,
     PrecioVigente,
+    ProductoEnCadena,
     ResultadoComparacion,
 )
 from src.dominio.precios.estados import AmbitoPrecio
@@ -338,6 +340,92 @@ class SQLAlchemyRepositorioPrecios:
                 provincia=fila["provincia"],
                 disponible=fila["disponible"],
                 fecha_consulta=fila["fecha_consulta"],
+            )
+            for fila in filas
+        ]
+
+    async def productos_con_precio(
+        self,
+        *,
+        categorias: Sequence[str],
+        cadenas: Sequence[str],
+        limite: int = 400,
+    ) -> list[ProductoEnCadena]:
+        """Productos de las cadenas indicadas, con su precio verificado actual.
+
+        Es la consulta que alimenta la búsqueda de equivalentes al comparar
+        una lista entre cadenas. Se filtra por categoría porque el tamaño y la
+        categoría acotan mucho el conjunto, y el resto de filtros (descripción
+        sin marca) se aplican en el dominio.
+        """
+        if not cadenas:
+            return []
+
+        condiciones = [
+            PrecioModelo.estado == "verificado",
+            PrecioModelo.ambito == "nacional",
+            CadenaModelo.slug.in_(list(cadenas)),
+        ]
+        if categorias:
+            condiciones.append(
+                or_(
+                    ProductoModelo.categoria.in_(list(categorias)),
+                    ProductoModelo.categoria.is_(None),
+                )
+            )
+
+        filas = (
+            (
+                await self._session.execute(
+                    select(
+                        ProductoModelo.id.label("producto_id"),
+                        ProductoCadenaModelo.id.label("producto_cadena_id"),
+                        ProductoModelo.nombre.label("nombre"),
+                        ProductoModelo.marca.label("marca"),
+                        ProductoModelo.categoria.label("categoria"),
+                        ProductoModelo.formato.label("formato"),
+                        ProductoModelo.litros_o_kg.label("litros_o_kg"),
+                        CadenaModelo.slug.label("cadena"),
+                        PrecioModelo.precio_eur.label("precio_eur"),
+                        ProductoCadenaModelo.url_producto.label("url_producto"),
+                    )
+                    .select_from(ProductoModelo)
+                    .join(
+                        ProductoCadenaModelo,
+                        ProductoCadenaModelo.producto_id == ProductoModelo.id,
+                    )
+                    .join(
+                        CadenaModelo, CadenaModelo.id == ProductoCadenaModelo.cadena_id
+                    )
+                    .join(
+                        PrecioModelo,
+                        PrecioModelo.producto_cadena_id == ProductoCadenaModelo.id,
+                    )
+                    .where(*condiciones)
+                    .ext(distinct_on(ProductoCadenaModelo.id))
+                    .order_by(
+                        ProductoCadenaModelo.id,
+                        PrecioModelo.fecha_consulta.desc(),
+                    )
+                    .limit(limite)
+                )
+            )
+            .mappings()
+            .all()
+        )
+
+        return [
+            ProductoEnCadena(
+                producto_id=fila["producto_id"],
+                producto_cadena_id=fila["producto_cadena_id"],
+                nombre=fila["nombre"],
+                marca=fila["marca"],
+                categoria=fila["categoria"],
+                formato=fila["formato"],
+                litros_o_kg=fila["litros_o_kg"],
+                cadena=fila["cadena"],
+                precio_eur=fila["precio_eur"],
+                url_producto=fila["url_producto"],
             )
             for fila in filas
         ]

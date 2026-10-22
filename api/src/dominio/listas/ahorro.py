@@ -11,12 +11,21 @@ Es lógica pura: no toca la base de datos ni depende de ningún framework.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import ROUND_HALF_UP, Decimal
 from uuid import UUID
 
 PRECISION = Decimal("0.0001")
 CERO = Decimal(0)
+
+
+@dataclass(frozen=True)
+class Equivalente:
+    """Producto de otra cadena que cubre la misma necesidad de compra."""
+
+    nombre: str
+    precio: Decimal
+    marca: str | None = None
 
 
 @dataclass(frozen=True)
@@ -29,6 +38,11 @@ class ItemConPrecios:
     precios: Mapping[str, Decimal]
     cadena_compra: str | None = None
     precio_compra: Decimal | None = None
+    # Nombre sin marca, para los avisos: «Leche desnatada 1 L» en vez de
+    # «Leche desnatada Dia Láctea 1 L».
+    nombre_base: str = ""
+    # Equivalente usado en cada cadena, cuando el producto no está en ella.
+    equivalentes: Mapping[str, Equivalente] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -69,10 +83,18 @@ def calcular_ahorro(
     se excluyen de esa cadena (con aviso), los que no están en ninguna se
     excluyen de todo el cálculo, con una sola cadena el % A no aplica y con
     `coste_mixta_real == 0` el % C no aplica.
+
+    Cuando el producto no está en una cadena pero sí tiene un equivalente
+    (`ADR-026`), se compara con el equivalente: el artículo concreto es de
+    una marca que la otra cadena no vende, pero la necesidad de compra sí
+    existe allí. El aviso dice con qué se ha comparado.
     """
     avisos: list[str] = []
     costes: dict[str, Decimal] = {cadena: CERO for cadena in cadenas}
     no_disponibles: dict[str, list[str]] = {cadena: [] for cadena in cadenas}
+    sustituciones: dict[str, list[tuple[str, str, Equivalente]]] = {
+        cadena: [] for cadena in cadenas
+    }
     coste_optimo = CERO
     coste_mixta_real = CERO
 
@@ -82,8 +104,9 @@ def calcular_ahorro(
             for cadena, precio in item.precios.items()
             if cadena in costes
         }
+        nombre_aviso = item.nombre_base or item.nombre
 
-        if not precios_seleccionados:
+        if not precios_seleccionados and not item.equivalentes:
             avisos.append(
                 f"«{item.nombre}» no está disponible en las cadenas elegidas "
                 "y se ha excluido del cálculo"
@@ -94,10 +117,25 @@ def calcular_ahorro(
             costes[cadena] += precio * item.cantidad
 
         for cadena in costes:
-            if cadena not in precios_seleccionados:
-                no_disponibles[cadena].append(item.nombre)
+            if cadena in precios_seleccionados:
+                continue
+            equivalente = item.equivalentes.get(cadena)
+            if equivalente is None:
+                no_disponibles[cadena].append(nombre_aviso)
+                continue
+            costes[cadena] += equivalente.precio * item.cantidad
+            sustituciones[cadena].append((nombre_aviso, item.nombre, equivalente))
 
-        coste_optimo += min(precios_seleccionados.values()) * item.cantidad
+        # El óptimo es el precio más bajo de la necesidad, venga del producto
+        # exacto o de un equivalente.
+        candidatos = [*precios_seleccionados.values()]
+        candidatos.extend(
+            equivalente.precio
+            for cadena, equivalente in item.equivalentes.items()
+            if cadena in costes
+        )
+        if candidatos:
+            coste_optimo += min(candidatos) * item.cantidad
 
         if item.cadena_compra and item.cadena_compra in precios_seleccionados:
             precio_compra = item.precio_compra
@@ -123,6 +161,12 @@ def calcular_ahorro(
     )
 
     for cadena in cadenas:
+        for nombre_aviso, _original, equivalente in sustituciones[cadena]:
+            marca = f" ({equivalente.marca})" if equivalente.marca else ""
+            avisos.append(
+                f"En «{cadena}», «{nombre_aviso}» se ha comparado con "
+                f"«{equivalente.nombre}»{marca}"
+            )
         if no_disponibles[cadena]:
             avisos.append(
                 f"En «{cadena}» no hay precio para: {', '.join(no_disponibles[cadena])}"

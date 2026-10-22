@@ -14,7 +14,10 @@ async function reenviar(request: NextRequest, metodo: string, contexto: Contexto
   const conCuerpo = metodo === "PATCH";
   const cuerpo = conCuerpo ? await request.json().catch(() => ({})) : undefined;
 
-  const respuesta = await llamarApi(request, `/v1/listas/${id}`, {
+  // El query string se reenvía: el resumen lo necesita para saber qué
+  // cadenas se comparan (`?cadenas=dia,carrefour`).
+  const consulta = request.nextUrl.search;
+  const respuesta = await llamarApi(request, `/v1/listas/${id}${consulta}`, {
     method: metodo,
     ...(cuerpo === undefined ? {} : { body: JSON.stringify(cuerpo) }),
   });

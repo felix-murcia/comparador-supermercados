@@ -51,3 +51,8 @@ class ItemListaDetalle:
     producto_marca: str | None = None
     producto_ean: str | None = None
     cadena_compra: str | None = None
+    # Categoría, formato y tamaño: hacen falta para saber si el producto de
+    # otra cadena es equivalente (ver `ADR-026`).
+    producto_categoria: str | None = None
+    producto_formato: str | None = None
+    producto_litros_o_kg: Decimal | None = None

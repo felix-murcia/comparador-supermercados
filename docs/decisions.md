@@ -651,6 +651,36 @@ La referencia visual se obtuvo del catálogo de [21st.dev](https://21st.dev) (MC
 
 ---
 
+## ADR-026: Al comparar una lista entre cadenas, se usa el equivalente de marca propia
+
+**Fecha**: 2026-10-22
+**Estado**: aceptado
+**Contexto**: Al comparar la cesta de la compra entre cadenas, el aviso decía «En \u00abcarrefour\u00bb no hay precio para: Leche desnatada Dia L\u00e1ctea 1 L». El producto es de la marca propia de DIA y, por supuesto, Carrefour no lo vende. La comparaci\u00f3n quedaba sin sentido: se med\u00eda el precio de un art\u00edculo contra la ausencia de precio, y el % A de esa cadena sal\u00eda artificialmente bajo.
+
+La causa est\u00e1 en el modelo de datos. `productos_cadena` relaciona un producto can\u00f3nico con cada cadena, as\u00ed que un producto puede vivir en varias. Pero `_resolver_producto` empareja por EAN o por nombre normalizado **exacto**, as\u00ed que «Leche desnatada Dia L\u00e1ctea 1 L» (DIA), «Leche desnatada Hacendado» (Mercadona) y «Leche desnatada brik 1 l.» (Carrefour) son tres productos can\u00f3nicos distintos, cada uno en su cadena. `CalcularAhorroLista` ped\u00eda los precios del mismo `producto_id` en cada cadena, y en las dem\u00e1s no hab\u00edaa ninguno.
+
+**Decisi\u00f3n**:
+- **La equivalencia se decide en el dominio, por descripci\u00f3n y no por marca.** Un producto tiene una *descripci\u00f3n base*: su nombre sin la marca y sin las medidas. «Leche desnatada Dia L\u00e1ctea 1 L» y «Leche desnatada brik 1 l.» (marca SIMPL) describen la misma necesidad: \u00abdesnatada leche\u00bb frente a \u00abbrik desnatada leche\u00bb.
+- **Dos productos son equivalentes si coinciden categor\u00eda, tama\u00f1o y descripci\u00f3n.** La similitud es el Jaccard de los tokens de la descripci\u00f3n base, con un umbral de 0,6. Se usa Jaccard y no similitud de cadenas porque el orden de las palabras var\u00eda entre cadenas, y porque as\u00ed «desnatada leche» y «semidesnatada leche» se parecen mucho como cadena pero no son lo mismo. El tama\u00f1o es obligatorio: sin \u00e9l, «Leche desnatada 1 L» ser\u00eda equivalente a «Leche desnatada 3 L».
+- **Si falta el producto en una cadena, se usa su equivalente m\u00e1s barato.** Es lo que se pagar\u00eda de verdad al cambiar de cadena, que es lo que el % A y el % C miden.
+- **La sustituci\u00f3n se dice en el aviso.** «En \u00abcarrefour\u00bb, \u00abLeche desnatada 1 L\u00bb se ha comparado con \u00abLeche desnatada brik 1 l.\u00bb (SIMPL)». Cuando no hay equivalente, el aviso nombra la necesidad sin marca: «En \u00abcarrefour\u00bb no hay precio para: Leche desnatada 1 L».
+- **La fila de la lista sigue mostrando el producto concreto** que la persona a\u00f1adi\u00f3; el nombre sin marca es solo para los avisos, donde lo que se compara es la necesidad.
+
+**Consecuencias**:
+- ✅ La comparaci\u00f3n entre cadenas vuelve a significar algo: cada cadena se mide con el precio de lo que comprar\u00edas all\u00ed, y el % A de Carrefour ya no sale penalizado por un producto que no vende.
+- ✅ El coste \u00f3ptimo (% C) tambi\u00e9n baja: se considera el equivalente m\u00e1s barato, no solo el precio del art\u00edculo exacto.
+- ✅ No hace falta llamar al LLM ni guardar una tabla de equivalencias: la descripci\u00f3n base se deriva del nombre y la marca, y el emparejamiento es determinista. El cat\u00e1logo tiene 326 productos, as\u00ed que una consulta por categor\u00eda y el filtrado en Python bastan.
+- ⚠️ La equivalencia es aproximada: «Leche desnatada brik» se considera equivalente a «Leche desnatada» aunque el envase no sea el mismo. El aviso lo dice, as\u00ed que quien lee sabe qu\u00e9 se est\u00e1 comparando.
+- ⚠️ Los datos existentes no se han re-ingerido: la comparaci\u00f3n se corrige al vuelo, pero el cat\u00e1logo sigue teniendo tres productos can\u00f3nicos para la misma leche.
+
+**Alternativas consideradas**:
+- **Unir los productos en la ingesta** (que «Leche desnatada Hacendado» se colgara del can\u00f3nico «Leche desnatada»): deja el modelo limpio, pero exige re-ingerir todo el cat\u00e1logo, con el coste de LLM que eso implica, y no arregla los datos ya guardados.
+- **Una tabla de equivalencias** llena por el LLM: m\u00e1s precisa, pero a\u00f1ade coste por llamada y un paso m\u00e1s en la ingesta que puede fallar.
+- **Comparar solo por categor\u00eda y tama\u00f1o**, sin mirar el nombre: demasiado laxo; comparar\u00eda «Leche entera» con «Leche desnatada».
+- **Avisar del equivalente y no usarlo**, dejando la cadena fuera del c\u00e1lculo: mantiene intacto el % A, pero el coste por cadena no refleja lo que se pagar\u00eda all\u00ed.
+
+---
+
 ## Plantilla para nuevas decisiones
 
 ```markdown

@@ -7,7 +7,11 @@ from uuid import uuid4
 
 import pytest
 
-from src.dominio.listas.ahorro import ItemConPrecios, calcular_ahorro
+from src.dominio.listas.ahorro import (
+    Equivalente,
+    ItemConPrecios,
+    calcular_ahorro,
+)
 
 
 def _item(
@@ -16,6 +20,8 @@ def _item(
     cantidad: int = 1,
     cadena_compra: str | None = None,
     precio_compra: str | None = None,
+    nombre_base: str | None = None,
+    equivalentes: dict[str, Equivalente] | None = None,
 ) -> ItemConPrecios:
     return ItemConPrecios(
         producto_id=uuid4(),
@@ -24,6 +30,8 @@ def _item(
         precios={cadena: Decimal(precio) for cadena, precio in precios.items()},
         cadena_compra=cadena_compra,
         precio_compra=Decimal(precio_compra) if precio_compra else None,
+        nombre_base=nombre_base or nombre,
+        equivalentes=equivalentes or {},
     )
 
 
@@ -158,3 +166,73 @@ def test_la_cantidad_multiplica_el_coste(cantidad: int) -> None:
     resumen = calcular_ahorro(items, ["dia"])
 
     assert resumen.coste_total == Decimal(cantidad)
+
+
+def test_compara_con_el_equivalente_cuando_el_producto_no_esta_en_la_cadena() -> None:
+    """El artículo de DIA no está en Carrefour, pero su equivalente sí.
+
+    Sin equivalente, la comparación entre cadenas no significaría nada: se
+    compararía el precio de un producto con la ausencia de precio.
+    """
+    item = _item(
+        "Leche desnatada Dia Láctea 1 L",
+        {"dia": "1.29"},
+        cadena_compra="dia",
+        nombre_base="leche desnatada 1 l",
+        equivalentes={
+            "carrefour": Equivalente(
+                nombre="Leche desnatada brik 1 l.", precio=Decimal("0.79"), marca="SIMPL"
+            )
+        },
+    )
+
+    resumen = calcular_ahorro([item], ["dia", "carrefour"])
+
+    costes = {coste.cadena: coste for coste in resumen.por_cadena}
+    assert costes["dia"].coste == Decimal("1.29")
+    assert costes["carrefour"].coste == Decimal("0.79")
+    assert costes["carrefour"].productos_no_disponibles == ()
+    # El óptimo ahora es el equivalente más barato.
+    assert resumen.coste_optimo == Decimal("0.79")
+    # Y el aviso dice con qué se ha comparado.
+    assert resumen.avisos == (
+        (
+            "En «carrefour», «leche desnatada 1 l» se ha comparado con "
+            "«Leche desnatada brik 1 l.» (SIMPL)"
+        ),
+    )
+
+
+def test_sin_equivalente_el_aviso_usa_el_nombre_sin_marca() -> None:
+    """Cuando no hay equivalente, el aviso nombra la necesidad de compra."""
+    item = _item(
+        "Leche desnatada Dia Láctea 1 L",
+        {"dia": "1.29"},
+        nombre_base="leche desnatada 1 l",
+    )
+
+    resumen = calcular_ahorro([item], ["dia", "carrefour"])
+
+    assert resumen.avisos == (
+        "En «carrefour» no hay precio para: leche desnatada 1 l",
+    )
+    costes = {coste.cadena: coste for coste in resumen.por_cadena}
+    assert costes["carrefour"].coste == Decimal("0")
+
+
+def test_el_equivalente_no_sustituye_al_producto_exacto() -> None:
+    """Si el producto está en la cadena, manda su precio exacto."""
+    item = _item(
+        "Leche desnatada",
+        {"dia": "1.00", "carrefour": "1.20"},
+        equivalentes={
+            "carrefour": Equivalente(
+                nombre="Leche desnatada Puleva", precio=Decimal("0.70"), marca="Puleva"
+            )
+        },
+    )
+
+    resumen = calcular_ahorro([item], ["dia", "carrefour"])
+
+    costes = {coste.cadena: coste for coste in resumen.por_cadena}
+    assert costes["carrefour"].coste == Decimal("1.20")

@@ -98,6 +98,27 @@ class PrecioVigente:
 
 
 @dataclass(frozen=True)
+class ProductoEnCadena:
+    """Producto con su precio actual en una cadena.
+
+    Es el candidato a equivalente: al comparar una lista entre cadenas, el
+    producto que una persona compró en DIA no está en Carrefour, pero sí
+    puede estarlo su equivalente de marca propia.
+    """
+
+    producto_id: UUID
+    producto_cadena_id: UUID
+    nombre: str
+    cadena: str
+    precio_eur: Decimal
+    marca: str | None = None
+    categoria: str | None = None
+    formato: str | None = None
+    litros_o_kg: Decimal | None = None
+    url_producto: str | None = None
+
+
+@dataclass(frozen=True)
 class HistoricoPrecio:
     """Un punto del histórico de precios de un producto en una cadena."""
 

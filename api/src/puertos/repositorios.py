@@ -6,6 +6,7 @@ lectura (RO) o de escritura (RW) según el caso de uso.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime
 from decimal import Decimal
 from typing import Protocol, runtime_checkable
@@ -31,6 +32,7 @@ from src.dominio.precios.entidades import (
     PrecioNuevo,
     PrecioRegistrado,
     PrecioVigente,
+    ProductoEnCadena,
     ResultadoComparacion,
 )
 from src.dominio.productos.entidades import Producto, ProductoIngestable, ProductoNuevo
@@ -77,6 +79,21 @@ class RepositorioPrecios(Protocol):
     async def precios_actuales(
         self, producto_id: UUID, provincia: str | None = None
     ) -> list[PrecioVigente]: ...
+
+    async def productos_con_precio(
+        self,
+        *,
+        categorias: Sequence[str],
+        cadenas: Sequence[str],
+        limite: int = 400,
+    ) -> list[ProductoEnCadena]:
+        """Productos de las cadenas indicadas con su precio actual.
+
+        Sirve para buscar el equivalente de un producto en otra cadena: el
+        artículo que una persona compró en DIA no está en Carrefour, pero su
+        equivalente de marca propia sí.
+        """
+        ...
 
     async def historico_producto(
         self, producto_id: UUID, desde: datetime | None = None

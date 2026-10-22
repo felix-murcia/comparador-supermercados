@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
@@ -21,6 +22,7 @@ from src.dominio.precios.entidades import (
     PrecioNuevo,
     PrecioRegistrado,
     PrecioVigente,
+    ProductoEnCadena,
     ResultadoComparacion,
 )
 from src.dominio.precios.errores import ErrorProductor
@@ -144,6 +146,21 @@ class PreciosFake:
     def __init__(self) -> None:
         self.insertados: list[PrecioNuevo] = []
         self.anterior: PrecioRegistrado | None = None
+        self.productos: list[ProductoEnCadena] = []
+
+    async def productos_con_precio(
+        self,
+        *,
+        categorias: Sequence[str],
+        cadenas: Sequence[str],
+        limite: int = 400,
+    ) -> list[ProductoEnCadena]:
+        return [
+            producto
+            for producto in self.productos
+            if producto.cadena in cadenas
+            and (not categorias or producto.categoria in categorias)
+        ]
 
     async def insertar(self, datos: PrecioNuevo) -> PrecioRegistrado:
         self.insertados.append(datos)

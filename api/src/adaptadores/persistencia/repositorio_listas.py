@@ -120,6 +120,9 @@ class SQLAlchemyRepositorioListas:
                 producto_marca=producto.marca,
                 producto_ean=producto.ean,
                 cadena_compra=cadena,
+                producto_categoria=producto.categoria,
+                producto_formato=producto.formato,
+                producto_litros_o_kg=producto.litros_o_kg,
             )
             for item, producto, cadena in filas
         ]

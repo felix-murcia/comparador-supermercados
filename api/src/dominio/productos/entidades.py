@@ -65,3 +65,19 @@ class ProductoIngestable:
     id: UUID
     nombre: str
     cadenas: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class DescripcionProducto:
+    """Lo que un producto es para quien compra, más allá de su marca.
+
+    Dos productos de cadenas distintas con la misma descripción son
+    equivalentes: cubren la misma necesidad de compra aunque el artículo
+    concreto sea de marca propia en cada cadena.
+    """
+
+    nombre: str
+    marca: str | None = None
+    categoria: str | None = None
+    litros_o_kg: Decimal | None = None
+    formato: str | None = None
