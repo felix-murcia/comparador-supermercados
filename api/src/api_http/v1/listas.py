@@ -65,6 +65,25 @@ class ResumenCadenaResponse(BaseModel):
     productos_no_disponibles: list[str] = Field(default_factory=list)
 
 
+class EquivalenteResponse(BaseModel):
+    """Producto equivalente usado en una cadena, con su marca."""
+
+    nombre: str
+    marca: str | None = None
+
+
+class ProductoResumenResponse(BaseModel):
+    """Un producto de la lista con su precio en cada cadena."""
+
+    producto_id: UUID
+    nombre: str
+    cantidad: int
+    precios: dict[str, Decimal] = Field(default_factory=dict)
+    equivalentes: dict[str, EquivalenteResponse] = Field(default_factory=dict)
+    mejor_cadena: str | None = None
+    ahorro: Decimal | None = None
+
+
 class ResumenListaResponse(BaseModel):
     """Resumen del ahorro de la lista."""
 
@@ -74,6 +93,9 @@ class ResumenListaResponse(BaseModel):
     coste_optimo: Decimal
     coste_mixta_real: Decimal
     avisos: list[str] = Field(default_factory=list)
+    productos: list[ProductoResumenResponse] = Field(default_factory=list)
+    mejor_cadena: str | None = None
+    ahorro_maximo: Decimal | None = None
 
     @classmethod
     def desde(cls, resumen: ResumenAhorro) -> ResumenListaResponse:
@@ -92,6 +114,25 @@ class ResumenListaResponse(BaseModel):
             coste_optimo=resumen.coste_optimo,
             coste_mixta_real=resumen.coste_mixta_real,
             avisos=list(resumen.avisos),
+            productos=[
+                ProductoResumenResponse(
+                    producto_id=producto.producto_id,
+                    nombre=producto.nombre,
+                    cantidad=producto.cantidad,
+                    precios=dict(producto.precios),
+                    equivalentes={
+                        cadena: EquivalenteResponse(
+                            nombre=equivalente.nombre, marca=equivalente.marca
+                        )
+                        for cadena, equivalente in producto.equivalentes.items()
+                    },
+                    mejor_cadena=producto.mejor_cadena,
+                    ahorro=producto.ahorro,
+                )
+                for producto in resumen.productos
+            ],
+            mejor_cadena=resumen.mejor_cadena,
+            ahorro_maximo=resumen.ahorro_maximo,
         )
 
 

@@ -1,41 +1,11 @@
 import { llamarApiServidor } from "@/lib/api";
 import { VistaLista } from "@/components/listas/VistaLista";
+import type { Lista, Resumen } from "@/components/listas/tipos";
 import { SLUGS_CADENAS } from "@/lib/cadenas";
 import { t } from "@/lib/i18n";
 
 type Props = {
   params: { id: string };
-};
-
-type Item = {
-  id: string;
-  producto_id: string;
-  cantidad: number;
-  cadena_compra_id: string | null;
-  precio_snapshot: string | null;
-  producto_nombre: string | null;
-  producto_marca: string | null;
-  cadena_compra: string | null;
-};
-
-type Lista = {
-  id: string;
-  nombre: string;
-  items: Item[];
-};
-
-type CosteCadena = {
-  cadena: string;
-  coste: string;
-  porcentaje_a: number | null;
-  productos_no_disponibles: string[];
-};
-
-type Resumen = {
-  coste_total: string;
-  por_cadena: CosteCadena[];
-  porcentaje_c: number | null;
-  avisos: string[];
 };
 
 async function cargarLista(id: string): Promise<Lista | null> {

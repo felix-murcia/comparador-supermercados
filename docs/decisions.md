@@ -681,6 +681,35 @@ La causa est\u00e1 en el modelo de datos. `productos_cadena` relaciona un produc
 
 ---
 
+## ADR-027: La lista se reorderna alrededor de la pregunta «¿dónde me sale más barata?»
+
+**Fecha**: 2026-10-22
+**Estado**: aceptado
+**Contexto**: La vista de la lista de la compra mostraba el nombre de la lista, un coste, una tabla con tres columnas, un texto con avisos y las tarjetas de los productos. Toda la información estaba, pero jerarquizada por cómo se construye la pantalla, no por lo que la persona quiere saber. Abrir una lista de la compra no es curiosity: es una pregunta, «¿cuánto me cuesta y dónde debería comprar?», y la pantalla obligaba a recorrer la tabla comparando números a mano.
+
+**Decisión**:
+- **La cabecera responde a la pregunta.** Una card con la opción más barata (cadena y coste), el ahorro frente a la más cara, y el botón de añadir producto, que es la acción principal de esta pantalla y estaba al final de la página.
+- **La tabla se sustituye por barras.** Cada cadena, ordenada de más barata a más cara, con una barra proporcional al coste: la diferencia se ve sin comparar números. La más barata va destacada.
+- **El nombre de la lista es editable en el sitio** (icono de lápiz junto al nombre), porque «lista 1» no dice nada y era un nombre técnico que la persona no podía corregir.
+- **Los avisos se repliegan.** Las equivalencias son un matiz importante, no lo primero que se lee: van en una tarjeta `<details>` cerrada, con el detalle de qué producto se comparó con cuál.
+- **Las filas de producto se compactan.** Nombre, cadena y precio en una línea; cantidad y eliminar al lado. El desglose de precios por cadena queda a un clic, para quien quiera ver dónde sale más barato cada cosa.
+- **La API expone el precio de cada producto en cada cadena.** El resumen añade `productos` (con `precios`, `equivalentes`, `mejor_cadena` y `ahorro` por producto), `mejor_cadena` y `ahorro_maximo` a nivel de lista. Sin eso, la interfaz no puede responder «¿en qué cadena sale más barato cada cosa?» sin recalcular la comparación en el cliente.
+- **La vista se divide en componentes** (`CabeceraLista`, `ComparativaCadenas`, `AvisoEquivalencias`, `FilaProducto`, `ModalAnadirProducto`) en vez de un único `VistaLista` que lo hacía todo.
+
+**Consecuencias**:
+- ✅ La primera pantalla ya dice dónde comprar y cuánto se ahorra, sin que la persona tenga que leer nada más.
+- ✅ Se puede ver, producto a producto, dónde sale más barato y cuánto se ahorra: es lo que explica el valor de la aplicación.
+- ⚠️ La respuesta de `GET /v1/listas/{id}/resumen` crece: ahora incluye un objeto por producto de la lista. Para una cesta grande es más carga, y el resumen está cacheado 60 s.
+- ⚠️ La barra comparativa asume que un coste mayor se ve como una barra más larga: si una cadena no tiene algún producto, su barra no es comparable con la de al lado. El detalle por producto deja ver el matiz.
+- ⚠️ El renombrado en el sitio escribe en cuanto se guarda; no hay deshacer.
+
+**Alternativas consideradas**:
+- **Reordenar la vista sin tocar la API**: no llega al desglose por producto, que es el cambio de mayor valor; y obligaba a duplicar en el cliente la lógica de equivalencias.
+- **Medallas (🥇🥈🥉) en la comparativa**: se leen bien, pero los emojis como iconos rompen el tono del resto de la interfaz y no escalan a más de tres cadenas. Se usa la posición en una badge numerada.
+- **Dejar los avisos como texto suelto**: es lo que había, y no se leía.
+
+---
+
 ## Plantilla para nuevas decisiones
 
 ```markdown

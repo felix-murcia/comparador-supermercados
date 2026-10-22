@@ -17,7 +17,10 @@ export type NombreIcono =
   | "check"
   | "filtros"
   | "mas"
-  | "volver";
+  | "volver"
+  | "info"
+  | "editar"
+  | "candado";
 
 const TRAZOS: Record<NombreIcono, ReactNode> = {
   buscar: (
@@ -50,6 +53,24 @@ const TRAZOS: Record<NombreIcono, ReactNode> = {
   ),
   mas: <path d="M12 5v14M5 12h14" />,
   volver: <path d="m15 18-6-6 6-6" />,
+  info: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5M12 8h.01" />
+    </>
+  ),
+  editar: (
+    <>
+      <path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3Z" />
+      <path d="m14.5 6.5 3 3" />
+    </>
+  ),
+  candado: (
+    <>
+      <rect x="4" y="10" width="16" height="10" rx="2" />
+      <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+    </>
+  ),
 };
 
 export function Icono({

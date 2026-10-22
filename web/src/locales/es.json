@@ -132,7 +132,22 @@
     "error": "No se pudo guardar el cambio. Inténtalo de nuevo.",
     "tooltip_porcentaje_c": "Cuánto pagarías de más respecto a comprar cada producto en el supermercado más barato.",
     "anadida": "Añadido a la lista.",
-    "elegir": "Elegir lista"
+    "elegir": "Elegir lista",
+    "mejor_opcion": "Mejor opción",
+    "ahorro_frente_a": "Ahorras {importe} frente a {cadena}",
+    "comparativa": "Comparativa de supermercados",
+    "equivalencias_explica": "Estos productos no existen con el mismo nombre en todas las cadenas, así que se ha comparado con su equivalente:",
+    "productos": "Productos ({numero})",
+    "sin_productos": "La lista está vacía. Añade el primer producto.",
+    "ver_precios": "Ver precios por cadena",
+    "ocultar_precios": "Ocultar precios",
+    "es_equivalente_de": "equivalente a {nombre}",
+    "ahorro_producto": "Ahorras {importe} comprándolo en {cadena}",
+    "renombrar": "Renombrar la lista",
+    "guardar": "Guardar",
+    "nombre": "Nombre de la lista",
+    "equivalencias_titulo_1": "Se ha comparado 1 producto con su equivalente",
+    "equivalencias_titulo_n": "Se han comparado {numero} productos con su equivalente"
   },
   "proximamente": "Disponible en la próxima versión."
 }

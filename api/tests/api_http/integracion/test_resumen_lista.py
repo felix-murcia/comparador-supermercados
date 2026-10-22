@@ -176,6 +176,9 @@ async def test_devuelve_el_resumen_de_la_lista(
         "coste_optimo",
         "coste_mixta_real",
         "avisos",
+        "productos",
+        "mejor_cadena",
+        "ahorro_maximo",
     }
     costes = {coste["cadena"]: coste for coste in cuerpo["por_cadena"]}
     assert costes["dia"]["coste"] == "1.00"
@@ -183,6 +186,18 @@ async def test_devuelve_el_resumen_de_la_lista(
     assert float(costes["dia"]["porcentaje_a"]) == 0.5
     assert cuerpo["coste_total"] == "1.00"
     assert cuerpo["porcentaje_c"] == "0.0000"
+    # La cadena donde la lista sale más barata y el ahorro frente a la peor.
+    assert cuerpo["mejor_cadena"] == "dia"
+    assert cuerpo["ahorro_maximo"] == "1.00"
+    # El precio de cada producto en cada cadena, que es lo que permite
+    # responder "¿en qué cadena sale más barato cada cosa?".
+    assert len(cuerpo["productos"]) == 1
+    producto = cuerpo["productos"][0]
+    assert producto["nombre"] == "Leche entera"
+    assert producto["cantidad"] == 1
+    assert producto["precios"] == {"dia": "1.00", "carrefour": "2.00"}
+    assert producto["mejor_cadena"] == "dia"
+    assert producto["ahorro"] == "1.00"
     assert cuerpo["avisos"] == []
 
 

@@ -28,6 +28,9 @@ const config: Config = {
         // activo de la navegación.
         superficie: "#fafafa",
         "superficie-activa": "#f4f4f5",
+        // Tono medio para barras comparativas: marca la diferencia sin
+        // competir con el color de acento.
+        barra: "#a1a1aa",
       },
       fontFamily: {
         sans: [

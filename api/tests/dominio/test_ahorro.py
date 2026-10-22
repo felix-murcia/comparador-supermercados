@@ -236,3 +236,64 @@ def test_el_equivalente_no_sustituye_al_producto_exacto() -> None:
 
     costes = {coste.cadena: coste for coste in resumen.por_cadena}
     assert costes["carrefour"].coste == Decimal("1.20")
+
+
+def test_dice_en_que_cadena_sale_mas_barata_la_lista() -> None:
+    """La pregunta al abrir la lista es "¿dónde me sale más barata?"."""
+    items = [
+        _item("Leche", {"dia": "1.00", "carrefour": "1.50"}),
+        _item("Café", {"dia": "3.00", "carrefour": "2.00"}),
+    ]
+
+    resumen = calcular_ahorro(items, ["dia", "carrefour"])
+
+    assert resumen.mejor_cadena == "carrefour"
+    # 3,50 € en Carrefour frente a 4,00 € en DIA.
+    assert resumen.ahorro_maximo == Decimal("0.50")
+
+
+def test_una_cadena_sin_productos_no_es_la_mas_barata() -> None:
+    """Una cadena donde no hay nada no es la más barata: es una cadena vacía."""
+    items = [_item("Leche", {"dia": "1.00"})]
+
+    resumen = calcular_ahorro(items, ["dia", "carrefour"])
+
+    assert resumen.mejor_cadena == "dia"
+    assert resumen.ahorro_maximo == Decimal("0")
+
+
+def test_el_precio_por_cadena_de_cada_producto() -> None:
+    """Cada producto lleva su precio en cada cadena, con su equivalente."""
+    item = _item(
+        "Leche desnatada Dia Láctea 1 L",
+        {"dia": "1.29"},
+        cantidad=2,
+        nombre_base="leche desnatada 1 l",
+        equivalentes={
+            "carrefour": Equivalente(
+                nombre="Leche desnatada", precio=Decimal("0.79"), marca="Puleva"
+            )
+        },
+    )
+
+    resumen = calcular_ahorro([item], ["dia", "carrefour"])
+
+    producto = resumen.productos[0]
+    assert producto.precios == {"dia": Decimal("1.29"), "carrefour": Decimal("0.79")}
+    assert producto.mejor_cadena == "carrefour"
+    # Ahorrar 0,50 € por unidad, dos unidades.
+    assert producto.ahorro == Decimal("1.00")
+    assert producto.equivalentes["carrefour"].nombre == "Leche desnatada"
+    assert producto.equivalentes["carrefour"].marca == "Puleva"
+
+
+def test_un_producto_sin_precio_en_ninguna_cadena_no_tiene_precios() -> None:
+    """Queda en el resumen, pero sin precios: la interfaz lo muestra vacío."""
+    item = _item("Leche", {})
+
+    resumen = calcular_ahorro([item], ["dia", "carrefour"])
+
+    producto = resumen.productos[0]
+    assert producto.precios == {}
+    assert producto.mejor_cadena is None
+    assert producto.ahorro is None
