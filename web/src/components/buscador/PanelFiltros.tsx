@@ -29,7 +29,7 @@ function Etiqueta({ htmlFor, children }: { htmlFor: string; children: string }) 
  *
  * Los controles viven en una card con rejilla responsive: cuatro columnas
  * en pantallas anchas, dos en medianas y una en móvil. La sombra es mínima
- * (`shadow-xs`), solo para separar la card del fondo.
+ * (`shadow-sm`), solo para separar la card del fondo.
  */
 export function PanelFiltros({
   filtros,
@@ -39,7 +39,7 @@ export function PanelFiltros({
   onLimpiar,
 }: Props) {
   return (
-    <section className="mt-6 rounded-tarjeta border border-borde bg-white p-4 shadow-xs sm:p-5">
+    <section className="mt-6 rounded-tarjeta border border-borde bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-center gap-2">
         <Icono nombre="filtros" className="h-4 w-4 text-gris" />
         <h2 className="text-sm font-medium text-texto">{t("filtros.titulo")}</h2>

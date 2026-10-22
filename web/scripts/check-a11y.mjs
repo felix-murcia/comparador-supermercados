@@ -6,9 +6,10 @@
  *   1. Cada `<img>` tiene `alt` (puede estar vacío si es decorativa).
  *   2. Cada campo de formulario tiene nombre accesible (label, aria-label…).
  *   3. La paleta de tokens cumple el contraste mínimo (4,5:1 texto, 3:1 UI).
- *   4. No se usan sombras marcadas ni degradados. Solo se admiten las dos
- *      sombras más discretas de Tailwind (`shadow-xs` y `shadow-sm`), que
- *      sirven para separar una card del fondo sin efecto visual apreciable.
+ *   4. No se usan sombras marcadas ni degradados. Solo se admite
+ *      `shadow-sm`, que en Tailwind 3.4 es la más discreta de la escala
+ *      (0 1px 2px 0 rgb(0 0 0 / 0.05)) y sirve para separar una card del
+ *      fondo sin efecto visual apreciable.
  */
 
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -132,9 +133,9 @@ for (const [nombre, primero, segundo, minimo] of PALETA) {
   }
 }
 
-// 4: sin sombras marcadas ni degradados. Solo se admiten `shadow-xs` y
-// `shadow-sm`, que apenas se distinguen del fondo.
-const SOMBRAS_PERMITIDAS = new Set(["shadow-xs", "shadow-sm"]);
+// 4: sin sombras marcadas ni degradados. Solo se admite `shadow-sm`, que
+// es la más discreta de la escala de Tailwind 3.4.
+const SOMBRAS_PERMITIDAS = new Set(["shadow-sm"]);
 for (const archivo of archivos(SRC, ".tsx")) {
   const contenido = readFileSync(archivo, "utf8");
   contenido.split("\n").forEach((linea, indice) => {

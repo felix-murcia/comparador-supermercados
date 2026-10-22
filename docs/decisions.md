@@ -634,8 +634,8 @@ La referencia visual se obtuvo del catálogo de [21st.dev](https://21st.dev) (MC
 **Decisión**:
 - **Se adopta el lenguaje visual de 21st.dev, no sus dependencias.** La escala de neutros (superficie `#fafafa`, superficie activa `#f4f4f5`, borde `#e4e4e7`, texto `#18181b`) y la jerarquía (etiqueta de sección en mayúsculas atenuadas, elemento activo con fondo gris, precio grande y en negrita) se replican sobre los tokens que ya tenía el proyecto. No se instalan `framer-motion`, `@base-ui/react` ni `@tabler/icons-react`: la animación de indicador activo que aporta el sidebar de referencia es justo lo que el brief excluye, y los iconos se dibujan en línea en `components/ui/Icono.tsx`.
 - **El ancho máximo del contenido baja de 60 a 54 rem** para que la columna de resultados siga siendo legible con la barra lateral abierta en un portátil de 1280 px.
-- **Los filtros pasan a una card con rejilla** de 1, 2 o 5 columnas según el ancho, con `shadow-xs` (la sombra más discreta de Tailwind) para separarla del fondo.
-- **El linter de a11y admite `shadow-xs` y `shadow-sm`** y sigue rechazando el resto de sombras y cualquier degradado. Antes no admitía ninguna.
+- **Los filtros pasan a una card con rejilla** de 1, 2 o 5 columnas según el ancho, con `shadow-sm` (la sombra más discreta de la escala de Tailwind 3.4: `0 1px 2px 0 rgb(0 0 0 / 0.05)`) para separarla del fondo.
+- **El linter de a11y admite `shadow-sm`** y sigue rechazando el resto de sombras y cualquier degradado. Antes no admitía ninguna.
 - **El linter de hover pasa a analizar el `className` completo** en vez de línea a línea: al repartir las clases en varias líneas, las plantillas multilínea se escapaban de la comprobación.
 
 **Consecuencias**:
