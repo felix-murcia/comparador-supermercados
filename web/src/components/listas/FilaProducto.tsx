@@ -47,7 +47,11 @@ export function FilaProducto({
 
   return (
     <li className="rounded-tarjeta border border-borde bg-white px-4 py-3">
-      <div className="flex items-center gap-3">
+      {/* En móvil los controles (precio, cantidad, eliminar) bajan a una
+          segunda línea; en escritorio caben en la misma. `sm:contents`
+          hace que el div de controles deje de ser una caja y sus hijos se
+         (sumen) a la fila. */}
+      <div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2 sm:flex">
         <Image
           src={`/logos/${item.cadena_compra ?? "dia"}.svg`}
           alt={item.cadena_compra ?? t("lista.sin_cadena")}
@@ -56,7 +60,7 @@ export function FilaProducto({
           className="h-7 w-7 shrink-0 rounded-pill"
         />
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0">
           <p className="truncate text-sm font-medium text-texto">
             {item.producto_nombre ?? item.producto_id}
           </p>
@@ -65,61 +69,53 @@ export function FilaProducto({
           </p>
         </div>
 
-        {/* En móvil el precio baja a la línea siguiente: si no, el nombre
-            del producto queda cortado. */}
-        <span className="shrink-0 text-sm font-medium tabular-nums text-texto sm:hidden">
-          {precio === undefined ? t("lista.sin_precio") : PRECIO.format(precio)}
-        </span>
-      </div>
-
-      {/* `sm:contents` deja que los controles formen parte de la fila
-          superior en pantallas anchas. */}
-      <div className="mt-2 flex items-center justify-end gap-3 sm:mt-0 sm:contents">
-        <span className="hidden shrink-0 text-sm font-medium tabular-nums text-texto sm:inline">
-          {precio === undefined ? t("lista.sin_precio") : PRECIO.format(precio)}
-        </span>
-
-        <label className="flex shrink-0 items-center gap-1 text-xs text-gris">
-          <span className="sr-only">{t("lista.cantidad")}</span>
-          <input
-            type="number"
-            min="1"
-            max="999"
-            defaultValue={item.cantidad}
-            aria-label={`${t("lista.cantidad")} ${item.producto_nombre ?? ""}`}
-            onBlur={(evento) =>
-              onCantidad(item, Number(evento.target.value))
-            }
-            className="w-14 rounded-lg border border-borde px-2 py-1 text-sm text-texto focus:border-primario"
-          />
-        </label>
-
-        {borrando ? (
-          <span className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onConfirmarBorrado(item)}
-              className="rounded-lg bg-error px-3 py-1 text-xs text-white transition-colors duration-150 hover:opacity-90"
-            >
-              {t("lista.confirmar")}
-            </button>
-            <button
-              type="button"
-              onClick={onCancelarBorrado}
-              className="rounded-lg border border-borde px-3 py-1 text-xs text-texto transition-colors duration-150 hover:bg-superficie"
-            >
-              {t("lista.cancelar")}
-            </button>
+        <div className="col-start-2 flex items-center justify-end gap-3 sm:contents">
+          <span className="shrink-0 text-sm font-medium tabular-nums text-texto">
+            {precio === undefined ? t("lista.sin_precio") : PRECIO.format(precio)}
           </span>
-        ) : (
-          <button
-            type="button"
-            onClick={() => onEliminar(item)}
-            className="shrink-0 rounded-lg px-2 py-1 text-xs text-gris transition-colors duration-150 hover:bg-superficie hover:text-error"
-          >
-            {t("lista.eliminar")}
-          </button>
-        )}
+
+          <label className="flex shrink-0 items-center gap-1 text-xs text-gris">
+            <span className="sr-only">{t("lista.cantidad")}</span>
+            <input
+              type="number"
+              min="1"
+              max="999"
+              defaultValue={item.cantidad}
+              aria-label={`${t("lista.cantidad")} ${item.producto_nombre ?? ""}`}
+              onBlur={(evento) =>
+                onCantidad(item, Number(evento.target.value))
+              }
+              className="w-14 rounded-lg border border-borde px-2 py-1 text-sm text-texto focus:border-primario"
+            />
+          </label>
+
+          {borrando ? (
+            <span className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onConfirmarBorrado(item)}
+                className="rounded-lg bg-error px-3 py-1 text-xs text-white transition-colors duration-150 hover:opacity-90"
+              >
+                {t("lista.confirmar")}
+              </button>
+              <button
+                type="button"
+                onClick={onCancelarBorrado}
+                className="rounded-lg border border-borde px-3 py-1 text-xs text-texto transition-colors duration-150 hover:bg-superficie"
+              >
+                {t("lista.cancelar")}
+              </button>
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onEliminar(item)}
+              className="shrink-0 rounded-lg px-2 py-1 text-xs text-gris transition-colors duration-150 hover:bg-superficie hover:text-error"
+            >
+              {t("lista.eliminar")}
+            </button>
+          )}
+        </div>
       </div>
 
       {conVariosPrecios && producto ? (
