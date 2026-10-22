@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
+import { Icono } from "@/components/ui/Icono";
 import { t } from "@/lib/i18n";
 
 type Item = {
@@ -135,16 +136,27 @@ export function CardProducto({
   );
 
   return (
-    <article className="rounded-tarjeta border border-borde p-4">
+    <article className="rounded-tarjeta border border-borde bg-white p-4 transition-colors duration-150 hover:border-borde-fuerte hover:bg-superficie">
       <div className="flex items-start gap-3">
-        <span className="w-6 shrink-0 text-sm text-gris">#{posicion}</span>
+        {/* Ranking: la posición va en una badge para que se lea de un
+            vistazo, sin mezclarse con el nombre del producto. */}
+        <span
+          className={`inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-md px-1.5 text-xs font-medium tabular-nums ${
+            posicion === 1
+              ? "bg-primario-suave text-primario-oscuro"
+              : "bg-superficie-activa text-gris"
+          }`}
+          aria-label={t("producto.posicion", { posicion: String(posicion) })}
+        >
+          {posicion}
+        </span>
 
         {url_producto ? (
           <a
             href={url_producto}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 rounded-pill transition-colors duration-200 hover:opacity-80"
+            className="shrink-0 rounded-pill transition-opacity duration-150 hover:opacity-80"
           >
             {logo}
           </a>
@@ -154,17 +166,19 @@ export function CardProducto({
 
         <div className="min-w-0 flex-1">
           <h3 className="truncate font-medium text-texto">{nombre}</h3>
-          <p className="truncate text-sm text-gris">
+          <p className="mt-0.5 truncate text-sm text-gris">
             {[descripcion, cadena].filter(Boolean).join(" · ")}
           </p>
         </div>
 
+        {/* El precio es el elemento principal: grande y en negrita; el
+            precio por kilo o litro queda como apoyo en texto secundario. */}
         <div className="shrink-0 text-right">
-          <p className="font-medium text-texto">
+          <p className="text-xl font-semibold tabular-nums text-texto">
             {PRECIO.format(Number(precio_eur))}
           </p>
           {precio_por_litro_kg ? (
-            <p className="text-sm text-gris">
+            <p className="mt-0.5 text-xs text-gris">
               {UNIDAD.format(Number(precio_por_litro_kg))} €/kg-L
             </p>
           ) : null}
@@ -186,8 +200,9 @@ export function CardProducto({
           type="button"
           ref={botonAbrir}
           onClick={() => void abrirModal()}
-          className="rounded-pill border border-borde px-4 py-1.5 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-borde px-3 py-1.5 text-sm text-texto transition-colors duration-150 hover:border-borde-fuerte hover:bg-white"
         >
+          <Icono nombre="mas" className="h-4 w-4" />
           {t("lista.anadir")}
         </button>
       </div>
@@ -217,7 +232,7 @@ export function CardProducto({
                     <button
                       type="button"
                       onClick={() => void anadir(lista)}
-                      className="w-full rounded-pill border border-borde px-4 py-2 text-left text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
+                      className="w-full rounded-lg border border-borde px-4 py-2 text-left text-sm text-texto transition-colors duration-150 hover:bg-superficie"
                     >
                       {lista.nombre}
                     </button>
@@ -230,7 +245,7 @@ export function CardProducto({
               <button
                 type="button"
                 onClick={cerrarModal}
-                className="rounded-pill border border-borde px-4 py-2 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
+                className="rounded-lg border border-borde px-4 py-2 text-sm text-texto transition-colors duration-150 hover:bg-superficie"
               >
                 {t("lista.cerrar")}
               </button>

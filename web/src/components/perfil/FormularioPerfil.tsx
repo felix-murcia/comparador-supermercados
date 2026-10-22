@@ -60,7 +60,7 @@ export function FormularioPerfil({
           value={nombre}
           onChange={(evento) => setNombre(evento.target.value)}
           placeholder={t("perfil.nombre_placeholder")}
-          className="mt-1 w-full rounded-pill border border-borde-fuerte px-4 py-2.5 text-sm text-texto focus:border-primario"
+          className="mt-1 w-full rounded-lg border border-borde bg-white px-3.5 py-2.5 text-sm text-texto transition-colors duration-150 hover:border-borde-fuerte focus:border-primario"
         />
       </div>
 
@@ -73,7 +73,7 @@ export function FormularioPerfil({
           name="provincia"
           value={provincia}
           onChange={(evento) => setProvincia(evento.target.value)}
-          className="mt-1 w-full rounded-pill border border-borde-fuerte px-4 py-2.5 text-sm text-texto focus:border-primario"
+          className="mt-1 w-full rounded-lg border border-borde bg-white px-3.5 py-2.5 text-sm text-texto transition-colors duration-150 hover:border-borde-fuerte focus:border-primario"
         >
           <option value="">{t("perfil.provincia_sin_elegir")}</option>
           {provincias.map((provincia) => (
@@ -88,7 +88,7 @@ export function FormularioPerfil({
       <button
         type="submit"
         disabled={estado === "guardando"}
-        className="mt-6 rounded-pill bg-primario px-5 py-2.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-borde disabled:text-gris"
+        className="mt-6 rounded-lg bg-primario px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-superficie-activa disabled:text-gris"
       >
         {estado === "guardando" ? t("perfil.guardando") : t("perfil.guardar")}
       </button>

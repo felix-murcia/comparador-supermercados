@@ -6,7 +6,9 @@
  *   1. Cada `<img>` tiene `alt` (puede estar vacío si es decorativa).
  *   2. Cada campo de formulario tiene nombre accesible (label, aria-label…).
  *   3. La paleta de tokens cumple el contraste mínimo (4,5:1 texto, 3:1 UI).
- *   4. No se usan sombras ni degradados (estilo minimalista tipo Google).
+ *   4. No se usan sombras marcadas ni degradados. Solo se admiten las dos
+ *      sombras más discretas de Tailwind (`shadow-xs` y `shadow-sm`), que
+ *      sirven para separar una card del fondo sin efecto visual apreciable.
  */
 
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -18,17 +20,22 @@ const SRC = join(RAIZ, "src");
 
 /** Pares de la paleta: [nombre, primer plano, fondo, mínimo]. */
 const PALETA = [
-  ["texto sobre blanco", "#202124", "#ffffff", 4.5],
-  ["gris sobre blanco", "#5f6368", "#ffffff", 4.5],
-  ["primario sobre blanco", "#1a73e8", "#ffffff", 4.5],
-  ["primario-oscuro sobre blanco", "#1558d6", "#ffffff", 4.5],
-  ["error sobre blanco", "#d93025", "#ffffff", 4.5],
-  ["texto sobre azul suave", "#202124", "#e8f0fe", 4.5],
-  ["gris sobre azul suave", "#5f6368", "#e8f0fe", 4.5],
-  ["primario-oscuro sobre azul suave", "#1558d6", "#e8f0fe", 4.5],
-  ["blanco sobre primario", "#ffffff", "#1a73e8", 4.5],
-  ["blanco sobre primario-oscuro", "#ffffff", "#1558d6", 4.5],
-  ["borde de campo sobre blanco", "#757575", "#ffffff", 3],
+  ["texto sobre blanco", "#18181b", "#ffffff", 4.5],
+  ["gris sobre blanco", "#6b6b73", "#ffffff", 4.5],
+  ["primario sobre blanco", "#2563eb", "#ffffff", 4.5],
+  ["primario-oscuro sobre blanco", "#1d4ed8", "#ffffff", 4.5],
+  ["error sobre blanco", "#dc2626", "#ffffff", 4.5],
+  ["texto sobre azul suave", "#18181b", "#eff6ff", 4.5],
+  ["gris sobre azul suave", "#6b6b73", "#eff6ff", 4.5],
+  ["primario-oscuro sobre azul suave", "#1d4ed8", "#eff6ff", 4.5],
+  ["blanco sobre primario", "#ffffff", "#2563eb", 4.5],
+  ["blanco sobre primario-oscuro", "#ffffff", "#1d4ed8", 4.5],
+  ["borde de campo sobre blanco", "#71717a", "#ffffff", 3],
+  ["texto sobre superficie", "#18181b", "#fafafa", 4.5],
+  ["gris sobre superficie", "#6b6b73", "#fafafa", 4.5],
+  ["texto sobre superficie activa", "#18181b", "#f4f4f5", 4.5],
+  ["gris sobre superficie activa", "#6b6b73", "#f4f4f5", 4.5],
+  ["borde sobre superficie", "#e4e4e7", "#fafafa", 1.2],
 ];
 
 function luminancia(hex) {
@@ -125,28 +132,45 @@ for (const [nombre, primero, segundo, minimo] of PALETA) {
   }
 }
 
-// 4: sin sombras ni degradados.
+// 4: sin sombras marcadas ni degradados. Solo se admiten `shadow-xs` y
+// `shadow-sm`, que apenas se distinguen del fondo.
+const SOMBRAS_PERMITIDAS = new Set(["shadow-xs", "shadow-sm"]);
 for (const archivo of archivos(SRC, ".tsx")) {
   const contenido = readFileSync(archivo, "utf8");
   contenido.split("\n").forEach((linea, indice) => {
-    if (/\b(shadow-[a-z]+|bg-gradient-[a-z]+)\b/.test(linea)) {
+    for (const coincidencia of linea.matchAll(/\bshadow-[a-z]+\b/g)) {
+      if (!SOMBRAS_PERMITIDAS.has(coincidencia[0])) {
+        problemas.push(
+          `${relative(RAIZ, archivo)}:${indice + 1} usa sombra marcada (${coincidencia[0]})`,
+        );
+      }
+    }
+    if (/\bbg-gradient-[a-z]+\b/.test(linea)) {
       problemas.push(
-        `${relative(RAIZ, archivo)}:${indice + 1} usa sombra o degradado`,
+        `${relative(RAIZ, archivo)}:${indice + 1} usa degradado`,
       );
     }
   });
 }
 
 // 5: los elementos con estado hover deben tener transición (cambio suave).
+// Se analiza el valor completo de cada `className`, no línea a línea: las
+// clases se reparten en varias líneas cuando el atributo es una plantilla.
 for (const archivo of archivos(SRC, ".tsx")) {
   const contenido = readFileSync(archivo, "utf8");
-  contenido.split("\n").forEach((linea, indice) => {
-    if (/\bhover:/.test(linea) && !/\btransition/.test(linea)) {
-      problemas.push(
-        `${relative(RAIZ, archivo)}:${indice + 1} estado hover sin transición`,
-      );
+  const lineas = contenido.split("\n");
+  for (const coincidencia of contenido.matchAll(
+    /className=(?:"([^"]*)"|\{`([^`]*)`\}|\{"([^"]*)"\})/g,
+  )) {
+    const valor = coincidencia[1] ?? coincidencia[2] ?? coincidencia[3] ?? "";
+    if (!/\bhover:/.test(valor) || /\btransition/.test(valor)) {
+      continue;
     }
-  });
+    const linea = contenido.slice(0, coincidencia.index).split("\n").length;
+    problemas.push(
+      `${relative(RAIZ, archivo)}:${linea} estado hover sin transición`,
+    );
+  }
 }
 
 // 6: los diálogos se cierran con Escape y devuelven el foco al abrirse.

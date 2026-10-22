@@ -3,10 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { CampoBusqueda } from "@/components/buscador/CampoBusqueda";
 import { IndicadorBusqueda } from "@/components/buscador/IndicadorBusqueda";
 import { PanelFiltros } from "@/components/buscador/PanelFiltros";
 import { SelectorCadenas } from "@/components/buscador/SelectorCadenas";
 import { CardProducto } from "@/components/producto/CardProducto";
+import { Icono } from "@/components/ui/Icono";
 import { t } from "@/lib/i18n";
 import {
   aplicarFiltros,
@@ -229,7 +231,7 @@ export function VistaBusqueda({
         <button
           type="button"
           onClick={() => router.push("/")}
-          className="mt-6 rounded-pill border border-borde px-5 py-2.5 text-sm transition-colors duration-200 hover:bg-primario-suave"
+          className="mt-6 rounded-lg border border-borde px-5 py-2.5 text-sm transition-colors duration-150 hover:bg-superficie"
         >
           {t("buscar.volver")}
         </button>
@@ -258,21 +260,9 @@ export function VistaBusqueda({
           type="button"
           onClick={() => router.push("/")}
           aria-label={t("buscar.volver")}
-          className="rounded-pill p-2 text-gris transition-colors duration-200 hover:bg-primario-suave hover:text-texto"
+          className="rounded-lg p-2 text-gris transition-colors duration-150 hover:bg-superficie hover:text-texto"
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
+          <Icono nombre="volver" />
         </button>
 
         <form
@@ -282,23 +272,18 @@ export function VistaBusqueda({
             void relanzar();
           }}
         >
-          <label className="sr-only" htmlFor="q">
-            {t("buscar.campo")}
-          </label>
-          <input
+          <CampoBusqueda
             id="q"
             name="q"
-            type="search"
             value={consulta}
             onChange={(evento) => setConsulta(evento.target.value)}
             placeholder={t("buscar.placeholder")}
-            autoComplete="off"
-            className="min-w-0 flex-1 rounded-pill border border-borde-fuerte px-4 py-2.5 text-sm text-texto placeholder:text-gris focus:border-primario"
+            className="min-w-0 flex-1"
           />
           <button
             type="submit"
             disabled={!puedeBuscar}
-            className="rounded-pill bg-primario px-5 py-2.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-borde disabled:text-gris"
+            className="shrink-0 rounded-lg bg-primario px-4 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-superficie-activa disabled:text-gris"
           >
             {t("buscar.comparar")}
           </button>
@@ -335,7 +320,7 @@ export function VistaBusqueda({
           {t("buscar.sin_resultados")}
         </p>
       ) : (
-        <ul className="mt-4 space-y-3">
+        <ul className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
           {visibles.map((resultado) => (
             <li key={`${resultado.producto_cadena_id}-${resultado.cadena}`}>
               <CardProducto {...resultado} />

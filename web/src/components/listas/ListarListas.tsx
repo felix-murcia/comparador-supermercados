@@ -63,12 +63,12 @@ export function ListarListas({ listas }: { listas: Lista[] }) {
           value={nombre}
           onChange={(evento) => setNombre(evento.target.value)}
           placeholder={t("listas.nombre_placeholder")}
-          className="min-w-0 flex-1 rounded-pill border border-borde-fuerte px-4 py-2 text-sm text-texto focus:border-primario"
+          className="min-w-0 flex-1 rounded-lg border border-borde-fuerte px-4 py-2 text-sm text-texto focus:border-primario"
         />
         <button
           type="submit"
           disabled={nombre.trim().length === 0 || creando}
-          className="rounded-pill bg-primario px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-borde disabled:text-gris"
+          className="rounded-lg bg-primario px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-superficie-activa disabled:text-gris"
         >
           {t("listas.crear")}
         </button>
@@ -88,7 +88,7 @@ export function ListarListas({ listas }: { listas: Lista[] }) {
             <li key={lista.id}>
               <Link
                 href={`/listas/${lista.id}`}
-                className="block rounded-tarjeta border border-borde px-4 py-3 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
+                className="block rounded-tarjeta border border-borde px-4 py-3 text-sm text-texto transition-colors duration-150 hover:bg-superficie"
               >
                 {lista.nombre}
               </Link>

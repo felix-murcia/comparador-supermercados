@@ -623,6 +623,34 @@ Responde: "¿cuánto pierdo por no ir a 3 supermercados?" (coste de la comodidad
 
 ---
 
+## ADR-025: El rediseño visual sigue el patrón de 21st.dev sin adoptar su librería de componentes
+
+**Fecha**: 2026-10-22
+**Estado**: aceptado
+**Contexto**: La interfaz era correcta pero se cohería con un único patrón: cabecera con el nombre de la aplicación, menú lateral en forma de píldoras sin iconos, casillas de verificación para elegir supermercado, filtros sueltos en una fila y resultados en filas planas. El objetivo era acercarla al patrón de paneles de producto que usan Linear, Vercel y Stripe Dashboard: barra lateral estrecha con iconos y sección activa marcada, campo de búsqueda con icono, filtros seleccionables en forma de chip, filtros agrupados en una card y resultados como cards donde el precio manda.
+
+La referencia visual se obtuvo del catálogo de [21st.dev](https://21st.dev) (MCP `21st`): `wensity/sidebar`, `shadcnstore/app-1`, `shadcnstore/product-card-1` y `skovhm/data-table-toolbar`. Los componentes son shadcn con `framer-motion`, `@base-ui/react` y `@tabler/icons-react`.
+
+**Decisión**:
+- **Se adopta el lenguaje visual de 21st.dev, no sus dependencias.** La escala de neutros (superficie `#fafafa`, superficie activa `#f4f4f5`, borde `#e4e4e7`, texto `#18181b`) y la jerarquía (etiqueta de sección en mayúsculas atenuadas, elemento activo con fondo gris, precio grande y en negrita) se replican sobre los tokens que ya tenía el proyecto. No se instalan `framer-motion`, `@base-ui/react` ni `@tabler/icons-react`: la animación de indicador activo que aporta el sidebar de referencia es justo lo que el brief excluye, y los iconos se dibujan en línea en `components/ui/Icono.tsx`.
+- **El ancho máximo del contenido baja de 60 a 54 rem** para que la columna de resultados siga siendo legible con la barra lateral abierta en un portátil de 1280 px.
+- **Los filtros pasan a una card con rejilla** de 1, 2 o 5 columnas según el ancho, con `shadow-xs` (la sombra más discreta de Tailwind) para separarla del fondo.
+- **El linter de a11y admite `shadow-xs` y `shadow-sm`** y sigue rechazando el resto de sombras y cualquier degradado. Antes no admitía ninguna.
+- **El linter de hover pasa a analizar el `className` completo** en vez de línea a línea: al repartir las clases en varias líneas, las plantillas multilínea se escapaban de la comprobación.
+
+**Consecuencias**:
+- ✅ La interfaz sigue el patrón de los paneles de producto actuales sin añadir una sola dependencia.
+- ✅ Todos los pares texto/fondo de la paleta nueva superan 4,5:1 y el linter lo comprueba; `borde-fuerte` mantiene 4,8:1 para los campos de formulario (WCAG 1.4.11).
+- ✅ La lógica de negocio y las APIs no cambian: el selector de cadenas sigue alternando la misma lista, y los filtros siguen aplicando los mismos parámetros.
+- ⚠️ El catálogo de 21st.dev solo permite 2 recuperaciones de código al día en el plan gratuito, y su herramienta `search` devolvió `catalog search failed` durante el rediseño. La referencia se obtuvo de la API REST (`GET /api/v1/components/search`) y de las previews de CDN, que no consumen cuota. El código completo de un componente no se pudo instalar hasta el 23 de octubre.
+
+**Alternativas consideradas**:
+- **Instalar los componentes de 21st.dev tal cual** (`npx shadcn@latest add "https://21st.dev/r/<autor>/<slug>"`): arrastra `framer-motion`, `@base-ui/react` y `@tabler/icons-react`, y con ello animaciones que el brief excluye. Además exige el árbol de primitivas de shadcn, que el proyecto no tiene.
+- **Reemplazar la paleta por la del design system de 21st.dev** (negro `#171717` y dorado `#D4AF37`): era la propuesta del generador de design systems, pero rompe la identidad y el contraste ya verificado del proyecto. Se conserva el azul y solo se adopts la escala de neutros.
+- **Mantener los checkboxes**: un chip con `aria-pressed` comunica el estado seleccionado en el propio control, sin casilla que sumar.
+
+---
+
 ## Plantilla para nuevas decisiones
 
 ```markdown

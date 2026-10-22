@@ -28,7 +28,7 @@ Aplicación web para comparar precios de productos de supermercados en España (
   - % C: vs. la cesta óptima (mezclando lo más barato de cada cadena).
 - **Gestiona listas de la compra** con coste total y ahorro.
 - **Histórico de precios** por producto.
-- **Interfaz minimalista** tipo Google: buscar → comparar → decidir.
+- **Interfaz minimalista** de panel de producto (tipo Linear o Vercel): buscar → comparar → decidir.
 
 **Público objetivo**: consumidores españoles que quieren optimizar el gasto de la compra.
 

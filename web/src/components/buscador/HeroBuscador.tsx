@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { CampoBusqueda } from "@/components/buscador/CampoBusqueda";
 import { SelectorCadenas } from "@/components/buscador/SelectorCadenas";
 import { t } from "@/lib/i18n";
 
@@ -72,18 +73,12 @@ export function HeroBuscador() {
           void buscar();
         }}
       >
-        <label className="sr-only" htmlFor="q">
-          {t("buscar.campo")}
-        </label>
-        <input
+        <CampoBusqueda
           id="q"
           name="q"
-          type="search"
           value={query}
           onChange={(evento) => setQuery(evento.target.value)}
           placeholder={t("buscar.placeholder")}
-          autoComplete="off"
-          className="w-full rounded-pill border border-borde-fuerte px-5 py-3 text-base text-texto placeholder:text-gris focus:border-primario"
         />
 
         <SelectorCadenas seleccionadas={cadenas} onChange={setCadenas} />
@@ -91,7 +86,7 @@ export function HeroBuscador() {
         <button
           type="submit"
           disabled={!puedeBuscar}
-          className="mt-6 w-full rounded-pill bg-primario px-5 py-3 text-sm font-medium text-white transition hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-borde disabled:text-gris"
+          className="mt-6 w-full rounded-lg bg-primario px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-primario-oscuro disabled:cursor-not-allowed disabled:bg-superficie-activa disabled:text-gris"
         >
           {lanzando ? t("buscar.buscando") : t("buscar.comparar")}
         </button>

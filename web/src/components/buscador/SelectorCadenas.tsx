@@ -2,9 +2,18 @@
 
 import Image from "next/image";
 
+import { Icono } from "@/components/ui/Icono";
 import { CADENAS } from "@/lib/cadenas";
 import { t } from "@/lib/i18n";
 
+/**
+ * Selector de supermercados: chips con el logo de cada cadena.
+ *
+ * Antes eran casillas de verificación dentro de una etiqueta. Ahora cada
+ * cadena es un botón con `aria-pressed`, al estilo de los filtros de
+ * Vercel: el estado seleccionado se ve en el propio chip (fondo azul
+ * suave y marca de verificación) en lugar de depender de una casilla.
+ */
 export function SelectorCadenas({
   seleccionadas,
   onChange,
@@ -21,38 +30,38 @@ export function SelectorCadenas({
   }
 
   return (
-    <fieldset className="mt-6">
-      <legend className="text-sm text-gris">{t("buscar.cadenas")}</legend>
-      <div className="mt-3 flex flex-wrap gap-2">
+    <div className="mt-6" role="group" aria-label={t("buscar.cadenas")}>
+      <p className="text-sm text-gris">{t("buscar.cadenas")}</p>
+      <div className="mt-2.5 flex flex-wrap gap-2">
         {CADENAS.map((cadena) => {
           const activa = seleccionadas.includes(cadena.slug);
           return (
-            <label
+            <button
               key={cadena.slug}
-              className={`flex cursor-pointer items-center gap-2 rounded-pill border px-3 py-2 text-sm ${
+              type="button"
+              aria-pressed={activa}
+              onClick={() => alternar(cadena.slug)}
+              className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors duration-150 ${
                 activa
                   ? "border-primario bg-primario-suave text-primario-oscuro"
-                  : "border-borde bg-white text-texto transition-colors duration-200 hover:bg-primario-suave"
+                  : "border-borde bg-white text-texto hover:border-borde-fuerte hover:bg-superficie"
               }`}
             >
-              <input
-                type="checkbox"
-                className="h-4 w-4 accent-primario"
-                checked={activa}
-                onChange={() => alternar(cadena.slug)}
-              />
               <Image
                 src={`/logos/${cadena.slug}.svg`}
-                alt={cadena.nombre}
-                width={24}
-                height={24}
-                className="h-6 w-6"
+                alt=""
+                width={20}
+                height={20}
+                className="h-5 w-5 shrink-0"
               />
               <span>{cadena.nombre}</span>
-            </label>
+              {activa ? (
+                <Icono nombre="check" className="h-4 w-4 shrink-0" />
+              ) : null}
+            </button>
           );
         })}
       </div>
-    </fieldset>
+    </div>
   );
 }

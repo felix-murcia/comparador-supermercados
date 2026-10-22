@@ -257,7 +257,7 @@ export function VistaLista({ lista, resumen }: Props) {
                 onBlur={(evento) =>
                   void cambiarCantidad(item, Number(evento.target.value))
                 }
-                className="w-16 rounded-pill border border-borde-fuerte px-2 py-1 text-sm text-texto focus:border-primario"
+                className="w-16 rounded-lg border border-borde-fuerte px-2 py-1 text-sm text-texto focus:border-primario"
               />
             </label>
 
@@ -272,14 +272,14 @@ export function VistaLista({ lista, resumen }: Props) {
                 <button
                   type="button"
                   onClick={() => void eliminarItem(item)}
-                  className="rounded-pill bg-error px-3 py-1 text-white"
+                  className="rounded-lg bg-error px-3 py-1 text-white"
                 >
                   {t("lista.confirmar")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setBorrando(null)}
-                  className="rounded-pill border border-borde px-3 py-1 text-texto"
+                  className="rounded-lg border border-borde px-3 py-1 text-texto"
                 >
                   {t("lista.cancelar")}
                 </button>
@@ -288,7 +288,7 @@ export function VistaLista({ lista, resumen }: Props) {
               <button
                 type="button"
                 onClick={() => setBorrando(item.id)}
-                className="rounded-pill border border-borde px-3 py-1 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
+                className="rounded-lg border border-borde px-3 py-1 text-sm text-texto transition-colors duration-150 hover:bg-superficie"
               >
                 {t("lista.eliminar")}
               </button>
@@ -302,7 +302,7 @@ export function VistaLista({ lista, resumen }: Props) {
           type="button"
           ref={botonAbrir}
           onClick={() => setModal(true)}
-          className="rounded-pill bg-primario px-5 py-2.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-primario-oscuro"
+          className="rounded-lg bg-primario px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-primario-oscuro"
         >
           {t("lista.anadir_producto")}
         </button>
@@ -346,11 +346,11 @@ export function VistaLista({ lista, resumen }: Props) {
                 value={consulta}
                 onChange={(evento) => setConsulta(evento.target.value)}
                 placeholder={t("buscar.placeholder")}
-                className="min-w-0 flex-1 rounded-pill border border-borde-fuerte px-4 py-2 text-sm text-texto focus:border-primario"
+                className="min-w-0 flex-1 rounded-lg border border-borde-fuerte px-4 py-2 text-sm text-texto focus:border-primario"
               />
               <button
                 type="submit"
-                className="rounded-pill bg-primario px-4 py-2 text-sm text-white"
+                className="rounded-lg bg-primario px-4 py-2 text-sm text-white"
               >
                 {t("buscar.boton")}
               </button>
@@ -362,7 +362,7 @@ export function VistaLista({ lista, resumen }: Props) {
                   <button
                     type="button"
                     onClick={() => void anadir(candidato)}
-                    className="flex w-full items-center gap-3 rounded-pill border border-borde px-3 py-2 text-left text-sm transition-colors duration-200 hover:bg-primario-suave"
+                    className="flex w-full items-center gap-3 rounded-lg border border-borde px-3 py-2 text-left text-sm transition-colors duration-150 hover:bg-superficie"
                   >
                     <span className="min-w-0 flex-1 truncate text-texto">
                       {candidato.nombre}
@@ -387,7 +387,7 @@ export function VistaLista({ lista, resumen }: Props) {
                   setModal(false);
                   botonAbrir.current?.focus();
                 }}
-                className="rounded-pill border border-borde px-4 py-2 text-sm text-texto transition-colors duration-200 hover:bg-primario-suave"
+                className="rounded-lg border border-borde px-4 py-2 text-sm text-texto transition-colors duration-150 hover:bg-superficie"
               >
                 {t("lista.cerrar")}
               </button>
