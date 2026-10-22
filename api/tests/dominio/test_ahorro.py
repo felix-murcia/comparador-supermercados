@@ -259,7 +259,7 @@ def test_una_cadena_sin_productos_no_es_la_mas_barata() -> None:
     resumen = calcular_ahorro(items, ["dia", "carrefour"])
 
     assert resumen.mejor_cadena == "dia"
-    assert resumen.ahorro_maximo == Decimal("0")
+    assert resumen.ahorro_maximo == Decimal(0)
 
 
 def test_el_precio_por_cadena_de_cada_producto() -> None:

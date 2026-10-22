@@ -236,7 +236,9 @@ def calcular_ahorro(
     # algún producto con precio (una cadena sin productos no es la más
     # barata, es una cadena vacía).
     viables = [coste for coste in por_cadena if con_precio[coste.cadena] > 0]
-    mejor_cadena = min(viables, key=lambda coste: coste.coste).cadena if viables else None
+    mejor_cadena = (
+        min(viables, key=lambda coste: coste.coste).cadena if viables else None
+    )
     ahorro_maximo = None
     if viables:
         mas_cara = max(viables, key=lambda coste: coste.coste)
