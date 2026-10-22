@@ -62,6 +62,15 @@ export function VistaLista({ lista, resumen }: Props) {
   const botonAbrir = useRef<HTMLButtonElement | null>(null);
   const dialogo = useRef<HTMLDivElement | null>(null);
 
+  // Los items vienen del servidor, pero se guardan en estado para poder
+  // actualizarlos al vuelo (borrar, cambiar la cantidad). Al añadir un
+  // producto, `router.refresh()` trae la lista nueva por prop, pero el
+  // estado local no se reinicia solo: el coste (que llega por prop) se
+  // actualizaba y el producto no aparecía en la lista.
+  useEffect(() => {
+    setItems(lista.items);
+  }, [lista.items]);
+
   // El diálogo se cierra con Escape y devuelve el foco al botón que lo
   // abrió, para no perder el hilo con el teclado.
   useEffect(() => {

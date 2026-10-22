@@ -21,6 +21,7 @@ from src.adaptadores.persistencia.repositorio_productos_cadenas import (
     SQLAlchemyRepositorioProductosCadenas,
 )
 from src.dominio.busquedas.reglas import calcular_cache_key
+from src.dominio.listas.reglas import PREFIJO_RESUMEN
 from src.dominio.productos.entidades import ProductoNuevo
 from src.scheduler import (
     HORA_INGESTA,
@@ -101,7 +102,8 @@ async def test_la_ingesta_diaria_invalida_la_cache(
 
     await ingesta_diaria(sessionmaker, cache, espera_maxima=0.1)
 
-    assert cache.invalidados == [PREFIJO_CACHE]
+    # La ingesta cambia los precios: caducan las búsquedas y los resúmenes.
+    assert cache.invalidados == [PREFIJO_CACHE, PREFIJO_RESUMEN]
 
 
 async def test_esperar_cola_vacia_detecta_el_fin(

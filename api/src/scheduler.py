@@ -32,6 +32,7 @@ from src.adaptadores.persistencia.repositorio_productos import (
 )
 from src.dominio.busquedas.entidades import BusquedaNueva
 from src.dominio.busquedas.reglas import calcular_cache_key
+from src.dominio.listas.reglas import PREFIJO_RESUMEN
 from src.logging_config import configurar_logging
 from src.puertos.cache import Cache
 
@@ -98,6 +99,9 @@ async def ingesta_diaria(
 
     completada = await esperar_cola_vacia(sessionmaker, espera_maxima=espera_maxima)
     await cache.invalidar_prefijo(PREFIJO_CACHE)
+    # Los resúmenes viven en su propio grupo: también caducan, porque los
+    # precios de la ingesta han cambiado.
+    await cache.invalidar_prefijo(PREFIJO_RESUMEN)
 
     logger.info(
         "Ingesta diaria terminada en %.1f s (cola vacía: %s)",

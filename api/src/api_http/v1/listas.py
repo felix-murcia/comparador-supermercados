@@ -45,6 +45,7 @@ from src.dominio.listas.entidades import (
     ItemListaNuevo,
     Lista,
 )
+from src.dominio.listas.reglas import PREFIJO_RESUMEN
 from src.dominio.productos.errores import ProductoNoEncontradoError
 from src.dominio.usuarios.entidades import Usuario
 from src.dominio.usuarios.errores import UsuarioNoAutorizadoError
@@ -53,7 +54,6 @@ from src.puertos.cache import Cache
 router = APIRouter(prefix="/v1/listas", tags=["listas"])
 
 TTL_RESUMEN_SEGUNDOS = 60
-PREFIJO_RESUMEN = "v1:resumen"
 
 
 class ResumenCadenaResponse(BaseModel):
@@ -330,6 +330,7 @@ async def agregar_item(
             precio_snapshot=precio.importe_eur if precio is not None else None,
         )
     )
+    await _invalidar_resumen()
     return ItemResponse.desde(item)
 
 
@@ -355,6 +356,7 @@ async def actualizar_item(
     actualizado = await repositorio.actualizar_item(item_id, cantidad=body.cantidad)
     if actualizado is None:
         raise ErrorAPI(404, "ITEM_NO_ENCONTRADO", "El item no está en la lista")
+    await _invalidar_resumen()
     return ItemResponse.desde(actualizado)
 
 
@@ -377,6 +379,7 @@ async def eliminar_item(
         raise ErrorAPI(404, "ITEM_NO_ENCONTRADO", "El item no está en la lista")
 
     await repositorio.eliminar_item(item_id)
+    await _invalidar_resumen()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -386,6 +389,19 @@ def _cache_optional() -> Cache | None:
         return get_cache()
     except RuntimeError:
         return None
+
+
+async def _invalidar_resumen() -> None:
+    """Invalida los resúmenes cacheados.
+
+    El resumen depende de los items de la lista: si se añade, cambia o
+    quita un producto, el coste cacheado deja de ser cierto. Sin esto, la
+    lista mostraba el producto nuevo pero el coste tardaba un minuto (el TTL
+    de la caché) en actualizarse.
+    """
+    cache = _cache_optional()
+    if cache is not None:
+        await cache.invalidar_prefijo(PREFIJO_RESUMEN)
 
 
 @router.get("/{lista_id}/resumen", response_model=ResumenListaResponse)
